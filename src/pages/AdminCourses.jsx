@@ -113,31 +113,12 @@ export default function AdminCourses() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Optional: Frontend validation
+    //Frontend validation
     if (type === 'thumbnail' && !file.type.startsWith('image/')) {
       alert('Please upload an image file.');
       return;
     }
-    /**
-     * // Hard limit file sizes on the frontend for UX (e.g., 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit.');
-      return;
-    }
-      todo: You must configure CORS (Cross-Origin Resource Sharing) on your S3 Bucket settings in the AWS Console.
-
-    [
-  {
-    "AllowedHeaders": ["*"],
-    "AllowedMethods": ["PUT"],
-    "AllowedOrigins": ["http://localhost:3000", "https://yourproductionapp.com"],
-    "ExposeHeaders": []
-  }
-]
-     */
-
     setUploading(true);
-    //file_key = await uploadFileToS3(file, type,false);
     try {
       
       if (type === 'thumbnail') {
@@ -183,7 +164,6 @@ export default function AdminCourses() {
         <div className="flex items-center gap-3">
           <div className="w-16 h-10 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
             {row.thumbnail_storage_key ? (
-              // <img src={row.thumbnail_storage_key} alt={row.title} className="w-full h-full object-cover" />
               <PublicImage docKey={row.thumbnail_storage_key} alt={row.title} className="w-full h-full object-cover" />
             ) : (
               <BookOpen className="h-5 w-5 text-slate-400" />

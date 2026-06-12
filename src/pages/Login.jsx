@@ -35,7 +35,6 @@ export default function Login() {
         window.location.href = `/mfa-verify`;
         return;
       }
-      // localStorage.setItem("user", JSON.stringify(user));
       window.location.href = '/';
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");

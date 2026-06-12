@@ -22,8 +22,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useClient } from '@/lib/ClientContext';
-import { usePermission } from '@/hooks/usePermission'; // Import usePermission
-import { useClientRoles } from '@/hooks/useClientRoles'; // Import useClientRoles
+import { usePermission } from '@/hooks/usePermission'; 
+import { useClientRoles } from '@/hooks/useClientRoles'; 
 import { AvatarImg } from '@/components/UserAvatar';
 
 export default function ClientAdminDashboard() {
@@ -34,7 +34,7 @@ export default function ClientAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRoleIds, setInviteRoleIds] = useState([]); // State for roles to invite with
+  const [inviteRoleIds, setInviteRoleIds] = useState([]); 
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedMembershipToEdit, setSelectedMembershipToEdit] = useState(null); // To hold the specific membership being edited
@@ -43,7 +43,7 @@ export default function ClientAdminDashboard() {
   // Assuming 'client:admin.dashboard.view' or the 'client_admin' role itself
   const isAuthorized = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
 
-  const { data: allRoles = [] } = useQuery({ // Fetch all roles for the invite dialog
+  const { data: allRoles = [] } = useQuery({ 
     queryKey: ['all-roles'],
     queryFn: () => api.getRoles({ limit: 200 }),
   });
@@ -52,12 +52,12 @@ export default function ClientAdminDashboard() {
   const { data: orgUsersData = {}, isLoading: loadingUsers } = useQuery({
     queryKey: ['org-users', activeClientId],
     queryFn: () => api.getUsers({
-      client_id: activeClientId, // Backend should filter by client_id automatically for client users
+      client_id: activeClientId, 
       order: '-created_at',
       limit: 200,
-      search: searchTerm, // Pass search term
+      search: searchTerm, 
     }),
-    enabled: !!activeClientId && isAuthorized, // Only fetch if authorized and client is active
+    enabled: !!activeClientId && isAuthorized, 
   });
   const orgUsers = orgUsersData?.users ?? [];
 
@@ -126,7 +126,7 @@ export default function ClientAdminDashboard() {
             email: inviteEmail,
             inviteType: 'client',
             clientId: activeClientId,
-            role_ids: inviteRoleIds, // Pass the array of selected role IDs
+            role_ids: inviteRoleIds, 
         });
     } catch (error) {
         // Error handling is in mutationFn's onError
@@ -178,14 +178,14 @@ export default function ClientAdminDashboard() {
     if (!selectedUser || !selectedMembershipToEdit) return;
 
     // Construct the payload for PATCH /api/users/:id
-    // This example updates roles for *one* specific membership
+    // This updates roles for *one* specific membership
     await updateUserMutation.mutateAsync({
       id: selectedUser.id,
       data: {
-        // You can update other user fields here if needed in the dialog
+        // Can update other user fields here if needed in the dialog
         memberships: [{
           clientId: selectedMembershipToEdit.clientId,
-          roleIds: selectedMembershipToEdit.roles.map(r => r.id), // Send array of new role IDs
+          roleIds: selectedMembershipToEdit.roles.map(r => r.id), 
         }],
       }
     });

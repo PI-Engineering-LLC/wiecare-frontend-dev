@@ -1,11 +1,8 @@
 // Items lookup from the CSV catalog
 // Fetches and parses the CSV once, then provides lookup by Item ID or EZ Number
 
-// const CSV_URL = '8cf0b22f3_Items.csv';
 const CSV_URL = `${new URL(import.meta.env.VITE_API_URL).origin}/static/8cf0b22f3_Items.csv`;
-/**TODO:Upload the CSV to your own S3 bucket and update the URL
-Serve it from Express: app.use('/static', express.static('public')) and put the CSV in backend/public/
-Just keep the URL temporarily until you re-host it */
+/**TODO:Upload the CSV to R3 bucket and update the URL */
 let cachedLookup = null;
 
 function parseCSV(text) {

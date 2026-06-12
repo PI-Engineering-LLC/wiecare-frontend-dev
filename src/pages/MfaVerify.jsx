@@ -17,13 +17,13 @@ export default function MfaVerify() {
     const [params] = useSearchParams();
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    const [backupCodes, setBackupCodes] = useState(null); // New state for backup codes
-    const [showBackupCodes, setShowBackupCodes] = useState(false); // New state to control display
-    const { login } = useAuth(); // Get login function from AuthContext
+    const [backupCodes, setBackupCodes] = useState(null); 
+    const [showBackupCodes, setShowBackupCodes] = useState(false); 
+    const { login } = useAuth(); 
 
     const handleVerify = async (e) => {
         e.preventDefault();
-        setError(''); // Clear previous errors
+        setError(''); 
         try {
             const res = await api.verifyMfa( {
                 code,
@@ -37,7 +37,6 @@ export default function MfaVerify() {
             }
         } catch {
             setError( 'Invalid code. Please try again.');
-            // setError('Invalid code. Please try again.');
         }
     };
     const handleContinueToDashboard = () => {
@@ -98,27 +97,4 @@ export default function MfaVerify() {
             </> )}
         </div>
     );
-
-    // return (
-    //     <div className="max-w-sm mx-auto mt-32 p-8 border rounded-xl text-center">
-    //         <h1 className="text-2xl font-bold mb-2">Check your authenticator</h1>
-    //         <p className="text-gray-500 mb-8">Enter the 6-digit code from your app</p>
-    //         <form onSubmit={handleVerify} className="space-y-4">
-    //             <input
-    //                 type="text"
-    //                 inputMode="numeric"
-    //                 placeholder="000000"
-    //                 value={code}
-    //                 onChange={e => setCode(e.target.value)}
-    //                 maxLength={6}
-    //                 className="w-full border p-3 rounded-lg text-center text-3xl tracking-widest"
-    //                 autoFocus
-    //             />
-    //             {error && <p className="text-red-500 text-sm">{error}</p>}
-    //             <button type="submit" className="w-full bg-black text-white p-3 rounded-lg">
-    //                 Verify
-    //             </button>
-    //         </form>
-    //     </div>
-    // );
 }

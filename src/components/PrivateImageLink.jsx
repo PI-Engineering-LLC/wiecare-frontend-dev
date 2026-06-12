@@ -12,8 +12,6 @@ export function PrivateImageLink({ storageKey, alt, className = "", isLink = tru
     async function getSecureUrl() {
       try {
         setLoading(true);
-        // const response = await fetch(`/api/get-presigned-url?key=${encodeURIComponent(storageKey)}`);
-        // const data = await response.json();
         const { downloadUrl } = await api.getS3FileUrl({ fileKey:storageKey });
         if (isMounted) setImgSrc(downloadUrl);
       } catch (err) {
@@ -41,7 +39,7 @@ export function PrivateImageLink({ storageKey, alt, className = "", isLink = tru
     className={className}
     loading="lazy"
     onError={(e) => {
-      e.target.src = DEFAULT_AVATAR; // Fallback on load error
+      e.target.src = DEFAULT_AVATAR; 
     }}
     {...props}
   />);
@@ -53,7 +51,6 @@ export function PrivateImageLink({ storageKey, alt, className = "", isLink = tru
       </a>
     );
   }
-//   if (!imgSrc) return <div className="error">⚠️ Image unavailable</div>;
 
 return imageElement;
 }

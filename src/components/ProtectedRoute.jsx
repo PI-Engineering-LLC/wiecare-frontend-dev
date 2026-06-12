@@ -7,10 +7,9 @@ import { useClientRoles } from '@/hooks/useClientRoles';
 
 export const ProtectedRoute = ({permission=null, platformRole=null, allowedRoles=null, children}) => {
   const { user, isAuthenticated, loading } = useAuth();
-  const { activeClientId } = useClient(); // Get activeClientId from context
+  const { activeClientId } = useClient(); 
 
   // Check platform role directly from user object for platformRole prop
-  // const hasPlatformRole = user?.platform_role === platformRole;
   const hasPlatformRole = usePlatformRole('super_admin') || usePlatformRole(platformRole);
 
   // Check client roles for the active client
@@ -27,20 +26,17 @@ export const ProtectedRoute = ({permission=null, platformRole=null, allowedRoles
 
   // If a specific platformRole is required and the user doesn't have it
   if (platformRole && !hasPlatformRole) {
-    console.log("@@", hasPlatformRole,platformRole,user )
     return <Navigate to="/forbidden" replace />;
   }
 
   // If specific client roles are required and the user doesn't have them in the active client
   // Only check if allowedRoles is provided and not empty
   if (allowedRoles && allowedRoles.length > 0 && !hasClientRoles) {
-    console.log("Role@@", hasClientRoles,allowedRoles )
     return <Navigate to="/forbidden" replace />;
   }
 
   // If a specific permission is required and the user doesn't have it in the active client
   if (permission && !hasPermission) {
-    console.log("Perm@@", hasPermission,permission )
     return <Navigate to="/forbidden" replace />;
   }
 

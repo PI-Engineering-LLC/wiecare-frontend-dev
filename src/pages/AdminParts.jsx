@@ -151,10 +151,6 @@ export default function AdminParts() {
 
     setUploading(true);
     try {
-      // const result = await api.getPresignedUploadUrl({ filename: file.name, contentType: file.type });
-      //       const { file_url , file_key } = result;
-      //       const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: file });  
-      //       console.log('Upload successful! File stored securely in cloud bucket.');
       const file_key = await uploadFileToS3({file, type:'parts'});      
       setFormData(prev => ({ ...prev, image_storage_key: file_key }));
       toast.success('Image uploaded');

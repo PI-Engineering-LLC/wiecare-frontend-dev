@@ -25,7 +25,6 @@ export default function AcceptInvite() {
     if (password.length < 8) return toast.error('Password must be at least 8 characters');
     try {
       const {success, nextStep,requireLogin, message}=await api.acceptInvite({ token, password });
-      console.log(success, nextStep,requireLogin, message)
       setDone(true);
     } catch (err) {
       toast.error(err.message);

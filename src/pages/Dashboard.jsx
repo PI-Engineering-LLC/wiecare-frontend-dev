@@ -29,7 +29,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { activeClientId } = useClient();
 
-  // Queries are already correctly structured to use activeClientId if present
+  // Queries are structured to use activeClientId if present
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery({
     queryKey: ['invoices', activeClientId],
     queryFn: () => activeClientId

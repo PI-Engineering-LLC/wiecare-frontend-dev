@@ -1,13 +1,13 @@
 
 import { api } from "@/api/apiClient";
 import { debounce } from "lodash";
-import { useEffect, useState , useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 
-export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDuration, watchTimeSeconds }) {
+export default function CourseVideo({ videoKey, onLoadedMetadata, onVideoDuration, watchTimeSeconds }) {
   const [url, setUrl] = useState(null);
   const playerRef = useRef(null); // Ref to access ReactPlayer instance
-  // Use a ref to store the timestamp of the LAST time we sent an API save
+  // Use a ref to store the timestamp of the last time we sent an API save
   const lastSavedTimeRef = useRef(0);
   const hasJumped = useRef(false);
 
@@ -18,13 +18,10 @@ export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDurati
         setUrl(videoKey);
         return;
       }
-
       // otherwise assume S3 object key
       try {
         const { downloadUrl } = await api.getS3FileUrl({ fileKey: videoKey });
-
         setUrl(downloadUrl);
-
       } catch (err) {
         console.error(err);
       }
@@ -34,16 +31,14 @@ export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDurati
   }, [videoKey]);
 
   // Function to handle progress updates
-    const handleProgress = (e) => {
-    console.log("Current watch time:", e.currentTarget.currentTime);
-    console.log("Current watch duration:", e.currentTarget.duration);
+  const handleProgress = (e) => {
     const currentTime = e.currentTarget.currentTime;
     // Check if the user has watched 30 seconds MORE than our last saved timestamp
     const timeSinceLastSave = Math.abs(currentTime - lastSavedTimeRef.current);
     handleDuration(e.currentTarget.duration)
 
     if (timeSinceLastSave >= 30) {
-    saveWatchTime(currentTime);
+      saveWatchTime(currentTime);
     }
   };
   // Pause Handler (Guarantees no progress is lost if they walk away)
@@ -64,9 +59,7 @@ export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDurati
 
   // Function to save watch time to backend 
   const saveWatchTime = debounce((seconds) => {
-    // Call your backend API here
     if (onLoadedMetadata) {
-      console.log("!!!!!!!!",seconds)
       onLoadedMetadata(seconds); // Pass seconds to the parent
     }
     lastSavedTimeRef.current = seconds;
@@ -78,24 +71,19 @@ export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDurati
     }
   };
   const handleReady = () => {
-    console.log("Jump: ##", hasJumped,watchTimeSeconds)
     // Check if we have a saved time and the player instance is ready
-    if (!hasJumped.current && watchTimeSeconds !== undefined && watchTimeSeconds >0 && playerRef.current) {
-      const seconds = watchTimeSeconds ;
-      console.log("Seconds: ##", seconds)
-      // playerRef.current.seekTo(seconds)
-      //playerRef.current.seekTo(seconds, 'seconds');
-    // if(!!seconds) 
-      playerRef.current.currentTime= seconds;;
-    hasJumped.current = true;
+    if (!hasJumped.current && watchTimeSeconds !== undefined && watchTimeSeconds > 0 && playerRef.current) {
+      const seconds = watchTimeSeconds;
+      playerRef.current.currentTime = seconds;;
+      hasJumped.current = true;
     }
   };
 
   if (!url) {
     return <div>Loading video...</div>;
   }
-  
- 
+
+
   return (
     <ReactPlayer
       ref={playerRef}
@@ -103,15 +91,10 @@ export default function  CourseVideo({ videoKey, onLoadedMetadata, onVideoDurati
       controls
       width="100%"
       height="100%"
-      // className="w-full h-full"
       autoPlay
-      // playing={true}
-      // muted={true}
       onProgress={handleProgress}
-      // onLoadedMetadata={handleProgress}
-      onPause={handlePause}        
-        onEnded={handleEnded}
-        // onLoadedMetadata={handleDuration} 
+      onPause={handlePause}
+      onEnded={handleEnded}
       onReady={handleReady}
     />
   );
@@ -123,74 +106,3 @@ function isExternalUrl(value) {
     value.startsWith("https://")
   );
 }
-// import { api } from "@/api/apiClient";
-// import { debounce } from "lodash";
-// import { useEffect, useState, useRef } from "react";
-// import ReactPlayer from "react-player";
-
-// export default function CourseVideo({ videoKey, onLoadedMetadata, onVideoDuration, watchTimeSeconds }) {
-//   const [url, setUrl] = useState(null);
-//   const playerRef = useRef(null);
-//   const lastSavedTimeRef = useRef(0);
-
-//   useEffect(() => {
-//     async function resolveVideo() {
-//       if (videoKey.startsWith("http://") || videoKey.startsWith("https://")) {
-//         setUrl(videoKey);
-//         return;
-//       }
-//       try {
-//         const { downloadUrl } = await api.getS3FileUrl({ fileKey: videoKey });
-//         setUrl(downloadUrl);
-//       } catch (err) {
-//         console.error("Video resolve error:", err);
-//       }
-//     }
-//     resolveVideo();
-//   }, [videoKey]);
-
-//   const saveWatchTime = debounce((seconds) => {
-//     if (onLoadedMetadata) {
-//       onLoadedMetadata(seconds);
-//     }
-//     lastSavedTimeRef.current = seconds;
-//   }, 3000); // Reduced to 3s for better responsiveness during testing
-
-//   const handleProgress = (state) => {
-//     const { playedSeconds } = state;
-//     if (Math.abs(playedSeconds - lastSavedTimeRef.current) >= 30) {
-//       saveWatchTime(playedSeconds);
-//     }
-//   };
-
-//   const handleReady = () => {
-//     // Ensure we have a valid number and the player is ready
-//     if (watchTimeSeconds !== undefined && watchTimeSeconds !== null && playerRef.current) {
-//       const seconds = Number(watchTimeSeconds);
-//       if (seconds > 0) {
-//         playerRef.current.seekTo(seconds, 'seconds');
-//       }
-//     }
-//   };
-//   const handleDuration = (durationInSeconds) => { //  handler for duration
-//     if (onVideoDuration) {
-//       onVideoDuration(durationInSeconds);
-//     }
-//   };
-
-//   if (!url) return <div>Loading video...</div>;
-
-//   return (
-//     <ReactPlayer
-//       ref={playerRef}
-//       src={url} 
-//       controls
-//       width="100%"
-//       height="100%"
-//       onProgress={handleProgress}
-//       // onDuration={(d) => onVideoDuration?.(d)}
-//       onLoadedMetadata={handleDuration} 
-//       onReady={handleReady}
-//     />
-//   );
-// }

@@ -1,13 +1,12 @@
-import React from 'react'; // Removed unused useState, useEffect
+import React from 'react'; 
 import { Shield, Lock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '@/lib/AuthContext';
 import { usePlatformRole } from '@/hooks/usePlatfromRole';
-// import { useClientRoles } from '@/hooks/useClientRoles'; // Removed, AdminOnly should not check client roles
 
 export default function AdminOnly({ children, fallback = null }) {
   const { user, loading } = useAuth();
-  const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin'); // Corrected 'admin' to 'platform_admin' as per backend
+  const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin'); 
 
   if (loading) {
     return (
@@ -71,5 +70,5 @@ export default function AdminOnly({ children, fallback = null }) {
     );
   }
 
-  return <>{children}</>; // Render children if internal admin
+  return <>{children}</>; 
 }

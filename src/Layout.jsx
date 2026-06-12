@@ -13,15 +13,14 @@ import { AvatarImg } from "@/components/UserAvatar";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { usePlatformRole } from '@/hooks/usePlatfromRole';
-import { useClientRoles } from './hooks/useClientRoles'; // Corrected path/import
+import { useClientRoles } from './hooks/useClientRoles'; 
 import { useClient } from './lib/ClientContext';
 import { useSocket } from './hooks/useSocket';
-// import socket from './api/socket'; // Removed direct socket import, using useSocket hook
 import { useAuth } from './lib/AuthContext';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Imported Select components
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; 
 
 
-// ── CollapsibleGroup (unchanged) ──────────────────────────────────────────────
+// ── CollapsibleGroup) ──────────────────────────────────────────────
 function CollapsibleGroup({ label, icon: Icon, items, currentPageName, onNavigate }) {
   const isAnyActive = items.some(i => i.page === currentPageName);
   const [open, setOpen] = useState(isAnyActive);
@@ -74,8 +73,6 @@ export default function Layout({ children, currentPageName }) {
   const loadNotifications = async () => {
     try {
       if (!user?.id) return;
-      // Backend handles filtering notifications by recipient_id and admin permissions.
-      // Frontend simply requests notifications and displays them.
       const notifs = await api.getNotifications({ limit: 10, is_read: false }); // Request unread notifications
       setNotifications(notifs);
     } catch (e) {
@@ -94,9 +91,7 @@ export default function Layout({ children, currentPageName }) {
   });
 
   const handleLogout = async () => {
-    // socket.disconnect(); // useSocket hook should handle socket lifecycle
-    await logout(); // Use logout function from useAuth
-    // The logout function in useAuth should handle clearing local storage, cookies, and redirect
+    await logout();
   };
 
   // ── Nav config ────────────────────────────────────────────────
@@ -145,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
     ]},
   ];
 
-  const directItems = isInternalAdmin ? adminNavDirect : clientNavDirect; // Use isInternalAdmin for top-level admin vs client view
+  const directItems = isInternalAdmin ? adminNavDirect : clientNavDirect; 
   const navGroups   = isInternalAdmin ? adminNavGroups : clientNavGroups;
 
   const getInitials = (name) => {
@@ -423,11 +418,9 @@ function RightPanel({ user}) {
     queryKey: ['notif-panel', user?.id],
     queryFn:  () => {
         if (!user?.id) return [];
-        // Backend handles admin vs user specific notifications
         return api.getNotifications({ is_read: false, limit: 5 });
       },
     enabled: !!user?.id,
-    // refetchInterval: 15000,
   });
 
   useSocket(() => refetchNotifications());
@@ -455,7 +448,7 @@ function RightPanel({ user}) {
   return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} />;
 }
 
-// ── AdminRightPanel & ClientRightPanel (UI unchanged) ────────────────────────
+// ── AdminRightPanel & ClientRightPanel ────────────────────────
 function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending }) {
   const drafts = invoices.filter(i => i.status === 'draft').length;
   const inProgress = maintenance.filter(m => m.status === 'in_progress').length;
@@ -490,9 +483,7 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
          notifications?.map(n => (
            <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
            onClick={async () => {
-          // setNotifOpen(false); // Removed, as this is the RightPanel, not the overlay notification
           await api.markRead(`${n.id}`);
-          // loadNotifications(); // This should come from RightPanel or context
           if (n.link) window.location.href = n.link;
         }}>
              <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />

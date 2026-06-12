@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
   const activeClientId = localStorage.getItem('activeClientId');
 
-  // ── 1. Current User Profile Query ──────────────────────────────────
+  // ── Current User Profile Query ──────────────────────────────────
   const { 
     data: user = null, 
     isLoading: loading, 
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     staleTime: 1000 * 60 * 5, // 5 minutes cache validity
   });
 
-  // ── 2. Derive Errors and Auth States ───────────────────────────────
+  // ── Derive Errors and Auth States ───────────────────────────────
   const authError = useMemo(() => {
     if (!rawError) return null;
     const msg = rawError.message || '';
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!user;
   const isAdmin = user?.platform_role === 'super_admin' || user?.platform_role === 'platform_admin';
 
-  // ── 3. Login Mutation (Email / Password) ──────────────────────────
+  // ── Login Mutation (Email / Password) ──────────────────────────
   const loginMutation = useMutation({
     mutationFn: (credentials) => api.login(credentials),
     onSuccess: (data) => {
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // ── 4. Logout Mutation ───────────────────────────────────────────
+  // ── Logout Mutation ───────────────────────────────────────────
   const logoutMutation = useMutation({
     mutationFn: () => api.logout(),
     onSettled: () => {
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // ── 5. Profile Update Mutation ───────────────────────────────────
+  // ──Profile Update Mutation ───────────────────────────────────
   const updateMeMutation = useMutation({
     mutationFn: (updates) => api.updateMe(updates),
     onSuccess: (updatedUser) => {
@@ -91,11 +91,9 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  // ── 6. Legacy / Compatibility Methods ────────────────────────────
+  // ── Legacy / Compatibility Methods ────────────────────────────
   // Kept intact if external packages require manual callbacks
   const handleOAuthTokenLogin = async () => {
-    // NOTE: With your cookie rewrite, tokens are set directly by the server callback redirect.
-    // We invalidate the cache to pull the identity data down immediately.
     await queryClient.invalidateQueries({ queryKey: ['authUser'] });
   };
 

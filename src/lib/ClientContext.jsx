@@ -45,37 +45,3 @@ export const useClient = () => {
   }
   return context;
 };
-/**
- <select
-  value={
-    activeClientId
-  }
-
-  onChange={e =>
-    // setActiveClientId(
-    switchClient(
-      e.target.value
-    )
-  }
->
-  {
-    user.memberships.map(
-      m => (
-        <option
-          key={
-            m.client.id
-          }
-
-          value={
-            m.client.id
-          }
-        >
-          {
-            m.client.name
-          }
-        </option>
-      )
-    )
-  }
-</select>
- */

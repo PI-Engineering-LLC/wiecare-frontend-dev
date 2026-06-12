@@ -49,7 +49,7 @@ export default function AdminClients() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['admin-clients', searchTerm, statusFilter], // Include filters in queryKey
     queryFn: () => api.getClients({
-      order: '-created_at', // Corrected to '-created_at' for consistency with other date fields
+      order: '-created_at', 
       limit: 200,
       search: searchTerm,
       status: statusFilter === 'all' ? undefined : statusFilter, // Only send status if not 'all'

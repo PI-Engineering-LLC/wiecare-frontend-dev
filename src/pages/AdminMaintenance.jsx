@@ -71,9 +71,6 @@ export default function AdminMaintenance() {
     const file = e.target.files[0];
     if (!file) return;
     setUploadingReport(true);
-    // const { file_url , file_key } = await api.getPresignedUploadUrl({ filename: file.name, contentType: file.type });
-    // const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: file });  
-    // console.log('Upload successful! File stored securely in cloud bucket.');
     const file_key = await uploadFileToS3({client_id: selectedRequest?.client_id, file, type:'inspection_report'})     
     setInspectionReport({ file, fileKey: file_key });
     setUploadingReport(false);

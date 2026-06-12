@@ -17,7 +17,7 @@ import DataTable from '@/components/shared/DataTable';
 import EmptyState from '@/components/shared/EmptyState';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
-import { useAuth } from '@/lib/AuthContext'; // Import useAuth to get current user ID/info
+import { useAuth } from '@/lib/AuthContext'; 
 import { Switch } from '@/components/ui/switch';
 
 const categoryConfig = {
@@ -41,7 +41,7 @@ const typeIcon = {
 };
 
 export default function AdminNotifications() {
-  const { user } = useAuth(); // Get current user for audit/context
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [showDialog, setShowDialog] = useState(false);
@@ -52,14 +52,14 @@ export default function AdminNotifications() {
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['admin-notifications'],
-    queryFn: () => api.getNotifications( { order: '-created_at', limit: 300}), // Use created_at
+    queryFn: () => api.getNotifications( { order: '-created_at', limit: 300}),
   });
 
-  const { data: usersData = { users: [] } } = useQuery({ // Corrected usersData structure
+  const { data: usersData = { users: [] } } = useQuery({ 
     queryKey: ['all-users-for-admin-notifs'],
-    queryFn: () => api.getUsers({ order:'full_name', limit: 500}), // Fetch more users if needed
+    queryFn: () => api.getUsers({ order:'full_name', limit: 500}), 
   });
-  const users = usersData?.users ?? []; // Corrected to access users array
+  const users = usersData?.users ?? []; 
 
   const { data: clients = [] } = useQuery({
     queryKey: ['all-clients-for-admin-notifs'],
@@ -86,8 +86,8 @@ export default function AdminNotifications() {
         message: data.message,
         type: data.type,
         category: data.category,
-        link: data.link, // Assuming link can be part of formData
-        is_email_sent: data.is_email_sent || false, // Assuming is_email_sent can be part of formData
+        link: data.link, 
+        is_email_sent: data.is_email_sent || false, 
       };
 
       if (sendType === 'client') {
@@ -127,7 +127,7 @@ export default function AdminNotifications() {
   // Stats
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const todayCount = notifications.filter(n => {
-    const d = new Date(n.created_at); // Use created_at
+    const d = new Date(n.created_at); 
     const today = new Date();
     return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
   }).length;

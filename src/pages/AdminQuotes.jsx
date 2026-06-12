@@ -187,55 +187,19 @@ export default function AdminQuotes() {
       const updatedQuote = await updateMutation.mutateAsync({ id: selectedQuote.id, data: quoteData });
       // If sending/updating to client (status = sent), notify them
       if ((overrideStatus || formData.status) === 'sent') {
-        // await notifyClientAboutQuote({ ...quoteData, id: selectedQuote.id, quote_number: quoteData.quote_number || selectedQuote.quote_number }, true);
       }
     } else {
       const newQuote = await createMutation.mutateAsync(quoteData);
 
       if (isClientRequest) {
         // Mark the client's original request as resolved
-        // await updateMutation.mutateAsync(selectedQuote.id,{ status: 'converted', converted_to_order_id: newQuote.id });
-        //await updateMutation.mutateAsync({ status: 'converted', converted_to_order_id: newQuote.id });
         await  updateMutation.mutateAsync({ id: selectedQuote.id, data:{ status: 'converted', converted_to_order_id: newQuote.id }});
-        // Notify + email client
-        // await notifyClientAboutQuote(newQuote, false);
-      } else if ((overrideStatus || formData.status) === 'sent') {
-        // New quote created and sent directly
-        // await notifyClientAboutQuote(newQuote, false);
       }
     }
   };
 
-  // const notifyClientAboutQuote = async (quote, isUpdate = false) => {
-  //   const clientUsers = users.filter(u => u.client_id === quote.client_id);
-  //   const client = clients.find(c => c.id === quote.client_id);
-  
-  //   await Promise.all(clientUsers.map((u, index) =>
-  //     api.createNotifications({
-  //       recipient_id: u.id,
-  //       recipient_email: u.email,
-  //       title: isUpdate ? 'Quote Updated' : 'Your Quote is Ready',
-  //       message: isUpdate
-  //         ? `Your quote "${quote.title}" (${quote.quote_number || ''}) has been updated. Please log in to review the changes.`
-  //         : `Your quote "${quote.title}" (${quote.quote_number || ''}) has been prepared and is ready for your review.`,
-  //       type: 'success',
-  //       category: 'quote',
-  //       link: `/Quotes?quote_id=${quote.id}`,
-  //       is_read: false,
-  //       send_email: index === 0 && !!client?.contact_email,
-  //       email_to: client?.contact_email,
-  //       email_type: 'quote', 
-  //       email_data: {
-  //         is_update: isUpdate,
-  //         quote,
-  //         client,
-  //       },
-  //     })
-  //   ));
-  // };
   const handleSend = async (quote) => {
     await updateMutation.mutateAsync({ id: quote.id, data: { status: 'sent' } });
-    // await notifyClientAboutQuote(quote, false);
 
     // Find client's contact email just to show correct toast
     const client = clients.find(c => c.id === quote.client_id);
@@ -258,9 +222,6 @@ export default function AdminQuotes() {
   // Pre-fill form from a client's pending request to create a quote response
   const handleCreateFromRequest = async (row) => {
     // Mark client request as "assigned" immediately
-    console.log("rooow ", row.id)
-    console.log("rooow ",row)
-    // await updateMutation.mutateAsync(row.id, { status:'assigned' });
     await updateMutation.mutateAsync({id: row.id,data: { status: 'assigned' }});
     queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
 
@@ -774,9 +735,7 @@ export default function AdminQuotes() {
                         </div>
                         {item.description && <p className="text-slate-700">{item.description}</p>}
                         {item.photo_storage_key && (
-                          // <a href={item.photo_storage_key} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block">
                             <PublicImage docKey={item.photo_storage_key} alt="Attached" className="h-16 w-16 rounded-md object-cover border border-amber-300 hover:opacity-80 transition-opacity" isLink={true} />
-                          // </a>
                         )}
                       </div>
                     ))}

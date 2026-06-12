@@ -20,7 +20,7 @@ import { usePlatformRole } from "@/hooks/usePlatfromRole"
 import Forbidden from "@/components/Forbidden"
 import { ClientProvider } from "@/lib/ClientContext"
 
-const { Pages, Layout, getMainPage , routeGuards } = pagesConfig; // Changed 'roles' to 'routeGuards' for clarity
+const { Pages, Layout, getMainPage , routeGuards } = pagesConfig; 
 
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
@@ -28,7 +28,6 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  // Corrected 'admin' to 'platform_admin' to match backend roles
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
   const { user, loading, isAuthenticated, authError, navigateToLogin } = useAuth(); 
   const mainPageKey = getMainPage(isInternalAdmin);
@@ -49,7 +48,6 @@ const AuthenticatedApp = () => {
     } 
     else if (authError.type === 'auth_required') {
       navigateToLogin(); // Redirect to login automatically
-      // return null;
     }
   }
 

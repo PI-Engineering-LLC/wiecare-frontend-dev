@@ -83,10 +83,6 @@ export default function WarrantyClaims() {
     try {
       const uploadedStorageKeys = [];
       for (const file of files) {
-        // const result = await api.getPresignedUploadUrl({ filename: file.name, contentType: file.type });
-        //       const { file_url , file_key } = result;
-        //       const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: file });  
-        //       console.log('Upload successful! File stored securely in cloud bucket.');
         const file_key = await uploadFileToS3({client_id: activeClientId, file, type:'claim_img'})
         // Create the native preview URL for this file
   const previewUrl = URL.createObjectURL(file);
@@ -94,7 +90,6 @@ export default function WarrantyClaims() {
     uploadedStorageKey: file_key,
     previewUrl: previewUrl
   });
-        // uploadedStorageKeys.push(file_key);
       }
       setNewClaim(prev => ({
         ...prev,
@@ -118,7 +113,6 @@ export default function WarrantyClaims() {
     }));
   };
 
-  // const clientData = client?.find(c => c.id === activeClientId);
   const clientData = client;
 
   const warrantyStatus = (() => {
@@ -445,13 +439,6 @@ export default function WarrantyClaims() {
                   <p className="text-sm text-slate-500 mb-2">Photos</p>
                   <div className="flex gap-2 flex-wrap">
                     {selectedClaim.images.map((storage_key, idx) => (
-                      // <a key={idx} href={storage_key} target="_blank" rel="noopener noreferrer">
-                      //   <img
-                      //     src={storage_key}
-                      //     alt={`Claim photo ${idx + 1}`}
-                      //     className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity"
-                      //   />
-                      // </a>
                       <PrivateImageLink 
                        storageKey={storage_key}
                        alt={`Claim photo ${idx + 1}`}

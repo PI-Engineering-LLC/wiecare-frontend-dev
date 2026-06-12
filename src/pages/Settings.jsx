@@ -22,10 +22,10 @@ const NOTIF_PREFS = [
 ];
 
 export default function Settings() {
-  const { user, updateMe, api, refreshUser } = useAuth(); // Destructure refreshUser
+  const { user, updateMe, api, refreshUser } = useAuth(); 
 
   useEffect(() => {
-    if (user?.mfa_enabled) { // Check for user existence
+    if (user?.mfa_enabled) { 
       setMfaStep('done');
     }
   }, [user]);
@@ -56,8 +56,8 @@ export default function Settings() {
   const [mfaCodeError, setMfaCodeError] = useState('');
   const [disableCode, setDisableCode] = useState('');
 
-  const { activeClientId } = useClient(); // Corrected destructuring
-  const { uploadFileToS3 } = useUpload(); // isUploading not used, removed
+  const { activeClientId } = useClient(); 
+  const { uploadFileToS3 } = useUpload(); 
 
   const startSetup = async () => {
     try {
@@ -70,12 +70,12 @@ export default function Settings() {
     }
   };
 
-  const verifyCode = async () => { // Removed 'e' param as it's not used directly
+  const verifyCode = async () => { 
     try {
       const res = await api.verifyMfa({
         code: mfaCode,
       });
-      refreshUser(); // Refresh user context to update mfa_enabled status
+      refreshUser(); 
       setMfaStep('done');
       toast.success('2FA enabled successfully!');
     } catch (err) {
@@ -84,18 +84,18 @@ export default function Settings() {
     }
   };
 
-  const disableMfa = async () => { // Removed 'e' param as it's not used directly
+  const disableMfa = async () => { 
     setMfaStep('disabling');
     setDisableCode('');
   };
 
-  const confirmDisableMfa = async () => { // Removed 'e' param as it's not used directly
+  const confirmDisableMfa = async () => { 
     setMfaCodeError('');
     try {
       await api.disableMfa({
         code: disableCode,
       });
-      refreshUser(); // Refresh user context to update mfa_enabled status
+      refreshUser(); 
       setMfaStep('idle');
       setDisableCode('');
       toast.info('2FA has been disabled.');
@@ -109,7 +109,7 @@ export default function Settings() {
     mutationFn: (data) => updateMe(data),
     onSuccess: () => {
       toast.success('Profile updated');
-      refreshUser(); // Refresh user context after update
+      refreshUser(); 
     },
     onError: (err) => {
       console.error("Profile update failed:", err);
@@ -127,7 +127,7 @@ export default function Settings() {
       const newStorageKey = file_key;
       setProfile(prev => ({ ...prev, avatar_storage_key: newStorageKey }));
       await updateMe({ avatar_storage_key: newStorageKey });
-      refreshUser(); // Refresh user context after avatar update
+      refreshUser(); 
       toast.success('Photo updated');
     } catch (err) {
       console.error("Avatar upload failed:", err);
@@ -142,7 +142,7 @@ export default function Settings() {
     try {
       await updateMe({ [key]: value });
       toast.success('Preference saved');
-      refreshUser(); // Refresh user context to ensure persistence
+      refreshUser(); 
     } catch (err) {
       // Revert on error
       setPrefs(prev => ({ ...prev, [key]: !value }));

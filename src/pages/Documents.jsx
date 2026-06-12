@@ -143,7 +143,7 @@ export default function Documents() {
         status: 'active'
       });
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error('Upload failed');
     } finally {
       setUploading(false);

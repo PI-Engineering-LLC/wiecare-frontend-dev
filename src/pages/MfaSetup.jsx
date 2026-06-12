@@ -9,7 +9,7 @@ export default function MfaSetup() {
     const [mfaStep, setMfaStep] = useState('idle'); // idle | scanning | verifying | done_show_codes | done
     const [mfaCodeError, setMfaCodeError] = useState('');
     const [backupCodes, setBackupCodes] = useState(null); // New state for backup codes
-    const { login } = useAuth(); // Get login function from AuthContext
+    const { login } = useAuth(); 
     const navigate = useNavigate();
 
     const startSetup = async () => {
@@ -27,14 +27,13 @@ export default function MfaSetup() {
 
     const verifyCode = async (e) => {
         e.preventDefault();
-        setMfaCodeError(''); // Clear previous errors
-        setMfaStep('verifying'); // Indicate verification in progress
+        setMfaCodeError(''); 
+        setMfaStep('verifying');
         try {
             const res = await api.verifyMfa({
                 mfaCode,
             });
-          
-            // setMfaStep('done');
+            
             if (res.backup_codes && res.backup_codes.length > 0) {
                 setBackupCodes(res.backup_codes);
                 setMfaStep('done_show_codes'); // Transition to showing backup codes
@@ -42,7 +41,6 @@ export default function MfaSetup() {
                 setMfaStep('done'); // If no backup codes (e.g., already enabled), just show success
             }
         } catch (err){
-            // setMfaCodeError('Invalid code. Try again.');
             setMfaCodeError(err.response?.data?.error || 'Invalid code. Try again.');
             setMfaStep('scanning'); // Go back to scanning state for another attempt
         }

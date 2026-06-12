@@ -1,10 +1,9 @@
 import { useAuth } from "@/lib/AuthContext";
 import { PublicImage } from "@/components/PublicImage";
-// --- Centralized Constants ---
+// --- TODO:Centralize Constants ---
 // Define these once, possibly in a `src/lib/constants.js` file,
 // and import them into components that need them.
 const BASE_URL = import.meta.env.VITE_APP_ASSETS_BASE_URL;
-const DEFAULT_PLACEHOLDER_IMAGE = 'https://via.placeholder.com/150'; // Generic image placeholder
 
 
 // For providing a download/view link to any public file.

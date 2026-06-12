@@ -57,7 +57,7 @@ export const pagesConfig = {
     getMainPage: (isInternalAdmin) => isInternalAdmin ? 'AdminDashboard' : 'Dashboard',
     Pages: PAGES,
     Layout: __Layout,
-    routeGuards: { // Renamed from 'roles' to 'routeGuards'
+    routeGuards: { 
         // For platform-level admin pages, use platformRole: 'platform_admin'
         "AdminClients":       { platformRole: 'platform_admin' },
         "AdminCourses":       { platformRole: 'platform_admin' },

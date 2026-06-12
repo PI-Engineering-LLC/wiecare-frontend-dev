@@ -2,9 +2,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
 import { usePlatformRole } from '@/hooks/usePlatfromRole';
 
-export function useClientRoles(allowedRoleNames){ // Renamed parameter for clarity
+export function useClientRoles(allowedRoleNames){ 
     const { user } = useAuth();
-    const { activeClientId } = useClient(); // Get activeClientId from context
+    const { activeClientId } = useClient(); 
 
     // PLATFORM ADMINS bypass client-specific role checks
     if( usePlatformRole('super_admin') ||  usePlatformRole('platform_admin')){

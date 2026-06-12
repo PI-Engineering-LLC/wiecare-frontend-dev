@@ -1,8 +1,4 @@
-import { io } from 'socket.io-client';
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
-
-// const getToken = () => localStorage.getItem('token');
 
 // @ts-ignore
 const request = async (method, path, { data, params } = {}, isFormData = false) => {
@@ -12,14 +8,10 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
   }
   const activeClientId = localStorage.getItem('activeClientId');
   const headers = new Headers();
-  // const headers = { Authorization: `Bearer ${getToken()}` };
-  if (activeClientId) { // Only add if activeClientId exists
-    // headers['X-Tenant-Id'] = activeClientId;
+  if (activeClientId) { 
     headers.set('X-Tenant-Id', activeClientId);
   }
   if (!isFormData) headers.set('Content-Type', 'application/json');
-    //headers['Content-Type'] = 'application/json';
-
   const res = await fetch(url.toString(), {
     method,
     credentials: 'include',
@@ -39,11 +31,9 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
     // Retry original request with new token and headers
     const newHeaders =  new Headers();
     if (activeClientId) {
-      // newHeaders['X-Tenant-Id'] = activeClientId;
       newHeaders.set('X-Tenant-Id', activeClientId);
     }
     if (!isFormData) newHeaders.set('Content-Type', 'application/json');
-      // newHeaders['Content-Type'] = 'application/json';
 
     return fetch(url.toString(), {
       method,
@@ -63,7 +53,7 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
 async function tryRefresh() {
   const res = await fetch(`${BASE_URL}/auth/refresh`, {
     method: 'POST',
-    credentials: 'include', // sends the httpOnly cookie
+    credentials: 'include', 
   });
 
   if (!res.ok) return false;
@@ -135,7 +125,7 @@ export const api = {
   deleteClient: (id) => request('DELETE', `/clients/${id}`),
 
 
-  // Memberships (added for completeness, assuming /api/client_memberships exists)
+  // Memberships 
   getClientMemberships: (params) => request('GET', '/memberships', { params }),
   createClientMembership: (data) => request('POST', '/memberships', { data }),
   deleteClientMembership: (id) => request('DELETE', `/memberships/${id}`),

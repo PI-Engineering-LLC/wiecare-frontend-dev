@@ -275,13 +275,11 @@ export default function AdminWarranty() {
                     <p className="text-sm text-slate-500 mb-2">Photos</p>
                     <div className="flex gap-2 flex-wrap">
                       {selectedClaim.images.map((storage_key, idx) => (
-                        //<a key={idx} href={storage_key} target="_blank" rel="noopener noreferrer">
                         <PrivateImageLink
                           storageKey={storage_key}
                           alt={`Claim photo ${idx + 1}`}
                           className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity">
                         </PrivateImageLink>
-                        //</a>
                       ))}
                     </div>
                   </div>

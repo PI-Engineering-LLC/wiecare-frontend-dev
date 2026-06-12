@@ -127,11 +127,6 @@ export default function AdminDocuments() {
 
     setUploading(true);
     try {
-      // // const result = await api.uploadFile({ file }); //returns {file_url}
-      // const result = await api.getPresignedUploadUrl({ filename: file.name, contentType: file.type });
-      // const { file_url , file_key } = result;
-      // const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: file });  
-      // console.log('Upload successful! File stored securely in cloud bucket.');
       const file_key = await uploadFileToS3({client_id: formData?.client_id, file});
       
       setFormData(prev => ({

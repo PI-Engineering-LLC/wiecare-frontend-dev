@@ -16,17 +16,16 @@ export default function Notifications() {
   const queryClient = useQueryClient();
 
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications', user?.id], // Only user.id needed, backend handles filtering
-    // Simplified queryFn: Backend should handle filtering by the authenticated user
+    queryKey: ['notifications', user?.id], 
     queryFn: () => api.getNotifications({ order: '-created_at', limit: 100 }),
-    enabled: !!user?.id, // Only enable if user is logged in
+    enabled: !!user?.id, 
   });
 
   const markReadMutation = useMutation({
     mutationFn: (id) => api.markRead(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications']});
-      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); // Also invalidate RightPanel notifications
+      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
     },
     onError: (error) => {
         console.error('Failed to mark notification as read:', error);
@@ -35,10 +34,10 @@ export default function Notifications() {
   });
 
   const markAllReadMutation = useMutation({
-    mutationFn: () => api.markAllRead(), // Use new backend endpoint for marking all read
+    mutationFn: () => api.markAllRead(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications']});
-      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); // Also invalidate RightPanel notifications
+      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
       toast.success('All notifications marked as read.');
     },
     onError: (error) => {
@@ -51,7 +50,7 @@ export default function Notifications() {
     mutationFn: (id) => api.deleteNotif(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications']});
-      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); // Also invalidate RightPanel notifications
+      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
       toast.success('Notification deleted.');
     },
     onError: (error) => {
@@ -61,10 +60,10 @@ export default function Notifications() {
   });
 
   const clearAllReadMutation = useMutation({
-    mutationFn: () => api.clearReadNotifs(), // Use new backend endpoint for clearing all read
+    mutationFn: () => api.clearReadNotifs(), 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications']});
-      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); // Also invalidate RightPanel notifications
+      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
       toast.success('All read notifications cleared.');
     },
     onError: (error) => {

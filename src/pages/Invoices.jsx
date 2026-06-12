@@ -30,7 +30,6 @@ export default function Invoices() {
   
   const queryClient = useQueryClient();
   const { activeClientId, switchClient } = useClient()
-  //const clientId = user?.client_id;
   useEffect(() => {
     
     const responseCode = searchParams.get('responseCode');
@@ -39,7 +38,7 @@ export default function Invoices() {
       const params = new URLSearchParams(window.location.search);
       if (responseCode === '200') {
         toast.success('Payment recorded successfully!!!');
-        console.log('Payment Successful:', { transactionId, message });
+        // console.log('Payment Successful:', { transactionId, message });
       }else if (responseCode) {
         console.error('Payment Failed:', message);
       toast.success('Payment Error occured!!');
@@ -92,13 +91,7 @@ export default function Invoices() {
   const createPaymentSessionMutation = useMutation({
     mutationFn: (data) => api.createPaymentSession(data),
     onSuccess: (data) => {
-      console.log("**DATA",data.url)
       if(data.url) window.open(data.url, "_blank", "noopener,noreferrer");
-      // window.location.href = data.url;
-      // queryClient.invalidateQueries({ queryKey: ['invoices']});
-      // setShowPaymentDialog(false);
-      // setPaymentAmount('');
-      // toast.success('Payment recorded successfully');
     },
     onError: (err) => {
       console.error(err);
@@ -111,17 +104,7 @@ export default function Invoices() {
     
     const amount = parseFloat(paymentAmount);
     const paymentInformation = await createPaymentSessionMutation.mutateAsync({ invoiceId: selectedInvoice.id });
-  //   try {
-  //     const { paymentUrl } = await api.createPaymentSession({ amount, invoiceId: selectedInvoice.id })
-  //   // Redirect the customer to the secure hosted card entry page
-  //   if (paymentUrl) { //data.url TODO
-  //     window.location.href = paymentUrl;
-  // }
-         
-  //   } catch (e) {
-  //     alert("Payment failed to initialize.");
-  //     console.log('Error occured');
-  //   } //TODO 
+  
   };
   
 

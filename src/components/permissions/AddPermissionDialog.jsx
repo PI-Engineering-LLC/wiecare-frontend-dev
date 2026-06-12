@@ -8,10 +8,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
 
 export default function AddPermissionDialog({ open, onClose, onSuccess }) {
-    // Backend expects 'resource' and 'action', not 'name'
     const [permissionData, setPermissionsData] = useState({ resource: '', action: '' });
     const createMutation = useMutation({
-        mutationFn: (data) => api.createPermission(data), // api.createPermission expects {resource, action}
+        mutationFn: (data) => api.createPermission(data), 
         onSuccess: () => {
           onSuccess();
           onClose(false);
@@ -33,8 +32,7 @@ export default function AddPermissionDialog({ open, onClose, onSuccess }) {
             toast.error('Resource and Action are required.');
             return;
         }
-        await createMutation.mutateAsync(permissionData); // Pass the structured data
-    };
+        await createMutation.mutateAsync(permissionData); 
 
     return (
         <Dialog open={open} onOpenChange={(open) => { if (!open) resetForm(); onClose(open); }  }>

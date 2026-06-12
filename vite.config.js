@@ -12,18 +12,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, './src'),
     },
   },
-  // server: {
-  //   allowedHosts: ['my-local-site.test', 'frontend-web.local','https://sententious-nenita-physoclistous.ngrok-free.dev/', 'localhost']
-  // },
-  // server: {
-  //   proxy: {
-  //     // Redirects any frontend requests starting with /api to your Express backend
-  //     '/api': {
-  //       target: env.VITE_API_TARGET, 
-  //       changeOrigin: true,
-  //       secure: false,
-  //     }
-  //   }
-  // }
-  
+ 
 });

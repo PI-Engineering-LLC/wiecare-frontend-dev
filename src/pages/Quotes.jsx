@@ -54,8 +54,6 @@ export default function Quotes() {
 
 
   const { activeClientId, switchClient } = useClient()
-  // const clientId = user?.client_id;
-  console.log("**CLIENTID", activeClientId)
 
   const { data: quotes = [], isLoading } = useQuery({
     queryKey: ['quotes', activeClientId],
@@ -109,9 +107,6 @@ export default function Quotes() {
   const handleItemPhotoUpload = async (idx, file) => {
     if (!file) return;
     setUploadingIdx(idx);
-    // const { file_url , file_key }= await api.getPresignedUploadUrl({ filename: file.name, contentType: file.type });
-    // const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: file });  
-    // console.log('Upload successful! File stored securely in cloud bucket.');
     const file_key = await uploadFileToS3({client_id: activeClientId, file, type:'item_photo', isPrivate: false});
     const newItems = [...quoteRequest.items];
     newItems[idx].photo_storage_key = file_key;
@@ -172,12 +167,10 @@ export default function Quotes() {
   };
 
   const handleRequestModifications = async (quote) => {
-    // const modNote = `\n\n[Client Modification Request - ${new Date().toLocaleDateString()}]:\n${modificationRequest}`;
     await updateQuoteMutation.mutateAsync({
       id: quote.id,
       data: {
         status: 'pending',
-        // notes: (quote.notes || '') + modNote
         notes: modificationRequest
       }
     });

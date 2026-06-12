@@ -21,7 +21,6 @@ export function useSocket(onNotification) {
     
     if (!socket.connected) {
       socket.connect();
-      console.log("TTTT~~~~~~~~~!", socket.auth, socket.connected)
     }
 
     const handleNotification = (data) => {

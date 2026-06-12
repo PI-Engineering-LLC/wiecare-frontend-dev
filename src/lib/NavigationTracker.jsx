@@ -33,7 +33,7 @@ export default function NavigationTracker() {
 
         if (isAuthenticated && pageName) {
             //TODO: add internal analytics
-            // base44.appLogs.logUserInApp(pageName).catch(() => {
+            // api.appLogs.logUserInApp(pageName).catch(() => {
             //     // Silently fail - logging shouldn't break the app
             // });
         }

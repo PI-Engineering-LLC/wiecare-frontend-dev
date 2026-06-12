@@ -6,16 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
-import { Textarea } from "@/components/ui/textarea"; // Added Textarea for description
-import { Switch } from "@/components/ui/switch"; // Added Switch for is_system
+import { Textarea } from "@/components/ui/textarea"; 
+import { Switch } from "@/components/ui/switch"; 
 
-// `permissions` prop is now required from the parent component
 export default function AddRoleDialog({ permissions, open, onClose, onSuccess }) {
     const [roleData, setRoleData] = useState({ name: '', description: '', is_system: false, selectedPermissionIds: [] });
     const queryClient = useQueryClient();
 
     const createMutation = useMutation({
-        mutationFn: (data) => api.createRole(data), // api.createRole expects {name, permissionIds, description, is_system}
+        mutationFn: (data) => api.createRole(data), 
         onSuccess: () => {
             onSuccess();
             onClose(false);
@@ -41,7 +40,7 @@ export default function AddRoleDialog({ permissions, open, onClose, onSuccess })
           name: roleData.name,
           description: roleData.description,
           is_system: roleData.is_system,
-          permissionIds: roleData.selectedPermissionIds // Pass the array of selected permission IDs
+          permissionIds: roleData.selectedPermissionIds 
         });
     };
 

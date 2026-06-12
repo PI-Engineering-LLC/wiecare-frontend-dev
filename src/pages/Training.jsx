@@ -41,8 +41,6 @@ export default function Training() {
   const queryClient = useQueryClient();
   const {activeClientId, switchClient} = useClient()
 
-  // const clientId = user?.client_id;
-
   const { data: trainings = [], isLoading: loadingTrainings } = useQuery({
     queryKey: ['trainings', activeClientId],
     queryFn: () => api.getTrainings({ order:'-session_date', limit: 100 }),
@@ -62,13 +60,6 @@ export default function Training() {
     queryFn: () => api.getTrainingRequests({ user_id: user.id, order:'-created_date', limit: 50 }) ,
     enabled: !!user?.id,
   });
-
-  // const { data: client } = useQuery({
-  //   queryKey: ['client', activeClientId],
-  //   queryFn: () => api.getClient( activeClientId ),
-  //   // queryFn: () => api.getClient({ id: activeClientId }),
-  //   enabled: !!activeClientId,
-  // });
 
   const registerMutation = useMutation({
     mutationFn: (data) => api.createRegistrations(data),

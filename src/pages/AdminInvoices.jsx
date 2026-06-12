@@ -212,11 +212,6 @@ export default function AdminInvoices() {
 
     if (pdfFile) {
       setUploadingPdf(true);
-      // const { file_url } = await api.uploadFile({ file: pdfFile });
-      // const result = await api.getPresignedUploadUrl({ filename: pdfFile.name, contentType: pdfFile.type });
-      //       const { file_url , file_key } = result;
-      //       const s3Response =  await api.uploadFileToS3({ file_url: file_url, file: pdfFile });  
-      //       console.log('Upload successful! File stored securely in cloud bucket.');
       const file_key = await uploadFileToS3({client_id: client?.id, file: pdfFile, type:'invoice'});
       pdf_storage_key = file_key;
       setUploadingPdf(false);
@@ -288,40 +283,6 @@ export default function AdminInvoices() {
       queryClient.invalidateQueries({ queryKey: ['admin-orders']});
     }
 
-    const client = clients.find(c => c.id === invoice.client_id);
-
-    // // Create in-app notification for all users of this client
-    // const allUsers = await api.getUsers({limit: 10000});
-    // const clientUsers = allUsers.filter(u => u.client_id === invoice.client_id);
-    // await Promise.all(clientUsers.map((u, index) =>
-    //   api.createNotifications({
-    //     recipient_id: u.id,
-    //     recipient_email: u.email,
-    //     client_id: invoice.client_id,
-    //     title: `Invoice ${invoice.invoice_number || ''} Ready`,
-    //     message: `Your invoice "${invoice.title}" for $${(invoice.total_amount || 0).toLocaleString()} is now available in your portal.`,
-    //     type: 'info',
-    //     category: 'invoice',
-    //     link: `/Invoices`,
-    //     is_read: false,
-    //     send_email: index === 0 && !!client?.contact_email,
-    //     email_to: client?.contact_email,
-    //     email_type: 'invoice_sent', 
-    //     email_data: {
-    //       invoice,
-    //       client,
-    //     },
-    //   })
-    // ));
-
-    // Send email
-    // if (client?.contact_email) {
-    //   await base44.integrations.Core.SendEmail({
-    //     to: client.contact_email,
-    //     subject: `Invoice ${invoice.invoice_number || ''} – ${invoice.title}`,
-    //     body: `<p>Dear ${client.contact_name || client.company_name},</p><p>Please find your invoice from ${invoice.sending_entity || 'Wiegand'} attached.</p><p>Total: $${(invoice.total_amount || 0).toLocaleString()}</p><p>Please log in to your portal to view details.</p>`,
-    //   });
-    // }
     toast.success('Invoice sent');
   };
 
@@ -522,7 +483,6 @@ export default function AdminInvoices() {
                     <FileText className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-green-700 flex-1">PDF already uploaded</span>
                     <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"} 
-                    // target="_blank" rel="noopener noreferrer"
                     onClick={(e) => handleSecureView(e, selectedInvoice.pdf_storage_key)}>
                       <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedInvoice.pdf_storage_key? 'Authorizing Access...' :'View'}</a></Button>
                     <Button variant="ghost" size="sm" onClick={() => pdfInputRef.current?.click()} className="text-xs">Replace</Button>
