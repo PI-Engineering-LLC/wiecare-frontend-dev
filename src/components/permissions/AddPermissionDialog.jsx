@@ -33,6 +33,7 @@ export default function AddPermissionDialog({ open, onClose, onSuccess }) {
             return;
         }
         await createMutation.mutateAsync(permissionData); 
+    };
 
     return (
         <Dialog open={open} onOpenChange={(open) => { if (!open) resetForm(); onClose(open); }  }>
