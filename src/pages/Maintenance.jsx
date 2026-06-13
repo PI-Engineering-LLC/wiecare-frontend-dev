@@ -149,7 +149,21 @@ const {activeClientId} = useClient()
               variant="ghost"
               size="sm"
               className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
-              onClick={(e) => handleSecureView(e,row.inspection_report_key,true)}
+              onClick={(e) => {
+                try {
+                  handleSecureView(e, row.inspection_report_key, true)
+
+                } catch (error) {
+                  if (error.message === "FILE_MISSING_IN_STORAGE") {
+                    toast.error('File Not Found');
+                  } else {
+                    toast.error('Failed to download, please try again');
+                  }
+                }
+
+              }
+
+              }
             >
               <Download className="h-3.5 w-3.5 mr-1" />
               {currentlyLoadingKey === row.inspection_report_key? 'Authorizing Access...' :'Report'}
@@ -482,8 +496,22 @@ const {activeClientId} = useClient()
                       <Button
                         size="sm"
                         className="bg-green-700 hover:bg-green-800"
-                        onClick={(e) => handleSecureView(e,selectedRequest.inspection_report_key,true)} 
-                        
+                        onClick={(e) => {
+                          try {
+                            handleSecureView(e, selectedRequest.inspection_report_key, true)
+
+                          } catch (error) {
+                            if (error.message === "FILE_MISSING_IN_STORAGE") {
+                              toast.error('File Not Found');
+                            } else {
+                              toast.error('Failed to download, please try again');
+                            }
+                          }
+
+                        }
+
+                        }
+
                       >
                         <Download className="h-4 w-4 mr-1" />
                         {currentlyLoadingKey === selectedRequest.inspection_report_key? 'Authorizing Access...' :'Download'}

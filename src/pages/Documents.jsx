@@ -57,6 +57,22 @@ export default function Documents() {
       toast.success('Document uploaded successfully');
     },
   });
+  const updateDocumentMutation = useMutation({
+    mutationFn: ({ id, data }) => api.updateD(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      setShowUploadDialog(false);
+      setUploadData({
+        title: '',
+        description: '',
+        category: 'manual',
+        coaster_name: '',
+        equipment_model: ''
+      });
+      setSelectedFile(null);
+      toast.success('Document updated ');
+    },
+  });
 
   const { data: client } = useQuery({
     queryKey: ['client', activeClientId],
@@ -207,19 +223,19 @@ export default function Documents() {
         </TabsList>
 
         <TabsContent value="all" className="mt-4">
-          <DocumentGrid documents={filteredDocuments} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
+          <DocumentGrid documents={filteredDocuments} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="inspection" className="mt-4">
-          <DocumentGrid documents={inspectionDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
+          <DocumentGrid documents={inspectionDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="invoices" className="mt-4">
-          <DocumentGrid documents={invoiceDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
+          <DocumentGrid documents={invoiceDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="warranty" className="mt-4">
-          <DocumentGrid documents={warrantyDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
+          <DocumentGrid documents={warrantyDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="manuals" className="mt-4">
-          <DocumentGrid documents={manuals} getFileIcon={getFileIcon} formatFileSize={formatFileSize} />
+          <DocumentGrid documents={manuals} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
       </Tabs>
 
@@ -311,7 +327,7 @@ export default function Documents() {
   );
 }
 
-function DocumentGrid({ documents, getFileIcon, formatFileSize }) {
+function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMutation }) {
   const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
   if (documents.length === 0) {
     return (
@@ -367,8 +383,20 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize }) {
                 <a
                   href={"#view"}
 
-                  onClick={(e) => handleSecureView(e, doc.file_storage_key)}
+                  onClick={(e) => {
+                    try {
+                      handleSecureView(e, doc.file_storage_key)
 
+                    } catch (error) {
+                      if (error.message === "FILE_MISSING_IN_STORAGE") {
+                        toast.error('File Not Found');
+                      } else {
+                        toast.error('Failed to download, please try again');
+                      }
+                    }
+
+                  }
+                  }
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   {currentlyLoadingKey === doc.file_storage_key ? 'Authorizing Access...' : 'View'}
@@ -380,7 +408,25 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize }) {
                 asChild
               >
                 <a href={"#view"}
-                  onClick={(e) => handleSecureView(e, doc.file_storage_key, true)}>
+                  onClick={async(e) => {
+                    try {
+                      handleSecureView(e, doc.file_storage_key, true)
+
+                    } catch (error) {
+                      if (error.message === "FILE_MISSING_IN_STORAGE") {
+                        toast.error('File Not Found');
+                      } else {
+                        toast.error('Failed to download, please try again');
+                        await updateDocumentMutation.mutateAsync({
+                          id: doc.id,
+                          data: { file_storage_key: null, status: 'archived' }
+                        });
+                      }
+                    }
+
+                  }
+
+                  }>
                   <Download className="h-4 w-4 mr-2" />
                   {currentlyLoadingKey === doc.file_storage_key ? 'Authorizing Access...' : 'Download'}
                 </a>

@@ -107,11 +107,16 @@ export default function Quotes() {
   const handleItemPhotoUpload = async (idx, file) => {
     if (!file) return;
     setUploadingIdx(idx);
+    try{
     const file_key = await uploadFileToS3({client_id: activeClientId, file, type:'item_photo', isPrivate: false});
     const newItems = [...quoteRequest.items];
     newItems[idx].photo_storage_key = file_key;
     setQuoteRequest({ ...quoteRequest, items: newItems });
     setUploadingIdx(null);
+    }catch(error){
+      toast.error('Failed to upload image');
+      setUploadingIdx(null);
+    }
   };
 
   const removeItem = (index) => {
@@ -180,6 +185,11 @@ export default function Quotes() {
     setQuoteToModify(null);
     setSelectedQuote(null);
     toast.success('Modification request sent');
+  };
+  const handleDeleteQuoteItemByIndex = (indexToDelete, error) => { 
+    if (error.status === 404) {
+    setSelectedQuote((prevQuote) => ({ ...prevQuote, items: prevQuote.items.filter((_, i) => i !== indexToDelete) })); 
+  }
   };
 
   // Split quotes: client's own requests vs admin-sent quotes
@@ -456,7 +466,12 @@ export default function Quotes() {
                       {item.photo_storage_key && uploadingIdx !== idx && (
                         <div className="flex items-center gap-2">
                           {/* <img src={item.photo_storage_key} alt="Item photo" className="h-10 w-10 rounded-md object-cover border border-slate-200" /> */}
-                          <PublicImage docKey={item.photo_storage_key} alt={"Item photo"} className="h-10 w-10 rounded-md object-cover border border-slate-200" />
+                          <PublicImage docKey={item.photo_storage_key} alt={"Item photo"} className="h-10 w-10 rounded-md object-cover border border-slate-200" 
+                          onError={(err) => {
+                            handleDeleteQuoteItemByIndex(idx,err)
+                          }
+                          }
+                          />
                           <button
                             type="button"
                             onClick={() => updateItem(idx, 'photo_storage_key', '')}

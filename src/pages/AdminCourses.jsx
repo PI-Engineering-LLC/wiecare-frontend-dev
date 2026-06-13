@@ -131,6 +131,7 @@ export default function AdminCourses() {
       toast.success(`${type === 'thumbnail' ? 'Thumbnail' : 'Video'} uploaded`);
     } catch (error) {
       toast.error('Failed to upload file');
+      setUploading(false);
     }
     setUploading(false);
   };
@@ -142,6 +143,18 @@ export default function AdminCourses() {
       await createMutation.mutateAsync(formData);
     }
   };
+   const handleThumbnailError = async (courseId, error) => {
+      console.log(`Retrieving theumbnail for ${courseId} failed:`, error);
+      if (error.status === 404) {
+        console.log("Confirmed 404: File does not exist");
+    
+      await updateMutation.mutateAsync({
+        id: courseId,
+        data: { thumbnail_storage_key: null }
+      });
+      toast.error("Thumbnail not found")
+    }
+    };
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -164,7 +177,10 @@ export default function AdminCourses() {
         <div className="flex items-center gap-3">
           <div className="w-16 h-10 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
             {row.thumbnail_storage_key ? (
-              <PublicImage docKey={row.thumbnail_storage_key} alt={row.title} className="w-full h-full object-cover" />
+              <PublicImage docKey={row.thumbnail_storage_key} alt={row.title} className="w-full h-full object-cover" onError={(err) => {
+                handleThumbnailError(row.id,err)
+              }
+              } />
             ) : (
               <BookOpen className="h-5 w-5 text-slate-400" />
             )}

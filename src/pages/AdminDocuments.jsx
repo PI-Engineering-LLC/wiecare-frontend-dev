@@ -138,6 +138,7 @@ export default function AdminDocuments() {
       toast.success('File uploaded');
     } catch (error) {
       toast.error('Failed to upload file');
+      setUploading(false);
     }
     setUploading(false);
   };

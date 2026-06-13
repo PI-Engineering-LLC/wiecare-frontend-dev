@@ -5,7 +5,7 @@ export function useUpload() {
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState(null);
 
-    const uploadFileToS3 = async ( {client_id, file, type = 'document', isPrivate = true}) => {
+    const uploadFileToS3 = async ( {file, type = 'document', isPrivate = true, client_id =null}) => {
         setIsUploading(true);
         setError(null);
         try {

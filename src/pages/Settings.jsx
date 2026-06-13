@@ -132,6 +132,7 @@ export default function Settings() {
     } catch (err) {
       console.error("Avatar upload failed:", err);
       toast.error('Failed to upload photo');
+      setUploading(false);
     }
     setUploading(false);
   };

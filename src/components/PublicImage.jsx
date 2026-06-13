@@ -2,7 +2,7 @@ import { useAuth } from '@/lib/AuthContext';
 const BASE_URL = import.meta.env.VITE_APP_ASSETS_BASE_URL;
 const DEFAULT_AVATAR = '/wiecare-logo';
 
-export const PublicImage = ({ docKey, alt = "user file", className = "", isLink = false, ...props }) => {
+export const PublicImage = ({ docKey, alt = "user file", className = "", isLink = false,onError=null, ...props }) => {
 
   const { user } = useAuth();
   const src = docKey  ? `${BASE_URL}/${docKey}`  : null; 
@@ -14,7 +14,11 @@ export const PublicImage = ({ docKey, alt = "user file", className = "", isLink 
       className={className}
       loading="lazy" // Native browser performance optimization
       onError={(e) => {
+        if (typeof onError === 'function') {
+          onError(e);
+        }
         e.target.src = DEFAULT_AVATAR;
+        
       }}
       {...props}
     />

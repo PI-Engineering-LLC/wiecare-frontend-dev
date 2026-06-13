@@ -3,6 +3,14 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/public/:path*",
+      "destination": "https://pub-<some-id>.r2.dev/public/:path*"
+    },
+    {
+      "source": "/:userId/public/:path*",
+      "destination": "https://pub-<some-id>.r2.dev/:userId/public/:path*"
     }
   ]
 }

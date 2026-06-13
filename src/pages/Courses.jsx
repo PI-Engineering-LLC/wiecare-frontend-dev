@@ -190,6 +190,19 @@ export default function Courses() {
       });
     }
   };
+  const handleVideoError = async (courseId, error) => {
+    console.log(`Video ${courseId} failed:`, error);
+    if (error.status === 404) {
+      console.log("Confirmed 404: File does not exist");
+  
+    await updateCourseMutation.mutateAsync({
+      courseId: courseId,
+      data: { video_storage_key: null , status: 'archived'}
+    });
+    toast.error("Video not found")
+    queryClient.invalidateQueries({ queryKey: ['courses'] });
+  }
+  };
 
   return (
     <div className="space-y-6">
@@ -348,7 +361,8 @@ export default function Courses() {
                     const newPercent = calculatePercentage(playedSeconds, selectedCourse.duration_minutes);
                     setLocalProgress(newPercent);
 
-                  }} onVideoDuration={handleVideoDurationUpdate} watchTimeSeconds={(getProgressForCourse(selectedCourse?.id)?.watch_time_seconds || 0)} />
+                  }} onVideoDuration={handleVideoDurationUpdate} watchTimeSeconds={(getProgressForCourse(selectedCourse?.id)?.watch_time_seconds || 0)} 
+                  onError={(err) => handleVideoError(selectedCourse?.id, err)} />
                 ) : (
                   <div className="text-center text-white">
                     <Play className="h-16 w-16 mx-auto mb-4 opacity-50" />

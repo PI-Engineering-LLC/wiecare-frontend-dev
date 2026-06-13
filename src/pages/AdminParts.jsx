@@ -156,6 +156,7 @@ export default function AdminParts() {
       toast.success('Image uploaded');
     } catch (error) {
       toast.error('Failed to upload image');
+      setUploading(false);
     }
     setUploading(false);
   };
@@ -167,6 +168,18 @@ export default function AdminParts() {
       await createMutation.mutateAsync(formData);
     }
   };
+  const handleImageError = async (partId, error) => {
+        console.log(`Retrieving image for ${partId} failed:`, error);
+        if (error.status === 404) {
+          console.log("Confirmed 404: File does not exist");
+      
+        await updateMutation.mutateAsync({
+          id: partId,
+          data: { image_storage_key: null }
+        });
+        toast.error("Image not found")
+      }
+      };
 
   const filteredParts = parts.filter(part => {
     const matchesSearch = part.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -184,7 +197,11 @@ export default function AdminParts() {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center">
             {row.image_storage_key ? (
-              <PublicImage docKey={row.image_storage_key} alt={row.name} className="w-full h-full object-cover" />
+              <PublicImage docKey={row.image_storage_key} alt={row.name} className="w-full h-full object-cover" 
+              onError={(err) => {
+                handleImageError(row.id,err)
+              }
+              } />
             ) : (
               <Package className="h-6 w-6 text-slate-400" />
             )}
@@ -426,7 +443,7 @@ export default function AdminParts() {
                 <Label>Image</Label>
                 <div className="mt-1 flex items-center gap-4">
                   {formData.image_storage_key && (
-                    <PublicImage docKey={formData.image_storage_key} alt="Part" className="w-20 h-20 object-cover rounded-lg" />
+                    <PublicImage docKey={formData.image_storage_key} alt="Part" className="w-20 h-20 object-cover rounded-lg"  />
                   )}
                   <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="part-image" disabled={uploading} />
                   <label htmlFor="part-image">

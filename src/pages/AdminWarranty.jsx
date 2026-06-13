@@ -94,6 +94,10 @@ export default function AdminWarranty() {
       }
     });
   };
+  const handleDeleteClaimImgByIndex = (indexToDelete, error) => { 
+    if (error.status === 404) {
+    setSelectedClaim((prevClaim) => ({ ...prevClaim, items: prevClaim.items.filter((_, i) => i !== indexToDelete) })); 
+  }};
 
   const filteredClaims = claims.filter(claim => {
     const matchesSearch = claim.equipment_info?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -278,7 +282,11 @@ export default function AdminWarranty() {
                         <PrivateImageLink
                           storageKey={storage_key}
                           alt={`Claim photo ${idx + 1}`}
-                          className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity">
+                          className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity"
+                          onError={(err) => {
+                            handleDeleteClaimImgByIndex(idx,err)
+                          }}
+                          >
                         </PrivateImageLink>
                       ))}
                     </div>

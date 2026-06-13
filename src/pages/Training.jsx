@@ -395,8 +395,21 @@ export default function Training() {
                     </div>
                     {reg.certificate_url && (
                       <Button variant="outline" size="sm" asChild>
-                        <a href={reg.certificate_storage_key} 
-                        onClick={(e) => handleSecureView(e, reg.certificate_storage_key)}>
+                        <a href={reg.certificate_storage_key}
+                          onClick={(e) => {
+                            try {
+                              handleSecureView(e, reg.certificate_storage_key)
+                            } catch (error) {
+                              if (error.message === "FILE_MISSING_IN_STORAGE") {
+                                toast.error('File Not Found');
+                              } else {
+                                toast.error('Failed to download, please try again');
+                              }
+                            }
+
+                          }
+
+                          }>
                           {currentlyLoadingKey === reg.certificate_storage_key? 'Authorizing Access...' : 'View Certificate'} 
                         </a>
                       </Button>

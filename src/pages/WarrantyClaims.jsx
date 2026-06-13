@@ -98,6 +98,7 @@ export default function WarrantyClaims() {
       toast.success(`${files.length} image(s) uploaded`);
     } catch (error) {
       toast.error('Failed to upload image');
+      setUploading(false);
     }
     setUploading(false);
   };
@@ -112,6 +113,11 @@ export default function WarrantyClaims() {
       images: prev.images.filter((_, i) => i !== index)
     }));
   };
+
+  const handleDeleteClaimImgByIndex = (indexToDelete, error) => { 
+    if (error.status === 404) {
+    setSelectedClaim((prevClaim) => ({ ...prevClaim, images: prevClaim.images.filter((_, i) => i !== indexToDelete) })); 
+  }};
 
   const clientData = client;
 
@@ -442,7 +448,11 @@ export default function WarrantyClaims() {
                       <PrivateImageLink 
                        storageKey={storage_key}
                        alt={`Claim photo ${idx + 1}`}
-                       className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity">
+                       className="w-24 h-24 object-cover rounded-lg hover:opacity-80 transition-opacity"
+                       onError={(err) => {
+                        handleDeleteClaimImgByIndex(idx,err)
+                      }}
+                       >
                       </PrivateImageLink>
                     ))}
                   </div>

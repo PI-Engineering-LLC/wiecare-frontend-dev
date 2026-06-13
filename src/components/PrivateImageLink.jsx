@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '@/api/apiClient';
 const DEFAULT_AVATAR = '/wiecare-logo';
 
-export function PrivateImageLink({ storageKey, alt, className = "", isLink = true, ...props }) {
+export function PrivateImageLink({ storageKey, alt, className = "", isLink = true,onError=null, ...props }) {
   const [imgSrc, setImgSrc] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +16,7 @@ export function PrivateImageLink({ storageKey, alt, className = "", isLink = tru
         if (isMounted) setImgSrc(downloadUrl);
       } catch (err) {
         console.error("Failed to fetch secure image link", err);
+        onError(err);
         if (isMounted) setImgSrc(null); // Clear src on error
       } finally {
         if (isMounted) setLoading(false);

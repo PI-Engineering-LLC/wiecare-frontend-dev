@@ -243,6 +243,16 @@ export default function AdminQuotes() {
     setShowDiscount(false);
     setShowDialog(true);
   };
+  const handleDeleteQuoteItemByIndex = (indexToDelete, error) => { 
+    if (error.status === 404) {
+    setSelectedQuote((prevQuote) => ({ ...prevQuote, items: prevQuote.items.filter((_, i) => i !== indexToDelete) })); 
+  }
+  };
+  const handleDeleteRequestItemByIndex = (indexToDelete, error) => { 
+    if (error.status === 404) {
+    setViewingRequest((prevQuote) => ({ ...prevQuote, items: prevQuote.items.filter((_, i) => i !== indexToDelete) })); 
+  }
+  };
 
   const adminColumns = [
     {
@@ -483,6 +493,10 @@ export default function AdminQuotes() {
                               alt={`Item ${idx + 1} photo`}
                               className="h-20 w-20 rounded-lg object-cover border-2 border-amber-300 hover:border-amber-500 transition-colors cursor-pointer"
                               isLink={true}
+                              onError={(err) => {
+                                handleDeleteQuoteItemByIndex(idx,err)
+                              }
+                              }
                             />
                           {/* </a> */}
                           <span className="text-[10px] text-amber-700">
@@ -735,7 +749,13 @@ export default function AdminQuotes() {
                         </div>
                         {item.description && <p className="text-slate-700">{item.description}</p>}
                         {item.photo_storage_key && (
-                            <PublicImage docKey={item.photo_storage_key} alt="Attached" className="h-16 w-16 rounded-md object-cover border border-amber-300 hover:opacity-80 transition-opacity" isLink={true} />
+                            <PublicImage docKey={item.photo_storage_key} alt="Attached" className="h-16 w-16 rounded-md object-cover border border-amber-300 hover:opacity-80 transition-opacity"
+                             isLink={true}
+                             onError={(err) => {
+                              handleDeleteRequestItemByIndex(idx,err)
+                            }
+                            }
+                              />
                         )}
                       </div>
                     ))}

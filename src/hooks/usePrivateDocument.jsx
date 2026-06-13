@@ -31,6 +31,7 @@ export const usePrivateDocument = () => {
       }
       else{
         window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+        // window.location.href = downloadUrl;
 
       }
       
@@ -38,6 +39,7 @@ export const usePrivateDocument = () => {
       console.error('Failed to view secure document:', err);
       setError(err.message);
       alert(err.message);
+      throw err;
     } finally {
       setLoadingKey(null);
     }

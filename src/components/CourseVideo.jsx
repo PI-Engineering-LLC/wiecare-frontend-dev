@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 import { useEffect, useState, useRef } from "react";
 import ReactPlayer from "react-player";
 
-export default function CourseVideo({ videoKey, onLoadedMetadata, onVideoDuration, watchTimeSeconds }) {
+export default function CourseVideo({ videoKey, onLoadedMetadata, onVideoDuration, watchTimeSeconds,  onError }) {
   const [url, setUrl] = useState(null);
   const playerRef = useRef(null); // Ref to access ReactPlayer instance
   // Use a ref to store the timestamp of the last time we sent an API save
@@ -24,6 +24,7 @@ export default function CourseVideo({ videoKey, onLoadedMetadata, onVideoDuratio
         setUrl(downloadUrl);
       } catch (err) {
         console.error(err);
+        onError(err);
       }
     }
 

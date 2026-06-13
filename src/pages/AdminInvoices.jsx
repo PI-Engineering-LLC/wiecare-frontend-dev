@@ -205,6 +205,7 @@ export default function AdminInvoices() {
   };
 
   const handleSubmit = async () => {
+    try{
     const client = clients.find(c => c.id === formData.client_id);
     const { subtotal, total_amount, sales_tax } = calculateTotals();
 
@@ -271,6 +272,9 @@ export default function AdminInvoices() {
           status: 'active',
         });
       }
+    }}catch(error){
+      toast.error('Failed to upload file');
+      setUploadingPdf(false);
     }
   };
 
@@ -482,8 +486,30 @@ export default function AdminInvoices() {
                   <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                     <FileText className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-green-700 flex-1">PDF already uploaded</span>
-                    <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"} 
-                    onClick={(e) => handleSecureView(e, selectedInvoice.pdf_storage_key)}>
+                    <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
+                      onClick={async (e) => {
+                        try {
+                          handleSecureView(e, selectedInvoice.pdf_storage_key)
+
+                        } catch (error) {
+                          if (error.message === "FILE_MISSING_IN_STORAGE") {
+                            try {
+                              await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });
+                              const existingDoc = await api.getDs({ invoice_id: selectedInvoice.id });
+                              if (existingDoc.length > 0) {
+                                await api.updateD(existingDoc.id, { file_storage_key: null, status: 'archived' })
+                              }
+                            } catch (error) {
+                              toast.error('Error occured');
+                            }
+
+                            toast.error('File Not Found');
+                          } else {
+                            toast.error('Failed to download, please try again');
+                          }
+                        }
+
+                      }}>
                       <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedInvoice.pdf_storage_key? 'Authorizing Access...' :'View'}</a></Button>
                     <Button variant="ghost" size="sm" onClick={() => pdfInputRef.current?.click()} className="text-xs">Replace</Button>
                   </div>
