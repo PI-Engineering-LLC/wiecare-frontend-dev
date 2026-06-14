@@ -28,31 +28,31 @@ export default function AdminDashboard() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['admin-clients'],
-    queryFn: () => api.getClients({ order: '-created_date',limit:100}),
+    queryFn: () => api.getClients({ order: '-created_at',limit:100}),
     enabled: !!user,
   });
 
   const { data: invoices = [] } = useQuery({
     queryKey: ['admin-invoices'],
-    queryFn: () => api.getInvoices({ order: '-created_date',limit:100}),
+    queryFn: () => api.getInvoices({ order: '-created_at',limit:100}),
     enabled: !!user,
   });
 
   const { data: quotes = [] } = useQuery({
     queryKey: ['admin-quotes'],
-    queryFn: () => api.getQuotes({ order: '-created_date',limit:100}),
+    queryFn: () => api.getQuotes({ order: '-created_at',limit:100}),
     enabled: !!user,
   });
 
   const { data: maintenance = [] } = useQuery({
     queryKey: ['admin-maintenance'],
-    queryFn: () => api.getMaintenance({ order: '-created_date',limit:100}),
+    queryFn: () => api.getMaintenance({ order: '-created_at',limit:100}),
     enabled: !!user,
   });
 
   const { data: warrantyClaims = [] } = useQuery({
     queryKey: ['admin-warranty'],
-    queryFn: () => api.getWarrantyClaims({ order: '-created_date',limit:50}),
+    queryFn: () => api.getWarrantyClaims({ order: '-created_at',limit:50}),
     enabled: !!user,
   });
 
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   const pendingMaintenance = maintenance.filter(m => m.status === 'pending');
   const overdueInvoices = invoices.filter(i => i.status === 'overdue');
   const pendingClaims = warrantyClaims.filter(c => c.status === 'pending');
-  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + (i.total_amount || 0), 0);
+  const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + Number(i.total_amount || 0), 0);
 
   return (
     <AdminOnly>
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                   <div key={invoice.id} className="flex items-center justify-between p-3 bg-rose-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{invoice.client_name}</p>
-                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : 'N/A'}</p>
+                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? format(new Date(invoice.due_date + 'T00:00:00'), 'MMM d, yyyy') : 'N/A'}</p>
                     </div>
                     <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString() || invoice.total_amount?.toLocaleString()}</p>
                   </div>

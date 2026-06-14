@@ -59,8 +59,8 @@ const {activeClientId} = useClient()
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['maintenance', activeClientId],
     queryFn: () => activeClientId 
-      ? api.getMaintenance({ client_id: activeClientId , order:'-created_date', limit: 100 })
-      : api.getMaintenance({ order:'-created_date', limit: 100 }),
+      ? api.getMaintenance({ client_id: activeClientId , order:'-created_at', limit: 100 })
+      : api.getMaintenance({ order:'-created_at', limit: 100 }),
     enabled: !!user,
   });
 
@@ -82,6 +82,14 @@ const {activeClientId} = useClient()
       toast.success('Maintenance request submitted successfully');
     },
   });
+  const updateMutation = useMutation({
+      mutationFn: ({ id, data }) => api.updateMaintenance(id, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['maintenance']});
+        setShowNewDialog(false);
+        toast.success('Request updated successfully');
+      },
+    });
 
   const handleSubmitRequest = async () => {
     if (!activeClientId) {
@@ -94,8 +102,8 @@ const {activeClientId} = useClient()
       client_id: activeClientId,
       status: 'pending',
       request_number: `MR-${Date.now()}`,
-      preferred_date_1: newRequest.preferred_date_1?.toISOString().split('T')[0],
-      preferred_date_2: newRequest.preferred_date_2?.toISOString().split('T')[0],
+      preferred_date_1: newRequest.preferred_date_1 ? format(newRequest.preferred_date_1, 'yyyy-MM-dd') : null,
+      preferred_date_2: newRequest.preferred_date_2 ? format(newRequest.preferred_date_2, 'yyyy-MM-dd') : null,
     });
   };
 
@@ -133,8 +141,8 @@ const {activeClientId} = useClient()
     {
       header: 'Scheduled Date',
       render: (row) => row.scheduled_date 
-        ? format(new Date(row.scheduled_date), 'MMM d, yyyy') 
-        : 'Pending'
+      ? format(new Date(row.scheduled_date + 'T00:00:00'), 'MMM d, yyyy') 
+      : 'Pending'
     },
     {
       header: 'Status',
@@ -149,12 +157,22 @@ const {activeClientId} = useClient()
               variant="ghost"
               size="sm"
               className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
-              onClick={(e) => {
+              onClick={async (e) => {
                 try {
                   handleSecureView(e, row.inspection_report_key, true)
 
                 } catch (error) {
                   if (error.message === "FILE_MISSING_IN_STORAGE") {
+                    try {
+                      await updateMutation.mutateAsync({ id: row.id, data: { inspection_report_key: null } });
+                      const existingDoc = await api.getDs({ file_storage_key: row.inspection_report_key });
+                      if (existingDoc.length > 0) {
+                        await api.updateD(existingDoc.id, { file_storage_key: null, status: 'archived' })
+                      }
+                    } catch (error) {
+                      toast.error('Error occured');
+                    }
+
                     toast.error('File Not Found');
                   } else {
                     toast.error('Failed to download, please try again');
@@ -448,7 +466,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1 
-                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -456,7 +474,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2 
-                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -466,7 +484,7 @@ const {activeClientId} = useClient()
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-600 font-medium">Scheduled Date</p>
                   <p className="text-lg font-bold text-blue-800">
-                    {format(new Date(selectedRequest.scheduled_date), 'MMMM d, yyyy')}
+                  {format(new Date(selectedRequest.scheduled_date + 'T00:00:00'), 'MMMM d, yyyy')}
                   </p>
                 </div>
               )}
@@ -496,12 +514,22 @@ const {activeClientId} = useClient()
                       <Button
                         size="sm"
                         className="bg-green-700 hover:bg-green-800"
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           try {
                             handleSecureView(e, selectedRequest.inspection_report_key, true)
 
                           } catch (error) {
                             if (error.message === "FILE_MISSING_IN_STORAGE") {
+                              try {
+                                await updateMutation.mutateAsync({ id: selectedRequest.id, data: { inspection_report_key: null } });
+                                const existingDoc = await api.getDs({ file_storage_key: selectedRequest.inspection_report_key });
+                                if (existingDoc.length > 0) {
+                                  await api.updateD(existingDoc.id, { file_storage_key: null, status: 'archived' })
+                                }
+                              } catch (error) {
+                                toast.error('Error occured');
+                              }
+          
                               toast.error('File Not Found');
                             } else {
                               toast.error('Failed to download, please try again');

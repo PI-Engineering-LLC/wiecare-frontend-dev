@@ -53,7 +53,7 @@ export default function AdminWarranty() {
     const valid = isAfter(expiry, new Date());
     return {
       valid,
-      label: valid ? `Valid until ${expiry.toLocaleDateString()}` : `Expired`,
+      label: valid ? `Valid until ${format(expiry, 'MMM d, yyyy')}` : `Expired`,
       color: valid ? 'text-emerald-600' : 'text-rose-600'
     };
   };
@@ -80,7 +80,7 @@ export default function AdminWarranty() {
   const handleUpdate = async () => {
     const data = { ...updateData };
     if (updateData.status === 'resolved') {
-      data.resolved_date = new Date().toISOString().split('T')[0];
+      data.resolved_date = format(new Date(), 'yyyy-MM-dd');
     }
     await updateMutation.mutateAsync({ id: selectedClaim.id, data });
   };
@@ -90,13 +90,13 @@ export default function AdminWarranty() {
       id: claim.id,
       data: {
         status,
-        resolved_date: status === 'resolved' ? new Date().toISOString().split('T')[0] : null
+        resolved_date: status === 'resolved' ? format(new Date(), 'yyyy-MM-dd') : null
       }
     });
   };
   const handleDeleteClaimImgByIndex = (indexToDelete, error) => { 
     if (error.status === 404) {
-    setSelectedClaim((prevClaim) => ({ ...prevClaim, items: prevClaim.items.filter((_, i) => i !== indexToDelete) })); 
+    setSelectedClaim((prevClaim) => ({ ...prevClaim, images: prevClaim.images.filter((_, i) => i !== indexToDelete) })); 
   }};
 
   const filteredClaims = claims.filter(claim => {
@@ -134,7 +134,7 @@ export default function AdminWarranty() {
     },
     {
       header: 'Submitted',
-      render: (row) => format(new Date(row.created_at), 'MMM d, yyyy')
+      render: (row) => format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy')
     },
     {
       header: 'Status',
@@ -263,8 +263,8 @@ export default function AdminWarranty() {
                     <p className="text-sm text-slate-500">Purchase Date</p>
                     <p className="font-semibold">
                       {selectedClaim.purchase_date
-                        ? format(new Date(selectedClaim.purchase_date), 'MMM d, yyyy')
-                        : '-'}
+                      ? format(new Date(selectedClaim.purchase_date + 'T00:00:00'), 'MMM d, yyyy')
+                      : '-'}
                     </p>
                   </div>
                 </div>

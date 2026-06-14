@@ -17,6 +17,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 export default function AdminClients() {
@@ -115,7 +116,7 @@ export default function AdminClients() {
     const expiry = addYears(start, years);
     const isValid = isAfter(expiry, new Date());
     return {
-      label: isValid ? `Valid until ${expiry.toLocaleDateString()}` : `Expired ${expiry.toLocaleDateString()}`,
+      label: isValid ? `Valid until ${format(expiry, 'MMM d, yyyy')}` : `Expired ${format(expiry, 'MMM d, yyyy')}`,
       color: isValid ? 'text-emerald-600' : 'text-rose-600',
       valid: isValid,
       expiry
@@ -137,8 +138,8 @@ export default function AdminClients() {
       country: client.country || '',
       subscription_tier: client.subscription_tier || 'basic',
       status: client.status || 'active',
-      warranty_start_date: client.warranty_start_date ? client.warranty_start_date.split('T')[0] : '', // Format for date input
-      contract_date: client.contract_date ? client.contract_date.split('T')[0] : '', // Format for date input
+      warranty_start_date: client.warranty_start_date || '', // Format for date input
+      contract_date: client.contract_date || '', // Format for date input new Date(client.contract_date + 'T00:00:00') : null,
       no_warranty: client.no_warranty || false,
       on_hold: client.on_hold || false,
       notes: client.notes || ''
@@ -480,8 +481,8 @@ export default function AdminClients() {
                        <p className="text-xs text-slate-500 mt-1">
                        {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : 'Pro: 2 year warranty'}
                        {' — '}expires{' '}
-                       {addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 2).toLocaleDateString()}
-                     </p>
+                       {format(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 2), 'MMM d, yyyy')}
+                       </p>
                     )}
                   </div>
                 )}

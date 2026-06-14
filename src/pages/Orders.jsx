@@ -27,8 +27,8 @@ export default function Orders() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['orders', activeClientId],
     queryFn: () => activeClientId
-      ? api.getOrders( { client_id: activeClientId , order:'-created_date', limit: 100})
-      : api.getOrders( { order:'-created_date', limit: 50 }),
+      ? api.getOrders( { client_id: activeClientId , order:'-created_at', limit: 100})
+      : api.getOrders( { order:'-created_at', limit: 50 }),
     enabled: !!user,
   });
 
@@ -67,7 +67,7 @@ export default function Orders() {
       )
     },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '-'}</span> },
-    { header: 'Date', render: (row) => row.created_date ? format(new Date(row.created_date), 'MMM d, yyyy') : '—' },
+    { header: 'Date', render: (row) => row.created_at ? format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy')  : '—' },
     { header: 'Status', render: (row) => <StatusBadge status={getDisplayStatus(row)} /> },
     {
       header: 'Tracking',

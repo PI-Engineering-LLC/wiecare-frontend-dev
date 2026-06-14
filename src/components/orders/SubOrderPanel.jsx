@@ -90,8 +90,8 @@ export default function SubOrderPanel({ subOrder, isAdmin, invoices = [] }) {
                     <tr key={idx} className="border-t">
                       <td className="p-2">
                         <p>{item.description || '—'}</p>
-                        {(item.item_number || item.z_number) && (
-                          <p className="text-xs text-slate-400">{item.item_number}{item.z_number ? ` / EZ: ${item.z_number}` : ''}</p>
+                        {(item.item_number || item.ez_number) && (
+                          <p className="text-xs text-slate-400">{item.item_number}{item.ez_number ? ` / EZ: ${item.ez_number}` : ''}</p>
                         )}
                       </td>
                       <td className="p-2 text-right">{item.quantity}</td>

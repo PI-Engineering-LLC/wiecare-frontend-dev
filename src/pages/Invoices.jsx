@@ -49,7 +49,7 @@ export default function Invoices() {
     }, [searchParams]);
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ['invoices', activeClientId],
-    queryFn: () => api.getInvoices({ client_id: activeClientId , order:'-created_date', limit: 50 }),
+    queryFn: () => api.getInvoices({ client_id: activeClientId , order:'-created_at', limit: 50 }),
     enabled: !!activeClientId,
   });
 
@@ -71,7 +71,7 @@ export default function Invoices() {
     const newBalance = selectedInvoice.total_amount - newAmountPaid;
     
     const paymentHistory = [...(selectedInvoice.payment_history || []), {
-      date: new Date().toISOString().split('T')[0],
+      date: format(new Date(), 'yyyy-MM-dd'),
       amount,
       method: 'online',
       reference: `PAY-${Date.now()}`
@@ -153,7 +153,7 @@ export default function Invoices() {
     },
     {
       header: 'Due Date',
-      render: (row) => row.due_date ? format(new Date(row.due_date), 'MMM d, yyyy') : '-'
+      render: (row) => row.due_date ? format(new Date(row.due_date + 'T00:00:00'), 'MMM d, yyyy') : '-'
     },
     {
       header: 'Status',
@@ -262,7 +262,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Issue Date</p>
                   <p className="font-medium">
                     {selectedInvoice.issue_date 
-                      ? format(new Date(selectedInvoice.issue_date), 'MMM d, yyyy')
+                      ? format(new Date(selectedInvoice.issue_date + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -270,7 +270,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Due Date</p>
                   <p className="font-medium">
                     {selectedInvoice.due_date 
-                      ? format(new Date(selectedInvoice.due_date), 'MMM d, yyyy')
+                      ? format(new Date(selectedInvoice.due_date + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -406,7 +406,11 @@ export default function Invoices() {
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-900 space-y-1">
                   <p className="font-semibold text-blue-800">Payment Instructions</p>
                   {selectedInvoice.notes ? (
+                    <>
+                    <p>Please pay by wire transfer. Contact us if you need banking details.</p>
                     <p className="whitespace-pre-line">{selectedInvoice.notes}</p>
+                    </>
+                    
                   ) : selectedInvoice.pdf_url ? (
                     <p>Please refer to the <a href={selectedInvoice.pdf_url} target="_blank" rel="noopener noreferrer" className="underline font-medium">invoice PDF</a> for payment instructions.</p>
                   ) : (

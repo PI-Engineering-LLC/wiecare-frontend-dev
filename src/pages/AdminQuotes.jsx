@@ -76,12 +76,12 @@ export default function AdminQuotes() {
 
   const { data: quotes = [], isLoading } = useQuery({
     queryKey: ['admin-quotes'],
-    queryFn: () => api.getQuotes({order: '-created_date', limit: 200}),
+    queryFn: () => api.getQuotes({order: '-created_at', limit: 200}),
   });
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => api.getClients({order: '-created_date', limit: 200}),
+    queryFn: () => api.getClients({order: '-created_at', limit: 200}),
   });
   
 
@@ -324,7 +324,7 @@ export default function AdminQuotes() {
     },
     {
       header: 'Requested',
-      render: (row) => row.created_date ? new Date(row.created_date).toLocaleDateString() : '-'
+      render: (row) => row.created_at ? new Date(row.created_at + 'T00:00:00').toLocaleDateString() : '-'
     },
     {
       header: 'Status',
@@ -720,7 +720,7 @@ export default function AdminQuotes() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Submitted</p>
-                  <p className="text-sm">{viewingRequest.created_date ? new Date(viewingRequest.created_date).toLocaleDateString() : '-'}</p>
+                  <p className="text-sm">{viewingRequest.created_at ? new Date(viewingRequest.created_at + 'T00:00:00').toLocaleDateString() : '-'}</p>
                 </div>
               </div>
 

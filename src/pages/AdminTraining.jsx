@@ -60,12 +60,12 @@ export default function AdminTraining() {
 
   const { data: registrations = [] } = useQuery({
     queryKey: ['all-registrations'],
-    queryFn: () => api.getRegistrations({ order:'-created_date', limit: 500}),
+    queryFn: () => api.getRegistrations({ order:'-created_at', limit: 500}),
   });
 
   const { data: trainingRequests = [], isLoading: isLoadingRequests } = useQuery({
     queryKey: ['admin-training-requests'],
-    queryFn: () => api.getTrainingRequests({ order:'-created_date', limit: 200}),
+    queryFn: () => api.getTrainingRequests({ order:'-created_at', limit: 200}),
   });
   
   const updateRequestMutation = useMutation({
@@ -189,8 +189,8 @@ export default function AdminTraining() {
       header: 'Preferred Dates',
       render: (row) => (
         <div className="text-sm">
-          {row.preferred_date_1 ? <p>{format(new Date(row.preferred_date_1), 'MMM d, yyyy')}</p> : null}
-          {row.preferred_date_2 ? <p className="text-slate-400">{format(new Date(row.preferred_date_2), 'MMM d, yyyy')}</p> : null}
+          {row.preferred_date_1 ? <p>{format(new Date(row.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')}</p> : null}
+          {row.preferred_date_2 ? <p className="text-slate-400">{format(new Date(row.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')}</p> : null}
         </div>
       )
     },
@@ -230,7 +230,7 @@ export default function AdminTraining() {
       header: 'Date & Time',
       render: (row) => (
         <div>
-          <p className="font-medium">{row.session_date ? format(new Date(row.session_date), 'MMM d, yyyy') : '-'}</p>
+          <p className="font-medium">{row.session_date ? format(new Date(row.session_date + 'T00:00:00'), 'MMM d, yyyy') : '-'}</p>
           <p className="text-sm text-slate-500">{row.start_time} - {row.end_time}</p>
         </div>
       )
@@ -400,7 +400,7 @@ export default function AdminTraining() {
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1
-                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -408,7 +408,7 @@ export default function AdminTraining() {
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2
-                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>

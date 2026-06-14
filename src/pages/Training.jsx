@@ -50,14 +50,14 @@ export default function Training() {
   const { data: registrations = [], isLoading: loadingRegistrations } = useQuery({
     queryKey: ['registrations', user?.id, activeClientId],
     queryFn: () => user?.id 
-      ? api.getRegistrations({ user_id: user.id, order:'-created_date', limit: 100 }) 
+      ? api.getRegistrations({ user_id: user.id, order:'-created_at', limit: 100 }) 
       : [],
     enabled: !!user?.id,
   });
 
   const { data: myRequests = [] } = useQuery({
     queryKey: ['training-requests', user?.id, activeClientId],
-    queryFn: () => api.getTrainingRequests({ user_id: user.id, order:'-created_date', limit: 50 }) ,
+    queryFn: () => api.getTrainingRequests({ user_id: user.id, order:'-created_at', limit: 50 }) ,
     enabled: !!user?.id,
   });
 
@@ -106,11 +106,15 @@ export default function Training() {
       user_email: user.email,
       client_id: activeClientId,
       status: 'registered',
-      registration_date: new Date().toISOString().split('T')[0]
+      registration_date: format(new Date(), 'yyyy-MM-dd')
     });
   };
 
   const handleRequestTraining = async () => {
+    if (!activeClientId) {
+      toast.error('Your account is not linked to a client. Please contact support.');
+      return;
+    }
     await requestTrainingMutation.mutateAsync({
       ...trainingRequest,
       client_id: activeClientId ,
@@ -258,7 +262,7 @@ export default function Training() {
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2 text-sm text-slate-600">
                           <Calendar className="h-4 w-4" />
-                          <span>{format(new Date(training.session_date), 'EEEE, MMMM d, yyyy')}</span>
+                          <span>{format(new Date(training.session_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}</span>
                         </div>
                         {training.start_time && (
                           <div className="flex items-center gap-2 text-sm text-slate-600">
@@ -343,7 +347,7 @@ export default function Training() {
                           <p className="font-semibold text-slate-900">{reg.training_title}</p>
                           <p className="text-sm text-slate-500">
                             {training?.session_date 
-                              ? format(new Date(training.session_date), 'MMM d, yyyy')
+                              ? format(new Date(training.session_date + 'T00:00:00'), 'MMM d, yyyy')
                               : 'Date TBD'}
                             {training?.start_time && ` at ${training.start_time}`}
                           </p>
@@ -388,7 +392,7 @@ export default function Training() {
                         <p className="font-semibold text-slate-900">{reg.training_title}</p>
                         <p className="text-sm text-slate-500">
                           Completed on {reg.completion_date 
-                            ? format(new Date(reg.completion_date), 'MMM d, yyyy')
+                            ? format(new Date(reg.completion_date + 'T00:00:00'), 'MMM d, yyyy')
                             : 'N/A'}
                         </p>
                       </div>
@@ -443,13 +447,12 @@ export default function Training() {
                         <div>
                           <p className="font-semibold text-slate-900 capitalize">{req.training_type?.replace(/_/g, ' ')} Training</p>
                           <p className="text-sm text-slate-500 mt-0.5">
-                          {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {req.created_date ? format(new Date(req.created_date), 'MMM d, yyyy') : 'N/A'}
-                          </p>
+                          {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {format(new Date(req.created_at), 'MMM d, yyyy')}                          </p>
                           {req.preferred_date_1 && (
                             <p className="text-sm text-slate-400 mt-0.5">
-                              Preferred: {format(new Date(req.preferred_date_1), 'MMM d, yyyy')}
-                              {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2), 'MMM d, yyyy')}`}
-                            </p>
+                            Preferred: {format(new Date(req.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')}
+                            {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')}`}
+                          </p>
                           )}
                           {req.description && (
                             <p className="text-sm text-slate-500 mt-1 line-clamp-2">{req.description}</p>
@@ -485,7 +488,7 @@ export default function Training() {
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    <span>{format(new Date(selectedTraining.session_date), 'EEEE, MMMM d, yyyy')}</span>
+                    <span>{format(new Date(selectedTraining.session_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}</span>
                   </div>
                   {selectedTraining.start_time && (
                     <div className="flex items-center gap-2 text-sm">
@@ -565,8 +568,15 @@ export default function Training() {
               <Input
                 type="number"
                 min="1"
+                defaultValue={1}
                 value={trainingRequest.number_of_participants}
-                onChange={(e) => setTrainingRequest({...trainingRequest, number_of_participants: parseInt(e.target.value) || 1})}
+                onChange={(e) => setTrainingRequest({...trainingRequest, number_of_participants: e.target.value === '' ? '' : parseInt(e.target.value) || 1})}
+                // onChange={(e) => setTrainingRequest({ ...trainingRequest, number_of_participants: parseInt(e.target.value) || 1 })}
+                onBlur={(e) => {
+                  if (e.target.value === "" || Number(e.target.value) < 1) {
+                    e.target.value = "1";
+                  }
+                }}
                 className="mt-1"
               />
             </div>
@@ -597,7 +607,7 @@ export default function Training() {
             </Button>
             <Button 
               onClick={handleRequestTraining}
-              disabled={!trainingRequest.training_type || !trainingRequest.preferred_date_1 || requestTrainingMutation.isPending}
+              disabled={!trainingRequest.training_type || !trainingRequest.preferred_date_1 || !(parseInt(trainingRequest.number_of_participants) >= 1) || requestTrainingMutation.isPending}
               className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
             >
               {requestTrainingMutation.isPending ? 'Submitting...' : 'Submit Request'}

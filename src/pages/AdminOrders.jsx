@@ -28,12 +28,12 @@ export default function AdminOrders() {
 
   const { data: orders = [], isLoading: loadingOrders } = useQuery({
     queryKey: ['admin-orders'],
-    queryFn: () => api.getOrders({ order: '-created_date', limit: 200}),
+    queryFn: () => api.getOrders({ order: '-created_at', limit: 200}),
   });
 
   const { data: partOrders = [], isLoading: loadingPartOrders } = useQuery({
     queryKey: ['admin-part-orders'],
-    queryFn: () => api.getPartOrders({ order: '-created_date', limit: 200}),
+    queryFn: () => api.getPartOrders({ order: '-created_at', limit: 200}),
   });
 
   const handleViewOrder = (order) => {
@@ -45,7 +45,7 @@ export default function AdminOrders() {
   const allOrders = [
     ...masterOrders.map(o => ({ ...o, _type: 'order' })),
     ...partOrders.map(o => ({ ...o, _type: 'part_order' }))
-  ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   const filteredOrders = allOrders.filter(order => {
     const matchesSearch = order.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,7 +78,7 @@ export default function AdminOrders() {
     },
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
-    { header: 'Date', render: (row) => row.created_date ? format(new Date(row.created_date), 'MMM d, yyyy') : '—' },
+    { header: 'Date', render: (row) => format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy') },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'Actions',

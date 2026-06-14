@@ -58,8 +58,8 @@ export default function Quotes() {
   const { data: quotes = [], isLoading } = useQuery({
     queryKey: ['quotes', activeClientId],
     queryFn: () => activeClientId
-      ? api.getQuotes({ client_id: activeClientId, sort: '-created_date', limit: 100 })
-      : api.getQuotes({ sort: '-created_date', limit: 100 }),
+      ? api.getQuotes({ client_id: activeClientId, sort: '-created_at', limit: 100 })
+      : api.getQuotes({ sort: '-created_at', limit: 100 }),
     enabled: !!user,
   });
 
@@ -361,7 +361,7 @@ export default function Quotes() {
                       <p className="text-sm text-slate-500 truncate">{req.description}</p>
                     )}
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Submitted {req.created_date ? format(new Date(req.created_date), 'MMM d, yyyy') : ''}
+                    Submitted {req.created_at ? format(new Date(req.created_at + 'T00:00:00'), 'MMM d, yyyy') : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -571,7 +571,7 @@ export default function Quotes() {
                         {(selectedQuote.items || []).map((item, idx) => (
                           <tr key={idx} className="border-t">
                             <td className="p-3 text-slate-600">{item.item_number || '-'}</td>
-                            <td className="p-3 text-slate-600">{item.z_number || '-'}</td>
+                            <td className="p-3 text-slate-600">{item.ez_number || '-'}</td>
                             <td className="p-3">{item.description}</td>
                             <td className="p-3 text-right">{item.quantity}</td>
                             <td className="p-3 text-right">${item.unit_price?.toLocaleString()}</td>

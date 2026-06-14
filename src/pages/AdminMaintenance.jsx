@@ -43,7 +43,7 @@ export default function AdminMaintenance() {
 
   const { data: requests = [], isLoading } = useQuery({
     queryKey: ['admin-maintenance'],
-    queryFn: () => api.getMaintenance(  { order:'-created_date', limit: 200}),
+    queryFn: () => api.getMaintenance(  { order:'-created_at', limit: 200}),
   });
 
   const updateMutation = useMutation({
@@ -59,7 +59,7 @@ export default function AdminMaintenance() {
     setSelectedRequest(request);
     setUpdateData({
       status: request.status || 'pending',
-      scheduled_date: request.scheduled_date ? new Date(request.scheduled_date) : null,
+      scheduled_date: request.scheduled_date ? new Date(request.scheduled_date + 'T00:00:00') : null,
       admin_notes: request.admin_notes || '',
       completion_notes: request.completion_notes || ''
     });
@@ -107,7 +107,7 @@ export default function AdminMaintenance() {
       id: selectedRequest.id,
       data: {
         ...updateData,
-        scheduled_date: updateData.scheduled_date?.toISOString().split('T')[0],
+        scheduled_date: updateData.scheduled_date ? format(updateData.scheduled_date, 'yyyy-MM-dd') : null,
         ...(reportStorageKey && { inspection_report_key: reportStorageKey })
       }
     });
@@ -145,8 +145,8 @@ export default function AdminMaintenance() {
     {
       header: 'Scheduled',
       render: (row) => row.scheduled_date 
-        ? format(new Date(row.scheduled_date), 'MMM d, yyyy') 
-        : 'Not scheduled'
+      ? format(new Date(row.scheduled_date + 'T00:00:00'), 'MMM d, yyyy') 
+      : 'Not scheduled'
     },
     {
       header: 'Status',
@@ -266,7 +266,7 @@ export default function AdminMaintenance() {
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1 
-                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export default function AdminMaintenance() {
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2 
-                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>

@@ -43,7 +43,7 @@ export default function MasterOrderDetail({ order, open, onClose, isAdmin, onSpl
 
   const { data: invoices = [] } = useQuery({
     queryKey: ['invoices-for-order', order?.id],
-    queryFn: () => api.getInvoices({order: '-created_date', limit: 100}),
+    queryFn: () => api.getInvoices({order: '-created_at', limit: 100}),
     enabled: !!order?.id && open,
   });
 
@@ -91,7 +91,7 @@ export default function MasterOrderDetail({ order, open, onClose, isAdmin, onSpl
           <div className="grid grid-cols-3 gap-4 bg-slate-50 rounded-xl p-4">
             <div>
               <p className="text-xs text-slate-500">Order Date</p>
-              <p className="font-semibold text-sm">{order.created_date ? format(new Date(order.created_date), 'MMM d, yyyy') : '—'}</p>
+              <p className="font-semibold text-sm">{order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy') : '—'}</p>
             </div>
             <div>
               <p className="text-xs text-slate-500">Total Amount</p>

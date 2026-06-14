@@ -3,7 +3,7 @@ import { api } from '@/api/apiClient';
 import { PrivateImageLink } from './PrivateImageLink';
 const DEFAULT_AVATAR = '/wiecare-logo';
 
-export function PrivateFileLink({ storageKey, label, alt = "Private File", className = "", showImage = false, ...props }) {
+export function PrivateFileLink({ storageKey, label, alt = "Private File",onError=null, className = "", showImage = false, ...props }) {
   const [fileHref, setFileHref] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,6 +17,7 @@ export function PrivateFileLink({ storageKey, label, alt = "Private File", class
         if (isMounted) setFileHref(downloadUrl);
       } catch (err) {
         console.error("Failed to fetch secure image link", err);
+        if(onError) onError(err)
         if (isMounted) setFileHref(null); // Clear src on error
       } finally {
         if (isMounted) setLoading(false);

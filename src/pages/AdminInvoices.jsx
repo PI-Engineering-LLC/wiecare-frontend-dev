@@ -30,8 +30,8 @@ const DEFAULT_FORM = (entity = 'Wiegand Sports Gmbh') => ({
   order_id: '',
   title: '',
   invoice_number: '',
-  issue_date: new Date().toISOString().split('T')[0],
-  due_date: '',
+  issue_date: format(new Date(), 'yyyy-MM-dd'),
+  due_date: format(new Date(), 'yyyy-MM-dd'),
   po_number: '',
   tax_code: '',
   tax_rate: 19,
@@ -59,7 +59,7 @@ export default function AdminInvoices() {
     amount: '',
     method: 'wire',
     reference: '',
-    date: new Date().toISOString().split('T')[0]
+    date: format(new Date(), 'yyyy-MM-dd')
   });
   const [pdfFile, setPdfFile] = useState(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -69,7 +69,7 @@ export default function AdminInvoices() {
 
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ['admin-invoices'],
-    queryFn: () => api.getInvoices({ order:'-created_date', limit:200}),
+    queryFn: () => api.getInvoices({ order:'-created_at', limit:200}),
   });
 
   const { data: clients = [] } = useQuery({
@@ -79,12 +79,12 @@ export default function AdminInvoices() {
 
   const { data: orders = [] } = useQuery({
     queryKey: ['orders-for-invoice'],
-    queryFn: () => api.getOrders({ order:'-created_date', limit:500}),
+    queryFn: () => api.getOrders({ order:'-created_at', limit:500}),
   });
 
   const { data: subOrders = [] } = useQuery({
     queryKey: ['sub-orders-for-invoice'],
-    queryFn: () => api.getSubOrders({ order:'-created_date', limit:500}),
+    queryFn: () => api.getSubOrders({ order:'-created_at', limit:500}),
   });
 
   const createMutation = useMutation({
@@ -172,8 +172,8 @@ export default function AdminInvoices() {
       client_id: invoice.client_id || '',
       title: invoice.title || '',
       invoice_number: invoice.invoice_number || '',
-      issue_date: invoice.issue_date || new Date().toISOString().split('T')[0],
-      due_date: invoice.due_date || '',
+      issue_date: invoice.issue_date || format(new Date(), 'yyyy-MM-dd'),
+      due_date: invoice.due_date || format(new Date(), 'yyyy-MM-dd'),
       po_number: invoice.po_number || '',
       order_id: invoice.order_id || '',
       tax_code: invoice.tax_code || '',
@@ -292,7 +292,7 @@ export default function AdminInvoices() {
 
   const handleRecordPayment = (invoice) => {
     setSelectedInvoice(invoice);
-    setPaymentData({ amount: invoice.balance_due || invoice.total_amount || '', method: 'wire', reference: '', date: new Date().toISOString().split('T')[0] });
+    setPaymentData({ amount: invoice.balance_due || invoice.total_amount || '', method: 'wire', reference: '', date: format(new Date(), 'yyyy-MM-dd') });
     setShowPaymentDialog(true);
   };
 
@@ -335,8 +335,8 @@ export default function AdminInvoices() {
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
     { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0).toLocaleString()}</span> },
-    { header: 'Date', render: (row) => row.issue_date ? format(new Date(row.issue_date), 'MMM d, yyyy') : '-' },
-    { header: 'Due', render: (row) => row.due_date ? format(new Date(row.due_date), 'MMM d, yyyy') : '-' },
+    { header: 'Date', render: (row) => row.issue_date ? format(new Date(row.issue_date + 'T00:00:00'), 'MMM d, yyyy') : '-' },
+    { header: 'Due', render: (row)  => row.due_date ? format(new Date(row.due_date + 'T00:00:00'), 'MMM d, yyyy') : '-' },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'Actions',

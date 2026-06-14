@@ -153,7 +153,7 @@ export default function ClientAdminDashboard() {
   const overdueInvoices = invoices.filter(i => i.status === 'overdue');
   const totalDue = invoices
     .filter(i => ['pending', 'overdue', 'partial'].includes(i.status))
-    .reduce((sum, i) => sum + (i.balance_due || i.total_amount || 0), 0);
+    .reduce((sum, i) => sum + Number(i.balance_due || i.total_amount || 0), 0);
   const pendingMaintenance = maintenance.filter(m => m.status === 'pending');
   const openWarranty = warrantyClaims.filter(c => ['pending', 'under_review'].includes(c.status));
 
@@ -290,7 +290,9 @@ export default function ClientAdminDashboard() {
                   <div key={inv.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-slate-900 truncate">{inv.invoice_number || inv.title}</p>
-                      <p className="text-xs text-slate-500">{inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : 'No due date'}</p>
+                      <p className="text-xs text-slate-500">
+                      {inv.due_date ? format(new Date(inv.due_date + 'T00:00:00'), 'MMM d, yyyy') : 'No due date'}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="text-sm font-semibold text-slate-800">${inv.total_amount?.toLocaleString()}</span>

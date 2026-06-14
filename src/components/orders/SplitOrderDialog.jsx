@@ -106,8 +106,8 @@ export default function SplitOrderDialog({ order, open, onClose, onSuccess }) {
                   <tr key={idx} className="border-t">
                     <td className="p-3">
                       <p className="font-medium">{item.description || '—'}</p>
-                      {(item.item_number || item.z_number) && (
-                        <p className="text-xs text-slate-400">{item.item_number} {item.z_number && `/ EZ: ${item.z_number}`}</p>
+                      {(item.item_number || item.ez_number) && (
+                        <p className="text-xs text-slate-400">{item.item_number} {item.ez_number && `/ EZ: ${item.ez_number}`}</p>
                       )}
                     </td>
                     <td className="p-3 text-right">{item.quantity}</td>

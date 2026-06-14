@@ -175,11 +175,11 @@ export default function WarrantyClaims() {
     },
     {
       header: 'Purchase Date',
-      render: (row) => row.purchase_date ? format(new Date(row.purchase_date), 'MMM d, yyyy') : '-'
+      render: (row) => row.purchase_date ? format(new Date(row.purchase_date + 'T00:00:00'), 'MMM d, yyyy') : '-'
     },
     {
       header: 'Submitted',
-      render: (row) => format(new Date(row.created_at), 'MMM d, yyyy')
+      render: (row) => format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy')
     },
     {
       header: 'Status',
@@ -429,7 +429,7 @@ export default function WarrantyClaims() {
                   <p className="text-sm text-slate-500">Purchase Date</p>
                   <p className="font-medium">
                     {selectedClaim.purchase_date 
-                      ? format(new Date(selectedClaim.purchase_date), 'MMM d, yyyy')
+                      ? format(new Date(selectedClaim.purchase_date + 'T00:00:00'), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>

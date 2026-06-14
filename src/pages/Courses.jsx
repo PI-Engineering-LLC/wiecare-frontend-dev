@@ -132,7 +132,7 @@ export default function Courses() {
           status: 'status',
           started_at: new Date().toISOString(),
           last_watched_at: new Date().toISOString(),
-          progress_percent: status === 'completed' ? 100 : Math.floor((seconds / (course.duration_minutes * 60)) * 100),
+          progress_percent: status === 'completed' ? 100 : Math.floor((secondsRef.current / (course.duration_minutes * 60)) * 100),
 
         }
       });
