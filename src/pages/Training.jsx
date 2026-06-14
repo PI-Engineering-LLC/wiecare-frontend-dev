@@ -392,7 +392,7 @@ export default function Training() {
                         <p className="font-semibold text-slate-900">{reg.training_title}</p>
                         <p className="text-sm text-slate-500">
                           Completed on {reg.completion_date 
-                            ? format(new Date(reg.completion_date + 'T00:00:00'), 'MMM d, yyyy')
+                            ? format(new Date(reg.completion_date), 'MMM d, yyyy')
                             : 'N/A'}
                         </p>
                       </div>
@@ -450,8 +450,8 @@ export default function Training() {
                           {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {format(new Date(req.created_at), 'MMM d, yyyy')}                          </p>
                           {req.preferred_date_1 && (
                             <p className="text-sm text-slate-400 mt-0.5">
-                            Preferred: {format(new Date(req.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')}
-                            {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')}`}
+                            Preferred: {format(new Date(req.preferred_date_1 ), 'MMM d, yyyy')}
+                            {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2), 'MMM d, yyyy')}`}
                           </p>
                           )}
                           {req.description && (
