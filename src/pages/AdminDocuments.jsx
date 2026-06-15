@@ -48,7 +48,7 @@ export default function AdminDocuments() {
 
   const { data: clients = [] } = useQuery({
     queryKey: ['admin-clients-docs'],
-    queryFn: () => api.updateClients({ order: 'company_name', limit: 200}),
+    queryFn: () => api.getClients({ order: 'company_name', limit: 200}),
   });
 
   const createMutation = useMutation({
