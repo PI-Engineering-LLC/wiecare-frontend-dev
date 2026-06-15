@@ -301,15 +301,26 @@ export default function AdminDocuments() {
               <div className="col-span-2">
                 <Label>File *</Label>
                 <div className="mt-1">
-                  {formData.file_storage_key ? (
+                  {selectedFile ?
+                  (
                     <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
                       <File className="h-5 w-5 text-slate-600" />
                       <span className="text-sm truncate flex-1">File uploaded</span>
-                      <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, file_storage_key: '' })}>
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
                         Change
                       </Button>
                     </div>
-                  ) : (
+                  )  
+                  // (
+                  //   <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                  //     <File className="h-5 w-5 text-slate-600" />
+                  //     <span className="text-sm truncate flex-1">File uploaded</span>
+                  //     <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, file_storage_key: '' })}>
+                  //       Change
+                  //     </Button>
+                  //   </div>
+                  // ) 
+                  : (
                     <>
                       <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
                       <label htmlFor="doc-upload">
