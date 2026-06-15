@@ -493,7 +493,7 @@ export default function AdminInvoices() {
 
                         } catch (error) {
                           console.log("#######", error)
-                          if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                          if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404 || error ==='Request failed') {
                             try {
                               await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });
                               const existingDoc = await api.getDs({ invoice_id: selectedInvoice.id });
@@ -506,7 +506,7 @@ export default function AdminInvoices() {
 
                             toast.error('File Not Found');
                           } else {
-                            toast.error('Failed to download, please try again');
+                            toast.error('Failed to download, please try again!');
                           }
                         }
 
