@@ -490,10 +490,7 @@ export default function AdminInvoices() {
                       onClick={async (e) => {
                         try {
                           const result = await handleSecureView(e, selectedInvoice.pdf_storage_key)
-                          console.log("#######1", result)
-
                         } catch (error) {
-                          console.log("#######", error)
                           if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404 || error ==='Request failed') {
                             try {
                               await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });

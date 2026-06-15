@@ -417,7 +417,6 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
                       await handleSecureView(e, doc.file_storage_key, true)
 
                     } catch (error) {
-                      console.log("Error", error)
                       if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                         toast.error('File Not Found');
                         try {
