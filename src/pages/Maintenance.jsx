@@ -141,7 +141,7 @@ const {activeClientId} = useClient()
     {
       header: 'Scheduled Date',
       render: (row) => row.scheduled_date 
-      ? format(new Date(row.scheduled_date + 'T00:00:00'), 'MMM d, yyyy') 
+      ? format(new Date(row.scheduled_date), 'MMM d, yyyy') 
       : 'Pending'
     },
     {
@@ -466,7 +466,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1 
-                      ? format(new Date(selectedRequest.preferred_date_1 + 'T00:00:00'), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -474,7 +474,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2 
-                      ? format(new Date(selectedRequest.preferred_date_2 + 'T00:00:00'), 'MMM d, yyyy')
+                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -484,7 +484,7 @@ const {activeClientId} = useClient()
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-600 font-medium">Scheduled Date</p>
                   <p className="text-lg font-bold text-blue-800">
-                  {format(new Date(selectedRequest.scheduled_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                  {format(new Date(selectedRequest.scheduled_date), 'MMMM d, yyyy')}
                   </p>
                 </div>
               )}

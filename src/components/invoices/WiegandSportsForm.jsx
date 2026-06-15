@@ -23,7 +23,7 @@ export default function WiegandSportsForm({ formData, setFormData, clients }) {
         <div>
           <Label>Invoice Date *</Label>
           <Input type="date" className="mt-1" value={formData.issue_date || ''} onChange={(e) => {const issueDate = e.target.value;
-            const due = issueDate ? new Date(new Date(issueDate + 'T00:00:00').getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '';
+            const due = issueDate ? new Date(new Date(issueDate).getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '';
             setFormData({ ...formData, issue_date: issueDate, due_date: due });}} />
         </div>
         <div>

@@ -153,7 +153,7 @@ export default function Invoices() {
     },
     {
       header: 'Due Date',
-      render: (row) => row.due_date ? format(new Date(row.due_date + 'T00:00:00'), 'MMM d, yyyy') : '-'
+      render: (row) => row.due_date ? format(new Date(row.due_date), 'MMM d, yyyy') : '-'
     },
     {
       header: 'Status',
@@ -262,7 +262,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Issue Date</p>
                   <p className="font-medium">
                     {selectedInvoice.issue_date 
-                      ? format(new Date(selectedInvoice.issue_date + 'T00:00:00'), 'MMM d, yyyy')
+                      ? format(new Date(selectedInvoice.issue_date), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -270,7 +270,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Due Date</p>
                   <p className="font-medium">
                     {selectedInvoice.due_date 
-                      ? format(new Date(selectedInvoice.due_date + 'T00:00:00'), 'MMM d, yyyy')
+                      ? format(new Date(selectedInvoice.due_date), 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>

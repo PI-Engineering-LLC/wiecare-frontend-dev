@@ -165,7 +165,7 @@ export default function Dashboard() {
                     <p className="font-medium text-slate-900 text-sm truncate">{invoice.invoice_number || invoice.title}</p>
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs text-slate-500">
-                      {invoice.due_date ? format(new Date(invoice.due_date + 'T00:00:00'), 'MMM d, yyyy') : 'No due date'}
+                      {invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : 'No due date'}
                       </p>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <p className="font-semibold text-slate-900 text-xs">${invoice.total_amount?.toLocaleString()}</p>
@@ -212,7 +212,7 @@ export default function Dashboard() {
                       <div className="min-w-0">
                         <p className="font-medium text-slate-900 text-sm truncate">{training.title}</p>
                         <p className="text-xs text-slate-500">
-                        {training.session_date ? format(new Date(training.session_date + 'T00:00:00'), 'MMM d, yyyy') : ''}
+                        {training.session_date ? format(new Date(training.session_date), 'MMM d, yyyy') : ''}
                         {training.start_time && ` at ${training.start_time}`}
                         </p>
                       </div>

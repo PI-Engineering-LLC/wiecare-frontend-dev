@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                   <div key={invoice.id} className="flex items-center justify-between p-3 bg-rose-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{invoice.client_name}</p>
-                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? format(new Date(invoice.due_date + 'T00:00:00'), 'MMM d, yyyy') : 'N/A'}</p>
+                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : 'N/A'}</p>
                     </div>
                     <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString() || invoice.total_amount?.toLocaleString()}</p>
                   </div>

@@ -134,7 +134,7 @@ export default function AdminWarranty() {
     },
     {
       header: 'Submitted',
-      render: (row) => format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy')
+      render: (row) => format(new Date(row.created_at), 'MMM d, yyyy')
     },
     {
       header: 'Status',
@@ -263,7 +263,7 @@ export default function AdminWarranty() {
                     <p className="text-sm text-slate-500">Purchase Date</p>
                     <p className="font-semibold">
                       {selectedClaim.purchase_date
-                      ? format(new Date(selectedClaim.purchase_date + 'T00:00:00'), 'MMM d, yyyy')
+                      ? format(new Date(selectedClaim.purchase_date), 'MMM d, yyyy')
                       : '-'}
                     </p>
                   </div>

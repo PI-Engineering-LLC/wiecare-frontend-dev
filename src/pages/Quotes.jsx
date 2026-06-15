@@ -361,7 +361,7 @@ export default function Quotes() {
                       <p className="text-sm text-slate-500 truncate">{req.description}</p>
                     )}
                     <p className="text-xs text-slate-400 mt-0.5">
-                    Submitted {req.created_at ? format(new Date(req.created_at + 'T00:00:00'), 'MMM d, yyyy') : ''}
+                    Submitted {req.created_at ? format(new Date(req.created_at), 'MMM d, yyyy') : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">

@@ -67,7 +67,7 @@ export default function Orders() {
       )
     },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '-'}</span> },
-    { header: 'Date', render: (row) => row.created_at ? format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy')  : '—' },
+    { header: 'Date', render: (row) => row.created_at ? format(new Date(row.created_at), 'MMM d, yyyy')  : '—' },
     { header: 'Status', render: (row) => <StatusBadge status={getDisplayStatus(row)} /> },
     {
       header: 'Tracking',

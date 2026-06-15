@@ -78,7 +78,7 @@ export default function AdminOrders() {
     },
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
-    { header: 'Date', render: (row) => format(new Date(row.created_at + 'T00:00:00'), 'MMM d, yyyy') },
+    { header: 'Date', render: (row) => format(new Date(row.created_at), 'MMM d, yyyy') },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'Actions',

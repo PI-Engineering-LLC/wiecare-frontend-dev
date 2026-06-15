@@ -324,7 +324,7 @@ export default function AdminQuotes() {
     },
     {
       header: 'Requested',
-      render: (row) => row.created_at ? new Date(row.created_at + 'T00:00:00').toLocaleDateString() : '-'
+      render: (row) => row.created_at ? new Date(row.created_at).toLocaleDateString() : '-'
     },
     {
       header: 'Status',
@@ -720,7 +720,7 @@ export default function AdminQuotes() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Submitted</p>
-                  <p className="text-sm">{viewingRequest.created_at ? new Date(viewingRequest.created_at + 'T00:00:00').toLocaleDateString() : '-'}</p>
+                  <p className="text-sm">{viewingRequest.created_at ? new Date(viewingRequest.created_at).toLocaleDateString() : '-'}</p>
                 </div>
               </div>
 
