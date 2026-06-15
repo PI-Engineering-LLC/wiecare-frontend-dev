@@ -33,8 +33,8 @@ export default function Training() {
   const [trainingRequest, setTrainingRequest] = useState({
     training_type: 'operations',
     description: '',
-    preferred_date_1: '',
-    preferred_date_2: '',
+    preferred_date_1: null,
+    preferred_date_2: null,
     number_of_participants: 1
   });
 
@@ -85,8 +85,8 @@ export default function Training() {
       setTrainingRequest({
         training_type: 'operations',
         description: '',
-        preferred_date_1: '',
-        preferred_date_2: '',
+        preferred_date_1: null,
+        preferred_date_2: null,
         number_of_participants: 1
       });
       toast.success('Training request submitted successfully');
