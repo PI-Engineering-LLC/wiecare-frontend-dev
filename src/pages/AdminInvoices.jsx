@@ -492,6 +492,7 @@ export default function AdminInvoices() {
                           await handleSecureView(e, selectedInvoice.pdf_storage_key)
 
                         } catch (error) {
+                          console.log("#######", error)
                           if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                             try {
                               await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });
