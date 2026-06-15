@@ -417,7 +417,7 @@ export default function AdminDocuments() {
             <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
             <Button 
               onClick={handleSubmit}
-              disabled={!formData.title || !formData.client_id || !formData.file_storage_key || uploading}
+              disabled={!formData.title || !formData.client_id || !selectedFile || uploading}
               className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
             >
               {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedDocument ? 'Update' : 'Upload'}
