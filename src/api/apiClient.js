@@ -12,7 +12,7 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
     headers.set('X-Tenant-Id', activeClientId);
   }
   if (!isFormData) headers.set('Content-Type', 'application/json');
-  const res = await fetch(url.toString(), {
+  let res = await fetch(url.toString(), {
     method,
     credentials: 'include',
     headers,
@@ -35,7 +35,7 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
     }
     if (!isFormData) newHeaders.set('Content-Type', 'application/json');
 
-    return fetch(url.toString(), {
+    res = await  fetch(url.toString(), {
       method,
       credentials: 'include',
       headers: newHeaders,
