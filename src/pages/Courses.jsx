@@ -365,7 +365,7 @@ export default function Courses() {
                     const newPercent = calculatePercentage(playedSeconds, selectedCourse.duration_minutes);
                     setLocalProgress(newPercent);
 
-                  }} onVideoDuration={handleVideoDurationUpdate} watchTimeSeconds={(getProgressForCourse(selectedCourse?.id)?.watch_time_seconds || 0)} 
+                  }} onVideoDuration={handleVideoDurationUpdate} watchTimeSeconds={(getProgressForCourse(selectedCourse?.id)?.status === 'completed')? 0:(getProgressForCourse(selectedCourse?.id)?.watch_time_seconds || 0)} 
                   onError={(err) => handleVideoError(selectedCourse?.id, err)} />
                 ) : (
                   <div className="text-center text-white">
