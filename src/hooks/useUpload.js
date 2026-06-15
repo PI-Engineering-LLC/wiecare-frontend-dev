@@ -13,7 +13,8 @@ export function useUpload() {
                 filename: file.name,
                 contentType: file.type,
                 type,
-                isPrivate
+                isPrivate, 
+                client_id 
             });
             
             const { file_url, file_key } = presignedUrlResponse;
