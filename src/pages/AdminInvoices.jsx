@@ -492,12 +492,12 @@ export default function AdminInvoices() {
                           await handleSecureView(e, selectedInvoice.pdf_storage_key)
 
                         } catch (error) {
-                          if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                          if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                             try {
                               await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });
                               const existingDoc = await api.getDs({ invoice_id: selectedInvoice.id });
                               if (existingDoc.length > 0) {
-                                await api.updateD(existingDoc.id, { file_storage_key: null, status: 'archived' })
+                                await api.updateD(existingDoc.id, { status: 'archived' })
                               }
                             } catch (error) {
                               toast.error('Error occured');

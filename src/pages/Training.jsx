@@ -404,7 +404,7 @@ export default function Training() {
                             try {
                               await handleSecureView(e, reg.certificate_storage_key)
                             } catch (error) {
-                              if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                              if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                                 toast.error('File Not Found');
                               } else {
                                 toast.error('Failed to download, please try again');

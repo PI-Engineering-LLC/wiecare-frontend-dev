@@ -388,7 +388,7 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
                       await handleSecureView(e, doc.file_storage_key)
 
                     } catch (error) {
-                      if (error.message === "FILE_MISSING_IN_STORAGE") {
+                      if (error.code === "FILE_MISSING_IN_STORAGE") {
                         toast.error('File Not Found');
                       } else {
                         toast.error('Failed to download, please try again');
@@ -418,7 +418,7 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
 
                     } catch (error) {
                       console.log("Error", error)
-                      if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                      if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                         toast.error('File Not Found');
                         try {
                           await updateDocumentMutation.mutateAsync({

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Search, Eye, Wrench, Calendar as CalendarIcon, Clock, CheckCircle2, Upload, FileText, Loader2, FileEdit } from 'lucide-react';
+import { Search, Eye, Wrench, Calendar as CalendarIcon, Clock, CheckCircle2, Upload, FileText, Loader2, FileEdit,Download } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from "@/lib/utils";
 import { useUpload } from '@/hooks/useUpload';
+import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 
 export default function AdminMaintenance() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,6 +37,7 @@ export default function AdminMaintenance() {
   });
   const [inspectionReport, setInspectionReport] = useState(null);
   const [uploadingReport, setUploadingReport] = useState(false);
+  const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
   const { uploadFileToS3, isUploading } = useUpload();
   const fileInputRef = useRef(null);
 
@@ -361,8 +363,33 @@ export default function AdminMaintenance() {
                   />
                   {selectedRequest?.inspection_report_key && !inspectionReport ? (
                     <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <FileText className="h-4 w-4 text-green-600" />
-                      <span className="text-sm text-green-700 flex-1">Report already uploaded</span>
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 flex-1">Report already uploaded</span>
+                        <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
+                          onClick={async (e) => {
+                            try {
+                              await handleSecureView(e, selectedRequest.inspection_report_key)
+
+                            } catch (error) {
+                              if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                                try {
+                                  await updateMutation.mutateAsync({ id: selectedRequest.id, data: { inspection_report_key: null } });
+                                  const existingDoc = await api.getDs({ invoice_id: selectedRequest.id });
+                                  if (existingDoc.length > 0) {
+                                    await api.updateD(existingDoc.id, { status: 'archived' })
+                                  }
+                                } catch (error) {
+                                  toast.error('Error occured');
+                                }
+
+                                toast.error('File Not Found');
+                              } else {
+                                toast.error('Failed to download, please try again');
+                              }
+                            }
+
+                          }}>
+                          <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedRequest.inspection_report_key ? 'Authorizing Access...' : 'View'}</a></Button>
                       <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs">
                         Replace
                       </Button>
