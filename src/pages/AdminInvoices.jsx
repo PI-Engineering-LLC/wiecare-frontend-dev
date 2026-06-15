@@ -489,10 +489,10 @@ export default function AdminInvoices() {
                     <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
                       onClick={async (e) => {
                         try {
-                          handleSecureView(e, selectedInvoice.pdf_storage_key)
+                          await handleSecureView(e, selectedInvoice.pdf_storage_key)
 
                         } catch (error) {
-                          if (error.message === "FILE_MISSING_IN_STORAGE") {
+                          if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                             try {
                               await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { pdf_storage_key: null } });
                               const existingDoc = await api.getDs({ invoice_id: selectedInvoice.id });

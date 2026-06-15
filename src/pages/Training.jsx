@@ -400,11 +400,11 @@ export default function Training() {
                     {reg.certificate_url && (
                       <Button variant="outline" size="sm" asChild>
                         <a href={reg.certificate_storage_key}
-                          onClick={(e) => {
+                          onClick={async(e) => {
                             try {
-                              handleSecureView(e, reg.certificate_storage_key)
+                              await handleSecureView(e, reg.certificate_storage_key)
                             } catch (error) {
-                              if (error.message === "FILE_MISSING_IN_STORAGE") {
+                              if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                                 toast.error('File Not Found');
                               } else {
                                 toast.error('Failed to download, please try again');

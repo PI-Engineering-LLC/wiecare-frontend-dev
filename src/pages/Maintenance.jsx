@@ -159,10 +159,10 @@ const {activeClientId} = useClient()
               className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
               onClick={async (e) => {
                 try {
-                  handleSecureView(e, row.inspection_report_key, true)
+                  await handleSecureView(e, row.inspection_report_key, true)
 
                 } catch (error) {
-                  if (error.message === "FILE_MISSING_IN_STORAGE") {
+                  if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                     try {
                       await updateMutation.mutateAsync({ id: row.id, data: { inspection_report_key: null } });
                       const existingDoc = await api.getDs({ file_storage_key: row.inspection_report_key });
@@ -516,10 +516,10 @@ const {activeClientId} = useClient()
                         className="bg-green-700 hover:bg-green-800"
                         onClick={async (e) => {
                           try {
-                            handleSecureView(e, selectedRequest.inspection_report_key, true)
+                            await handleSecureView(e, selectedRequest.inspection_report_key, true)
 
                           } catch (error) {
-                            if (error.message === "FILE_MISSING_IN_STORAGE") {
+                            if (error.message === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
                               try {
                                 await updateMutation.mutateAsync({ id: selectedRequest.id, data: { inspection_report_key: null } });
                                 const existingDoc = await api.getDs({ file_storage_key: selectedRequest.inspection_report_key });
