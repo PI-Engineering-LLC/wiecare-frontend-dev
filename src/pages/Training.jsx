@@ -450,8 +450,10 @@ export default function Training() {
                           {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {format(new Date(req.created_at), 'MMM d, yyyy')}                          </p>
                           {req.preferred_date_1 && (
                             <p className="text-sm text-slate-400 mt-0.5">
-                            Preferred: {format(new Date(req.preferred_date_1), 'MMM d, yyyy')}
-                            {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2), 'MMM d, yyyy')}`}
+                            {/* Preferred: {format(new Date(req.preferred_date_1), 'MMM d, yyyy')} */}
+                            Preferred: {req.preferred_date_1}
+                            {req.preferred_date_2 && ` or ${req.preferred_date_2}`}
+                            {/* {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2), 'MMM d, yyyy')}`} */}
                           </p>
                           )}
                           {req.description && (
