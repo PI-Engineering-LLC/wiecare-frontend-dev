@@ -585,7 +585,7 @@ export default function Training() {
               <Label>Preferred Date 1</Label>
               <Input
                 type="date"
-                value={trainingRequest.preferred_date_1}
+                value={trainingRequest.preferred_date_1 ?? ""}
                 onChange={(e) => setTrainingRequest({...trainingRequest, preferred_date_1: e.target.value})}
                 className="mt-1"
               />
@@ -595,7 +595,7 @@ export default function Training() {
               <Label>Preferred Date 2 (Optional)</Label>
               <Input
                 type="date"
-                value={trainingRequest.preferred_date_2}
+                value={trainingRequest.preferred_date_2 ?? ""}
                 onChange={(e) => setTrainingRequest({...trainingRequest, preferred_date_2: e.target.value})}
                 className="mt-1"
               />
