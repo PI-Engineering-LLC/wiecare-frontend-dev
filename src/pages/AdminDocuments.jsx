@@ -25,6 +25,7 @@ export default function AdminDocuments() {
   const [showDialog, setShowDialog] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const { uploadFileToS3, isUploading } = useUpload();
   const [formData, setFormData] = useState({
     title: '',
@@ -121,34 +122,45 @@ export default function AdminDocuments() {
     }));
   };
 
-  const handleFileUpload = async (e) => {
+  const handleFileSelection = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setUploading(true);
-    try {
-      const file_key = await uploadFileToS3({client_id: formData?.client_id, file});
-      
-      setFormData(prev => ({
-        ...prev,
-        file_storage_key: file_key,
-        file_type: file.type,
-        file_size: file.size
-      }));
-      toast.success('File uploaded');
-    } catch (error) {
-      toast.error('Failed to upload file');
-      setUploading(false);
-    }
-    setUploading(false);
+    setSelectedFile(file);
   };
 
   const handleSubmit = async () => {
-    if (selectedDocument) {
-      await updateMutation.mutateAsync({ id: selectedDocument.id, data: formData });
-    } else {
-      await createMutation.mutateAsync(formData);
+
+    
+
+
+    setUploading(true);
+    let finalFormData = { ...formData };
+    try {
+      if (selectedFile) {
+      const file_key = await uploadFileToS3({ client_id: formData?.client_id, file: selectedFile });
+      finalFormData.file_storage_key = file_key;
+      finalFormData.file_type = selectedFile.type;
+      // finalFormData.file_size = selectedFile.size;
+      // setFormData(prev => ({
+      //   ...prev,
+      //   file_storage_key: file_key,
+      //   file_type: file.type,
+      //   file_size: file.size
+      // }));
+      // toast.success('File uploaded');
+      if (selectedDocument) {
+        await updateMutation.mutateAsync({ id: selectedDocument.id, data: {...finalFormData,file_size:selectedFile.size} });
+      } else {
+        await createMutation.mutateAsync({...finalFormData,file_size:selectedFile.size});
+      }
     }
+    } catch (error) {
+      toast.error('Failed to upload file');
+    }finally {
+      setUploading(false);
+    }
+
+    
   };
 
   const filteredDocuments = documents.filter(doc => {
@@ -299,7 +311,7 @@ export default function AdminDocuments() {
                     </div>
                   ) : (
                     <>
-                      <input type="file" onChange={handleFileUpload} className="hidden" id="doc-upload" disabled={uploading} />
+                      <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
                       <label htmlFor="doc-upload">
                         <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
                           <Upload className="h-5 w-5 text-slate-400" />
