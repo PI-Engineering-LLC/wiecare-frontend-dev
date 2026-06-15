@@ -58,6 +58,7 @@ export default function Courses() {
       } else {
         return api.createCourseProgress(courseId, {
           client_id: activeClientId,
+          course_title: selectedCourse?.title,
           ...data
         });
       }
@@ -129,8 +130,9 @@ export default function Courses() {
       await updateProgressMutation.mutateAsync({
         courseId: course.id,
         data: {
-          status: 'status',
+          status: status,
           started_at: new Date().toISOString(),
+          watch_time_seconds: Math.floor(secondsRef.current),
           last_watched_at: new Date().toISOString(),
           progress_percent: status === 'completed' ? 100 : Math.floor((secondsRef.current / (course.duration_minutes * 60)) * 100),
 
@@ -141,11 +143,13 @@ export default function Courses() {
 
   const handleCompleteCourse = async (course) => {
     setLocalProgress(100);
+    setCurrentSeconds(course.duration_minutes * 60)
     await updateProgressMutation.mutateAsync({
       courseId: course.id,
       data: {
         status: 'completed',
         progress_percent: 100,
+        watch_time_seconds: Math.floor(secondsRef.current),
         completed_at: new Date().toISOString(),
         last_watched_at: new Date().toISOString()
       }
