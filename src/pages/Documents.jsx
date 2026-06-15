@@ -394,7 +394,7 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
                         toast.error('Failed to download, please try again');
                         await updateDocumentMutation.mutateAsync({
                           id: doc.id,
-                          data: { file_storage_key: null, status: 'archived' }
+                          data: { status: 'archived' }
                         });
                       }
                     }
@@ -423,7 +423,7 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
                         try {
                           await updateDocumentMutation.mutateAsync({
                             id: doc.id,
-                            data: { file_storage_key: null, status: 'archived' }
+                            data: { status: 'archived' }
                           });
                         } catch (error) {
                           toast.error('Error occured');
