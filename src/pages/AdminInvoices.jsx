@@ -489,7 +489,8 @@ export default function AdminInvoices() {
                     <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
                       onClick={async (e) => {
                         try {
-                          await handleSecureView(e, selectedInvoice.pdf_storage_key)
+                          const result = await handleSecureView(e, selectedInvoice.pdf_storage_key)
+                          console.log("#######1", result)
 
                         } catch (error) {
                           console.log("#######", error)
