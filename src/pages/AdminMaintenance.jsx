@@ -148,7 +148,7 @@ export default function AdminMaintenance() {
     {
       header: 'Scheduled',
       render: (row) => row.scheduled_date 
-      ? format(new Date(row.scheduled_date), 'MMM d, yyyy') 
+      ? formatInTimeZone(new Date(row.scheduled_date), 'UTC', 'MMM d, yyyy') 
       : 'Not scheduled'
     },
     {
