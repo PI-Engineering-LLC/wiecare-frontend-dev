@@ -15,10 +15,12 @@ export const usePrivateDocument = () => {
     setError(null);
     try {
       const result = await api.getS3FileUrl({ fileKey });
+      
 if (!result?.downloadUrl) {
   const err = new Error('FILE_MISSING_IN_STORAGE');
   err.code = 'FILE_MISSING_IN_STORAGE';
   err.status = 404;
+  console.log("???", result?.ok, err, err.code, err.status)
   throw err;
 }
 const { downloadUrl } = result;
