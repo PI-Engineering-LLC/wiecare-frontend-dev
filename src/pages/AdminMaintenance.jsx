@@ -19,6 +19,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { cn } from "@/lib/utils";
 import { useUpload } from '@/hooks/useUpload';
@@ -109,7 +110,7 @@ export default function AdminMaintenance() {
       id: selectedRequest.id,
       data: {
         ...updateData,
-        scheduled_date: updateData.scheduled_date ? format(updateData.scheduled_date, 'yyyy-MM-dd') : null,
+        scheduled_date: updateData.scheduled_date ? formatInTimeZone(updateData.scheduled_date, 'UTC', 'yyyy-MM-dd') : null,
         ...(reportStorageKey && { inspection_report_key: reportStorageKey })
       }
     });
