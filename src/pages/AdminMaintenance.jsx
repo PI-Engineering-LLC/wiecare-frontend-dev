@@ -18,7 +18,6 @@ import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { cn } from "@/lib/utils";
@@ -93,7 +92,7 @@ export default function AdminMaintenance() {
 
       // Also store in Documents entity for the client
       await api.createD({
-        title: `Inspection Report - ${selectedRequest.client_name} - ${format(new Date(), 'MMM d, yyyy')}`,
+        title: `Inspection Report - ${selectedRequest.client_name} - ${formatInTimeZone(new Date(), 'UTC', 'MMM d, yyyy')}`,
         description: `Inspection report for ${selectedRequest.title}`,
         category: 'inspection_report',
         coaster_name: selectedRequest.coaster_name || 'General',
@@ -269,7 +268,7 @@ export default function AdminMaintenance() {
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1 
-                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedRequest.preferred_date_1), 'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -277,7 +276,7 @@ export default function AdminMaintenance() {
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2 
-                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedRequest.preferred_date_2), 'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -312,7 +311,7 @@ export default function AdminMaintenance() {
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {updateData.scheduled_date 
-                          ? format(updateData.scheduled_date, 'PPP')
+                          ? formatInTimeZone(updateData.scheduled_date,'UTC', 'PPP')
                           : 'Select date'}
                       </Button>
                     </PopoverTrigger>

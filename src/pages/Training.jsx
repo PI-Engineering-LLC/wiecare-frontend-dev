@@ -16,7 +16,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 import { useAuth } from '@/lib/AuthContext';
@@ -106,7 +106,7 @@ export default function Training() {
       user_email: user.email,
       client_id: activeClientId,
       status: 'registered',
-      registration_date: format(new Date(), 'yyyy-MM-dd')
+      registration_date: formatInTimeZone(new Date(),'UTC', 'yyyy-MM-dd')
     });
   };
 
@@ -262,7 +262,7 @@ export default function Training() {
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2 text-sm text-slate-600">
                           <Calendar className="h-4 w-4" />
-                          <span>{format(new Date(training.session_date), 'EEEE, MMMM d, yyyy')}</span>
+                          <span>{formatInTimeZone(new Date(training.session_date),'UTC', 'EEEE, MMMM d, yyyy')}</span>
                         </div>
                         {training.start_time && (
                           <div className="flex items-center gap-2 text-sm text-slate-600">
@@ -347,7 +347,7 @@ export default function Training() {
                           <p className="font-semibold text-slate-900">{reg.training_title}</p>
                           <p className="text-sm text-slate-500">
                             {training?.session_date 
-                              ? format(new Date(training.session_date), 'MMM d, yyyy')
+                              ? formatInTimeZone(new Date(training.session_date),'UTC', 'MMM d, yyyy')
                               : 'Date TBD'}
                             {training?.start_time && ` at ${training.start_time}`}
                           </p>
@@ -392,7 +392,7 @@ export default function Training() {
                         <p className="font-semibold text-slate-900">{reg.training_title}</p>
                         <p className="text-sm text-slate-500">
                           Completed on {reg.completion_date 
-                            ? format(new Date(reg.completion_date), 'MMM d, yyyy')
+                            ? formatInTimeZone(new Date(reg.completion_date),'UTC', 'MMM d, yyyy')
                             : 'N/A'}
                         </p>
                       </div>
@@ -447,13 +447,13 @@ export default function Training() {
                         <div>
                           <p className="font-semibold text-slate-900 capitalize">{req.training_type?.replace(/_/g, ' ')} Training</p>
                           <p className="text-sm text-slate-500 mt-0.5">
-                          {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {format(new Date(req.created_at), 'MMM d, yyyy')}                          </p>
+                          {req.number_of_participants} participant{req.number_of_participants !== 1 ? 's' : ''} · Submitted {formatInTimeZone(new Date(req.created_at),'UTC', 'MMM d, yyyy')}                          </p>
                           {req.preferred_date_1 && (
                             <p className="text-sm text-slate-400 mt-0.5">
-                            {/* Preferred: {format(new Date(req.preferred_date_1), 'MMM d, yyyy')} */}
-                            Preferred: {req.preferred_date_1}
-                            {req.preferred_date_2 && ` or ${req.preferred_date_2}`}
-                            {/* {req.preferred_date_2 && ` or ${format(new Date(req.preferred_date_2), 'MMM d, yyyy')}`} */}
+                            Preferred: {formatInTimeZone(new Date(req.preferred_date_1),'UTC', 'MMM d, yyyy')}
+                            {/* Preferred: {req.preferred_date_1} */}
+                            {/* {req.preferred_date_2 && ` or ${req.preferred_date_2}`} */}
+                            {req.preferred_date_2 && ` or ${formatInTimeZone(new Date(req.preferred_date_2),'UTC', 'MMM d, yyyy')}`}
                           </p>
                           )}
                           {req.description && (
@@ -490,7 +490,7 @@ export default function Training() {
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    <span>{format(new Date(selectedTraining.session_date), 'EEEE, MMMM d, yyyy')}</span>
+                    <span>{formatInTimeZone(new Date(selectedTraining.session_date),'UTC', 'EEEE, MMMM d, yyyy')}</span>
                   </div>
                   {selectedTraining.start_time && (
                     <div className="flex items-center gap-2 text-sm">

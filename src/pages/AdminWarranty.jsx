@@ -16,7 +16,7 @@ import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { PublicImage } from '@/components/PublicImage';
 import { PrivateImageLink } from '@/components/PrivateImageLink';
@@ -53,7 +53,7 @@ export default function AdminWarranty() {
     const valid = isAfter(expiry, new Date());
     return {
       valid,
-      label: valid ? `Valid until ${format(expiry, 'MMM d, yyyy')}` : `Expired`,
+      label: valid ? `Valid until ${formatInTimeZone(expiry,'UTC', 'MMM d, yyyy')}` : `Expired`,
       color: valid ? 'text-emerald-600' : 'text-rose-600'
     };
   };
@@ -80,7 +80,7 @@ export default function AdminWarranty() {
   const handleUpdate = async () => {
     const data = { ...updateData };
     if (updateData.status === 'resolved') {
-      data.resolved_date = format(new Date(), 'yyyy-MM-dd');
+      data.resolved_date = formatInTimeZone(new Date(), 'UTC', 'yyyy-MM-dd');
     }
     await updateMutation.mutateAsync({ id: selectedClaim.id, data });
   };
@@ -90,7 +90,7 @@ export default function AdminWarranty() {
       id: claim.id,
       data: {
         status,
-        resolved_date: status === 'resolved' ? format(new Date(), 'yyyy-MM-dd') : null
+        resolved_date: status === 'resolved' ? formatInTimeZone(new Date(),'UTC', 'yyyy-MM-dd') : null
       }
     });
   };
@@ -134,7 +134,7 @@ export default function AdminWarranty() {
     },
     {
       header: 'Submitted',
-      render: (row) => format(new Date(row.created_at), 'MMM d, yyyy')
+      render: (row) => formatInTimeZone(new Date(row.created_at),'UTC', 'MMM d, yyyy')
     },
     {
       header: 'Status',
@@ -263,7 +263,7 @@ export default function AdminWarranty() {
                     <p className="text-sm text-slate-500">Purchase Date</p>
                     <p className="font-semibold">
                       {selectedClaim.purchase_date
-                      ? format(new Date(selectedClaim.purchase_date), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedClaim.purchase_date),'UTC', 'MMM d, yyyy')
                       : '-'}
                     </p>
                   </div>

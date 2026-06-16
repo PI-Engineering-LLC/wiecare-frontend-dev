@@ -13,7 +13,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import { PublicImage } from '@/components/PublicImage';
@@ -227,7 +227,7 @@ export default function Quotes() {
     },
     {
       header: 'Valid Until',
-      render: (row) => row.valid_until ? format(new Date(row.valid_until), 'MMM d, yyyy') : '-'
+      render: (row) => row.valid_until ? formatInTimeZone(new Date(row.valid_until),'UTC', 'MMM d, yyyy') : '-'
     },
     {
       header: 'Status',
@@ -361,7 +361,7 @@ export default function Quotes() {
                       <p className="text-sm text-slate-500 truncate">{req.description}</p>
                     )}
                     <p className="text-xs text-slate-400 mt-0.5">
-                    Submitted {req.created_at ? format(new Date(req.created_at), 'MMM d, yyyy') : ''}
+                    Submitted {req.created_at ? formatInTimeZone(new Date(req.created_at),'UTC', 'MMM d, yyyy') : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -532,7 +532,7 @@ export default function Quotes() {
                   <p className="text-sm text-slate-500">Valid Until</p>
                   <p className="font-medium">
                     {selectedQuote.valid_until
-                      ? format(new Date(selectedQuote.valid_until), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedQuote.valid_until),'UTC', 'MMM d, yyyy')
                       : 'Not specified'}
                   </p>
                 </div>

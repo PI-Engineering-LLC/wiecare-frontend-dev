@@ -16,7 +16,8 @@ import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
 import WiegandSportsForm from '@/components/invoices/WiegandSportsForm';
 import WiegandServicesForm from '@/components/invoices/WiegandServicesForm';
-import { format, differenceInDays } from 'date-fns';
+import { differenceInDays } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
@@ -30,8 +31,8 @@ const DEFAULT_FORM = (entity = 'Wiegand Sports Gmbh') => ({
   order_id: '',
   title: '',
   invoice_number: '',
-  issue_date: format(new Date(), 'yyyy-MM-dd'),
-  due_date: format(new Date(), 'yyyy-MM-dd'),
+  issue_date: null,
+  due_date: null,
   po_number: '',
   tax_code: '',
   tax_rate: 19,
@@ -59,7 +60,7 @@ export default function AdminInvoices() {
     amount: '',
     method: 'wire',
     reference: '',
-    date: format(new Date(), 'yyyy-MM-dd')
+    date: formatInTimeZone(new Date(),'UTC', 'yyyy-MM-dd')
   });
   const [pdfFile, setPdfFile] = useState(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -172,8 +173,8 @@ export default function AdminInvoices() {
       client_id: invoice.client_id || '',
       title: invoice.title || '',
       invoice_number: invoice.invoice_number || '',
-      issue_date: invoice.issue_date || format(new Date(), 'yyyy-MM-dd'),
-      due_date: invoice.due_date || format(new Date(), 'yyyy-MM-dd'),
+      issue_date: invoice.issue_date || null,
+      due_date: invoice.due_date || null,
       po_number: invoice.po_number || '',
       order_id: invoice.order_id || '',
       tax_code: invoice.tax_code || '',
@@ -291,7 +292,7 @@ export default function AdminInvoices() {
 
   const handleRecordPayment = (invoice) => {
     setSelectedInvoice(invoice);
-    setPaymentData({ amount: invoice.balance_due || invoice.total_amount || '', method: 'wire', reference: '', date: format(new Date(), 'yyyy-MM-dd') });
+    setPaymentData({ amount: invoice.balance_due || invoice.total_amount || '', method: 'wire', reference: '', date: formatInTimeZone(new Date(),'UTC', 'yyyy-MM-dd') });
     setShowPaymentDialog(true);
   };
 
@@ -334,8 +335,8 @@ export default function AdminInvoices() {
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
     { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0).toLocaleString()}</span> },
-    { header: 'Date', render: (row) => row.issue_date ? format(new Date(row.issue_date), 'MMM d, yyyy') : '-' },
-    { header: 'Due', render: (row)  => row.due_date ? format(new Date(row.due_date), 'MMM d, yyyy') : '-' },
+    { header: 'Date', render: (row) => row.issue_date ? formatInTimeZone(new Date(row.issue_date),'UTC', 'MMM d, yyyy') : '-' },
+    { header: 'Due', render: (row)  => row.due_date ? formatInTimeZone(new Date(row.due_date), 'UTC', 'MMM d, yyyy') : '-' },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'Actions',

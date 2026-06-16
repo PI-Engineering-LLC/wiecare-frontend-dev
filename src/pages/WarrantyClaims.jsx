@@ -14,7 +14,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
@@ -175,11 +175,11 @@ export default function WarrantyClaims() {
     },
     {
       header: 'Purchase Date',
-      render: (row) => row.purchase_date ? format(new Date(row.purchase_date), 'MMM d, yyyy') : '-'
+      render: (row) => row.purchase_date ? formatInTimeZone(new Date(row.purchase_date),'UTC', 'MMM d, yyyy') : '-'
     },
     {
       header: 'Submitted',
-      render: (row) => format(new Date(row.created_at), 'MMM d, yyyy')
+      render: (row) => formatInTimeZone(new Date(row.created_at),'UTC', 'MMM d, yyyy')
     },
     {
       header: 'Status',
@@ -429,7 +429,7 @@ export default function WarrantyClaims() {
                   <p className="text-sm text-slate-500">Purchase Date</p>
                   <p className="font-medium">
                     {selectedClaim.purchase_date 
-                      ? format(new Date(selectedClaim.purchase_date), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedClaim.purchase_date),'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>

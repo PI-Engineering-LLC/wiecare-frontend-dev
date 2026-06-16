@@ -15,7 +15,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import PageHeader from '@/components/shared/PageHeader';
 import DataTable from '@/components/shared/DataTable';
 import EmptyState from '@/components/shared/EmptyState';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext'; 
 import { Switch } from '@/components/ui/switch';

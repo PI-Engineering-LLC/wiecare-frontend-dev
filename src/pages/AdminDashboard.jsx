@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function AdminDashboard() {
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                   <div key={invoice.id} className="flex items-center justify-between p-3 bg-rose-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{invoice.client_name}</p>
-                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? format(new Date(invoice.due_date), 'MMM d, yyyy') : 'N/A'}</p>
+                      <p className="text-sm text-slate-500">Due: {invoice.due_date ? formatInTimeZone(new Date(invoice.due_date),'UTC', 'MMM d, yyyy') : 'N/A'}</p>
                     </div>
                     <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString() || invoice.total_amount?.toLocaleString()}</p>
                   </div>

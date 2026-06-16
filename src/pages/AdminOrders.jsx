@@ -14,7 +14,7 @@ import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
 import MasterOrderDetail from '@/components/orders/MasterOrderDetail';
 import SplitOrderDialog from '@/components/orders/SplitOrderDialog';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 
 export default function AdminOrders() {
@@ -78,7 +78,7 @@ export default function AdminOrders() {
     },
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
-    { header: 'Date', render: (row) => format(new Date(row.created_at), 'MMM d, yyyy') },
+    { header: 'Date', render: (row) => formatInTimeZone(new Date(row.created_at),'UTC', 'MMM d, yyyy') },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
     {
       header: 'Actions',

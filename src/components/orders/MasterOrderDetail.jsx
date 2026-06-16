@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import StatusBadge from '@/components/shared/StatusBadge';
 import SubOrderPanel from './SubOrderPanel';
 import { ShoppingCart, Package, CheckCircle2, Scissors, Truck, Send } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 
 const STATUS_STEPS = ['pending', 'partially_processing', 'partially_shipped', 'completed'];
@@ -91,7 +91,7 @@ export default function MasterOrderDetail({ order, open, onClose, isAdmin, onSpl
           <div className="grid grid-cols-3 gap-4 bg-slate-50 rounded-xl p-4">
             <div>
               <p className="text-xs text-slate-500">Order Date</p>
-              <p className="font-semibold text-sm">{order.created_at ? format(new Date(order.created_at), 'MMM d, yyyy') : '—'}</p>
+              <p className="font-semibold text-sm">{order.created_at ? formatInTimeZone(new Date(order.created_at), "UTC", 'MMM d, yyyy') : '—'}</p>
             </div>
             <div>
               <p className="text-xs text-slate-500">Total Amount</p>

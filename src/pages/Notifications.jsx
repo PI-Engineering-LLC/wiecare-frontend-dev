@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
 
@@ -203,7 +203,7 @@ function NotificationList({ notifications, onMarkRead, onDelete, getTypeIcon, ge
                         {notification.category}
                       </span>
                       <span className="text-xs text-slate-400">
-                      {notification.created_at ? format(new Date(notification.created_at), 'MMM d, yyyy • h:mm a') :  '—' }
+                      {notification.created_at ? formatInTimeZone(new Date(notification.created_at),'UTC', 'MMM d, yyyy • h:mm a') :  '—' }
                       </span>
                     </div>
                   </div>

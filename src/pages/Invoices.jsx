@@ -13,7 +13,7 @@ import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
@@ -71,7 +71,7 @@ export default function Invoices() {
     const newBalance = selectedInvoice.total_amount - newAmountPaid;
     
     const paymentHistory = [...(selectedInvoice.payment_history || []), {
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: formatInTimeZone(new Date(),'UTC', 'yyyy-MM-dd'),
       amount,
       method: 'online',
       reference: `PAY-${Date.now()}`
@@ -153,7 +153,7 @@ export default function Invoices() {
     },
     {
       header: 'Due Date',
-      render: (row) => row.due_date ? format(new Date(row.due_date), 'MMM d, yyyy') : '-'
+      render: (row) => row.due_date ? formatInTimeZone(new Date(row.due_date),'UTC', 'MMM d, yyyy') : '-'
     },
     {
       header: 'Status',
@@ -262,7 +262,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Issue Date</p>
                   <p className="font-medium">
                     {selectedInvoice.issue_date 
-                      ? format(new Date(selectedInvoice.issue_date), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedInvoice.issue_date),'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -270,7 +270,7 @@ export default function Invoices() {
                   <p className="text-sm text-slate-500">Due Date</p>
                   <p className="font-medium">
                     {selectedInvoice.due_date 
-                      ? format(new Date(selectedInvoice.due_date), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedInvoice.due_date),'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -321,7 +321,7 @@ export default function Invoices() {
                       <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
                         <div>
                           <p className="font-medium text-emerald-800">{payment.reference}</p>
-                          <p className="text-sm text-emerald-600">{format(new Date(payment.date), 'MMM d, yyyy')}</p>
+                          <p className="text-sm text-emerald-600">{formatInTimeZone(new Date(payment.date),'UTC', 'MMM d, yyyy')}</p>
                         </div>
                         <p className="font-semibold text-emerald-700">${payment.amountPaid?.toLocaleString()}</p>
                       </div>

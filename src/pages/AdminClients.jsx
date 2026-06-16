@@ -17,7 +17,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 
 export default function AdminClients() {
@@ -116,7 +116,7 @@ export default function AdminClients() {
     const expiry = addYears(start, years);
     const isValid = isAfter(expiry, new Date());
     return {
-      label: isValid ? `Valid until ${format(expiry, 'MMM d, yyyy')}` : `Expired ${format(expiry, 'MMM d, yyyy')}`,
+      label: isValid ? `Valid until ${formatInTimeZone(expiry,'UTC', 'MMM d, yyyy')}` : `Expired ${formatInTimeZone(expiry,'UTC', 'MMM d, yyyy')}`,
       color: isValid ? 'text-emerald-600' : 'text-rose-600',
       valid: isValid,
       expiry
@@ -481,7 +481,7 @@ export default function AdminClients() {
                        <p className="text-xs text-slate-500 mt-1">
                        {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : 'Pro: 2 year warranty'}
                        {' — '}expires{' '}
-                       {format(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 2), 'MMM d, yyyy')}
+                       {formatInTimeZone(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 2),'UTC', 'MMM d, yyyy')}
                        </p>
                     )}
                   </div>

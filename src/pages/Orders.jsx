@@ -11,7 +11,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
 import MasterOrderDetail from '@/components/orders/MasterOrderDetail';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
 
@@ -67,7 +67,7 @@ export default function Orders() {
       )
     },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '-'}</span> },
-    { header: 'Date', render: (row) => row.created_at ? format(new Date(row.created_at), 'MMM d, yyyy')  : '—' },
+    { header: 'Date', render: (row) => row.created_at ? formatInTimeZone(new Date(row.created_at),'UTC', 'MMM d, yyyy')  : '—' },
     { header: 'Status', render: (row) => <StatusBadge status={getDisplayStatus(row)} /> },
     {
       header: 'Tracking',

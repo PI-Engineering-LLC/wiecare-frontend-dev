@@ -17,7 +17,7 @@ import DataTable from '@/components/shared/DataTable';
 import StatusBadge from '@/components/shared/StatusBadge';
 import StatsCard from '@/components/shared/StatsCard';
 import EmptyState from '@/components/shared/EmptyState';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { cn } from "@/lib/utils";
 import { useClient } from '@/lib/ClientContext';
@@ -102,8 +102,8 @@ const {activeClientId} = useClient()
       client_id: activeClientId,
       status: 'pending',
       request_number: `MR-${Date.now()}`,
-      preferred_date_1: newRequest.preferred_date_1 ? format(newRequest.preferred_date_1, 'yyyy-MM-dd') : null,
-      preferred_date_2: newRequest.preferred_date_2 ? format(newRequest.preferred_date_2, 'yyyy-MM-dd') : null,
+      preferred_date_1: newRequest.preferred_date_1 ? formatInTimeZone(newRequest.preferred_date_1,'UTC', 'yyyy-MM-dd') : null,
+      preferred_date_2: newRequest.preferred_date_2 ? formatInTimeZone(newRequest.preferred_date_2,'UTC', 'yyyy-MM-dd') : null,
     });
   };
 
@@ -141,7 +141,7 @@ const {activeClientId} = useClient()
     {
       header: 'Scheduled Date',
       render: (row) => row.scheduled_date 
-      ? format(new Date(row.scheduled_date), 'MMM d, yyyy') 
+      ? formatInTimeZone(new Date(row.scheduled_date),'UTC', 'MMM d, yyyy') 
       : 'Pending'
     },
     {
@@ -357,7 +357,7 @@ const {activeClientId} = useClient()
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {newRequest.preferred_date_1 
-                        ? format(newRequest.preferred_date_1, 'PPP')
+                        ? formatInTimeZone(newRequest.preferred_date_1,'UTC', 'PPP')
                         : 'Select date'}
                     </Button>
                   </PopoverTrigger>
@@ -384,7 +384,7 @@ const {activeClientId} = useClient()
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {newRequest.preferred_date_2 
-                        ? format(newRequest.preferred_date_2, 'PPP')
+                        ? formatInTimeZone(newRequest.preferred_date_2,'UTC', 'PPP')
                         : 'Select date'}
                     </Button>
                   </PopoverTrigger>
@@ -466,7 +466,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 1</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_1 
-                      ? format(new Date(selectedRequest.preferred_date_1), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedRequest.preferred_date_1),'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -474,7 +474,7 @@ const {activeClientId} = useClient()
                   <p className="text-sm text-slate-500">Preferred Date 2</p>
                   <p className="font-medium">
                     {selectedRequest.preferred_date_2 
-                      ? format(new Date(selectedRequest.preferred_date_2), 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedRequest.preferred_date_2),'UTC', 'MMM d, yyyy')
                       : '-'}
                   </p>
                 </div>
@@ -484,7 +484,7 @@ const {activeClientId} = useClient()
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-600 font-medium">Scheduled Date</p>
                   <p className="text-lg font-bold text-blue-800">
-                  {format(new Date(selectedRequest.scheduled_date), 'MMMM d, yyyy')}
+                  {formatInTimeZone(new Date(selectedRequest.scheduled_date),'UTC', 'MMMM d, yyyy')}
                   </p>
                 </div>
               )}

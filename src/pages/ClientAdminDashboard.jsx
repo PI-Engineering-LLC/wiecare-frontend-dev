@@ -20,7 +20,7 @@ import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useClient } from '@/lib/ClientContext';
 import { usePermission } from '@/hooks/usePermission'; 
 import { useClientRoles } from '@/hooks/useClientRoles'; 
@@ -291,7 +291,7 @@ export default function ClientAdminDashboard() {
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-slate-900 truncate">{inv.invoice_number || inv.title}</p>
                       <p className="text-xs text-slate-500">
-                      {inv.due_date ? format(new Date(inv.due_date), 'MMM d, yyyy') : 'No due date'}
+                      {inv.due_date ? formatInTimeZone(new Date(inv.due_date),'UTC', 'MMM d, yyyy') : 'No due date'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
