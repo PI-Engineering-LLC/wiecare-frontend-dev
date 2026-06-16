@@ -44,8 +44,12 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
   }
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || 'Request failed');
+    // const err = await res.json().catch(() => ({ error: res.statusText }));
+    // throw new Error(err.error || 'Request failed');
+    const errBody = await res.json().catch(() => ({ error: res.statusText }));
+  const err = new Error(errBody.error || 'Request failed');
+  err.statusCode = res.status; // Attach the numeric status (e.g., 404)
+  throw err;
   }
   return res.json();
 };
