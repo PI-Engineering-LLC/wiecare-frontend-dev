@@ -212,7 +212,7 @@ export default function AdminInvoices() {
     let pdf_storage_key = selectedInvoice?.pdf_storage_key || undefined;
     console.log("pdfFile",pdfFile)
     if (pdfFile) {
-      console.log("pdfFile",pdfFile)
+      console.log("pdfFile2",pdfFile)
       setUploadingPdf(true);
       const file_key = await uploadFileToS3({client_id: client?.id, file: pdfFile, type:'invoice'});
       pdf_storage_key = file_key;
@@ -274,6 +274,7 @@ export default function AdminInvoices() {
         });
       }
     }}catch(error){
+      console.log(error)
       toast.error('Failed to upload file');
       setUploadingPdf(false);
     }
