@@ -48,9 +48,9 @@ const { downloadUrl } = result;
       console.error('Failed to view secure document:', err);
       setError(err.message);
       alert(err.message);
-      err.code = 'FILE_MISSING_IN_STORAGE';
-      err.status = 404;
-      console.log("???", err)
+      // err.code = 'FILE_MISSING_IN_STORAGE';
+      // // err.status = 404;
+      // console.log("???", err)
       throw err;
     } finally {
       setLoadingKey(null);
