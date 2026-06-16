@@ -18,9 +18,7 @@ export const usePrivateDocument = () => {
       
 if (!result?.downloadUrl) {
   const err = new Error('FILE_MISSING_IN_STORAGE');
-  err.code = 'FILE_MISSING_IN_STORAGE';
-  err.status = 404;
-  console.log("???", result?.ok, err, err.code, err.status)
+  console.log("???", result, result?.ok, err)
   throw err;
 }
 const { downloadUrl } = result;
