@@ -371,7 +371,7 @@ export default function AdminMaintenance() {
                               await handleSecureView(e, selectedRequest.inspection_report_key)
 
                             } catch (error) {
-                              if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                              if (error.message === "FILE_MISSING_IN_STORAGE") {
                                 try {
                                   await updateMutation.mutateAsync({ id: selectedRequest.id, data: { inspection_report_key: null } });
                                   const existingDoc = await api.getDs({ invoice_id: selectedRequest.id });
