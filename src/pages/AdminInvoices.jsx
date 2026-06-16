@@ -91,7 +91,7 @@ export default function AdminInvoices() {
     mutationFn: async (data) => {
       const invoice = await api.createInvoice(data);
       if (data.order_id) {
-        await api.updateInvoice(data.order_id, { status: 'invoiced' });
+        await api.updateInvoice( invoice.id,  { order_id: data.order_id,status: 'invoiced' });
         queryClient.invalidateQueries({ queryKey: ['admin-orders']});
       }
       return invoice;
@@ -210,9 +210,7 @@ export default function AdminInvoices() {
     const { subtotal, total_amount, sales_tax } = calculateTotals();
 
     let pdf_storage_key = selectedInvoice?.pdf_storage_key || undefined;
-    console.log("pdfFile",pdfFile)
     if (pdfFile) {
-      console.log("pdfFile2",pdfFile)
       setUploadingPdf(true);
       const file_key = await uploadFileToS3({client_id: client?.id, file: pdfFile, type:'invoice'});
       pdf_storage_key = file_key;
@@ -274,8 +272,7 @@ export default function AdminInvoices() {
         });
       }
     }}catch(error){
-      console.log(error)
-      toast.error('Failed to upload file');
+      toast.error('Error occured');
       setUploadingPdf(false);
     }
   };
