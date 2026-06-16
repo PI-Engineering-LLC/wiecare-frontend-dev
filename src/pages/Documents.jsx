@@ -383,19 +383,24 @@ function DocumentGrid({ documents, getFileIcon, formatFileSize, updateDocumentMu
                 <a
                   href={"#view"}
 
-                  onClick={async(e) => {
+                  onClick={async (e) => {
                     try {
                       await handleSecureView(e, doc.file_storage_key)
 
                     } catch (error) {
-                      if (error.code === "FILE_MISSING_IN_STORAGE") {
+                      if (error.message === "FILE_MISSING_IN_STORAGE") {
                         toast.error('File Not Found');
+                        try {
+                          await updateDocumentMutation.mutateAsync({
+                            id: doc.id,
+                            data: { status: 'archived' }
+                          });
+                        } catch (error) {
+                          toast.error('Error occured');
+                        }
                       } else {
                         toast.error('Failed to download, please try again');
-                        await updateDocumentMutation.mutateAsync({
-                          id: doc.id,
-                          data: { status: 'archived' }
-                        });
+
                       }
                     }
 

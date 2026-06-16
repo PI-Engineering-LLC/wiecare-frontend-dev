@@ -162,7 +162,7 @@ const {activeClientId} = useClient()
                   await handleSecureView(e, row.inspection_report_key, true)
 
                 } catch (error) {
-                  if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                  if (error.message === "FILE_MISSING_IN_STORAGE") {
                     try {
                       await updateMutation.mutateAsync({ id: row.id, data: { inspection_report_key: null } });
                       const existingDoc = await api.getDs({ file_storage_key: row.inspection_report_key });
@@ -519,7 +519,7 @@ const {activeClientId} = useClient()
                             await handleSecureView(e, selectedRequest.inspection_report_key, true)
 
                           } catch (error) {
-                            if (error.code === "FILE_MISSING_IN_STORAGE" || error.status === 404) {
+                            if (error.message === "FILE_MISSING_IN_STORAGE") {
                               try {
                                 await updateMutation.mutateAsync({ id: selectedRequest.id, data: { inspection_report_key: null } });
                                 const existingDoc = await api.getDs({ file_storage_key: selectedRequest.inspection_report_key });

@@ -15,14 +15,6 @@ export const usePrivateDocument = () => {
     setError(null);
     try {
       const result = await api.getS3FileUrl({ fileKey });
-      
-// if (!result?.downloadUrl) {
-//   const err = new Error('FILE_MISSING_IN_STORAGE');
-//   err.code = 'FILE_MISSING_IN_STORAGE';
-//   err.status = 404;
-//   console.log("???", result, result?.ok, err)
-//   throw err;
-// }
 const { downloadUrl } = result;
       if (download) {
         const response = await fetch(downloadUrl);
@@ -47,10 +39,6 @@ const { downloadUrl } = result;
     }catch (err) {
       console.error('Failed to view secure document:', err);
       setError(err.message);
-      alert(err.message);
-      // err.code = 'FILE_MISSING_IN_STORAGE';
-      // // err.status = 404;
-      // console.log("???", err)
       throw err;
     } finally {
       setLoadingKey(null);
