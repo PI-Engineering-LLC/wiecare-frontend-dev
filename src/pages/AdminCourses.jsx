@@ -411,7 +411,7 @@ export default function AdminCourses() {
               <div className="col-span-2">
                 <Label>Thumbnail</Label>
                 <div className="mt-1 flex items-center gap-4">
-                  {selectedThumbnail && (
+                  {selectedThumbnail  && previewURL && (
                     <div  className="relative group">
                     <img src={previewURL} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
                     <button
