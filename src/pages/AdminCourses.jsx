@@ -415,7 +415,7 @@ export default function AdminCourses() {
                             setSelectedThumbnail(null);
                             if(previewURL){
                               URL.revokeObjectURL(previewURL);
-                              setPreviewURL(null);
+                              // setPreviewURL(null);
 
                             }
                            
