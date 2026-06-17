@@ -160,25 +160,27 @@ export default function AdminCourses() {
 
   const handleSubmit = async () => {
     setUploading(true);
-    let finalFormData = { ...formData };
+   
     try {
       
       if (selectedThumbnail) {
         const file_key = await uploadFileToS3({file: selectedThumbnail, type: selectedThumbnail.type, isPrivate: false});
-        finalFormData.thumbnail_storage_key= file_key;
+        formData.thumbnail_storage_key= file_key;
         toast.success(`Thumbnail uploaded`);
       } 
        if (selectedVideo) {
         const file_key = await uploadFileToS3({file: selectedVideo, type: selectedVideo.type});
-        finalFormData.video_storage_key= file_key;
+        formData.video_storage_key= file_key;
+        //setFormData(prev => ({ ...prev, video_storage_key: file_key }));
         toast.success(`Video uploaded`);
+        console.log(`Video uploaded`);
       }    
 
 
     if (selectedCourse) {
-      await updateMutation.mutateAsync({ id: selectedCourse.id, data: finalFormData });
+      await updateMutation.mutateAsync({ id: selectedCourse.id, data: formData });
     } else {
-      await createMutation.mutateAsync(finalFormData);
+      await createMutation.mutateAsync(formData);
     }} catch (error) {
       toast.error('Failed to upload file');
       setUploading(false);
