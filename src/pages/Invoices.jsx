@@ -166,6 +166,42 @@ export default function Invoices() {
       header: '',
       render: (row) => (
         <div className="flex items-center gap-2">
+          { row.pdf_storage_key && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
+                        onClick={async (e) => {
+                          try {
+                            await handleSecureView(e, row.pdf_storage_key, true)
+          
+                          } catch (error) {
+                            if (error.message === "FILE_MISSING_IN_STORAGE") {
+                              try {
+                                await updateInvoiceMutation.mutateAsync({ id: row.id, data: { pdf_storage_key: null } });
+                                const existingDoc = await api.getDs({ invoice_id: row.id });
+                                if (existingDoc.length > 0) {
+                                  await api.updateD(existingDoc.id, { status: 'archived' })
+                                }
+                              } catch (error) {
+                                toast.error('Error occured');
+                              }
+    
+                              toast.error('File Not Found');
+                            } else {
+                              toast.error('Failed to download, please try again!');
+                            }
+                          }
+          
+                        }
+          
+                        }
+                      >
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        {currentlyLoadingKey === row.pdf_storage_key? 'Authorizing Access...' :'Report'}
+                        
+                      </Button>
+                    )}
           <Button
             variant="ghost"
             size="icon"
@@ -316,13 +352,25 @@ export default function Invoices() {
               )}
               {/** View uploaded pdf if existing */}
               {selectedInvoice?.pdf_storage_key && (
-                <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <FileText className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-700 flex-1">PDF already uploaded</span>
-                  <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
-                    onClick={async (e) => {
+                <div className={`p-4 rounded-lg border ${selectedInvoice.pdf_storage_key ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2"> 
+                      <FileText className={`h-4 w-4 ${selectedInvoice.pdf_storage_key ? 'text-green-600' : 'text-amber-500'}`} />
+                  </div>
+                  <div>
+                        <p className={`text-sm font-medium ${selectedInvoice.pdf_storage_key? 'text-green-800' : 'text-amber-800'}`}>
+                          Invoice
+                        </p>
+                        <p className={`text-xs ${selectedInvoice.pdf_storage_key? 'text-green-600' : 'text-amber-600'}`}>
+                          {selectedInvoice.pdf_storage_key? 'Invoice pdf attached' : 'no pdf attached'}
+                        </p>
+                      </div>
+                  <Button 
+                        size="sm"
+                        className="bg-green-700 hover:bg-green-800"
+                         onClick={async (e) => {
                       try {
-                        const result = await handleSecureView(e, selectedInvoice.pdf_storage_key)
+                        const result = await handleSecureView(e, selectedInvoice.pdf_storage_key, true)
                       } catch (error) {
                         if (error.message === "FILE_MISSING_IN_STORAGE") {
                           try {
@@ -342,7 +390,9 @@ export default function Invoices() {
                       }
 
                     }}>
-                    <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedInvoice.pdf_storage_key ? 'Authorizing Access...' : 'View'}</a></Button>
+                    <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedInvoice.pdf_storage_key ? 'Authorizing Access...' : 'Download'}
+                    </Button>
+                </div>
                 </div>
               )
               }
