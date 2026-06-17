@@ -176,9 +176,9 @@ export default function AdminCourses() {
 
 
     if (selectedCourse) {
-      await updateMutation.mutateAsync({ id: selectedCourse.id, data: formData });
+      await updateMutation.mutateAsync({ id: selectedCourse.id, data: finalFormData });
     } else {
-      await createMutation.mutateAsync(formData);
+      await createMutation.mutateAsync(finalFormData);
     }} catch (error) {
       toast.error('Failed to upload file');
       setUploading(false);
