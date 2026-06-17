@@ -198,7 +198,7 @@ export default function Invoices() {
                         }
                       >
                         <Download className="h-3.5 w-3.5 mr-1" />
-                        {currentlyLoadingKey === row.pdf_storage_key? 'Authorizing Access...' :'Report'}
+                        {currentlyLoadingKey === row.pdf_storage_key? 'Authorizing Access...' :'Invoice'}
                         
                       </Button>
                     )}
