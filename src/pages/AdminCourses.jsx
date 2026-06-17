@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
@@ -30,6 +30,7 @@ export default function AdminCourses() {
   const [previewURL, setPreviewURL] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const { uploadFileToS3, isUploading } = useUpload();
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -133,11 +134,6 @@ export default function AdminCourses() {
       return;
     }
     if (type === 'thumbnail') {
-      if(previewURL){
-        URL.revokeObjectURL(previewURL);
-        setPreviewURL(null);
-
-      }
       setSelectedThumbnail(file)
       setPreviewURL(URL.createObjectURL(file))
     } else if (type === 'video') {
@@ -411,19 +407,21 @@ export default function AdminCourses() {
               <div className="col-span-2">
                 <Label>Thumbnail</Label>
                 <div className="mt-1 flex items-center gap-4">
-                  {selectedThumbnail  && previewURL && (
+                  {previewURL && (
                     <div  className="relative group">
                     <img src={previewURL} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
                     <button
                         onClick={() => { 
                           if(selectedThumbnail){
                             setSelectedThumbnail(null);
-                            // if(previewURL){
-                            //   URL.revokeObjectURL(previewURL);
-                            //   setPreviewURL(null);
+                          }
+                          if(previewURL){
+                            URL.revokeObjectURL(previewURL);
+                            setPreviewURL(null);
 
-                            // }
-                           
+                          }
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = ""; 
                           }
                          
                         }}
@@ -439,7 +437,7 @@ export default function AdminCourses() {
                   >
                     <Upload className="h-4 w-4" />
                     Upload Thumbnail
-                    <input type="file" accept="image/*" onChange={(e) => handleFileSelection(e, 'thumbnail')} className="hidden" id="thumbnail-upload" disabled={uploading} />
+                    <input type="file" accept="image/*"  ref={fileInputRef}  onChange={(e) => handleFileSelection(e, 'thumbnail')} className="hidden" id="thumbnail-upload" disabled={uploading} />
                   </label>
                 </div>
               </div>
