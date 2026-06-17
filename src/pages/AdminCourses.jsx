@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, BookOpen, Trash2, Upload, Play } from 'lucide-react';
+import { Plus, Search, Edit2, BookOpen, Trash2, Upload, Play, X } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,9 @@ export default function AdminCourses() {
   const [showDialog, setShowDialog] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedThumbnail, setSelectedThumbnail] = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const { uploadFileToS3, isUploading } = useUpload();
   const [formData, setFormData] = useState({
     title: '',
@@ -109,7 +112,7 @@ export default function AdminCourses() {
     setShowDialog(true);
   };
 
-  const handleFileUpload = async (e, type) => {
+  const handleFileSelection = async (e, type) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -118,30 +121,63 @@ export default function AdminCourses() {
       alert('Please upload an image file.');
       return;
     }
-    setUploading(true);
-    try {
-      
-      if (type === 'thumbnail') {
-        const file_key = await uploadFileToS3({file, type, isPrivate: false});
-        setFormData(prev => ({ ...prev, thumbnail_storage_key: file_key }));
-      } else {
-        const file_key = await uploadFileToS3({file, type});
-        setFormData(prev => ({ ...prev, video_storage_key: file_key }));
-      }
-      toast.success(`${type === 'thumbnail' ? 'Thumbnail' : 'Video'} uploaded`);
-    } catch (error) {
-      toast.error('Failed to upload file');
-      setUploading(false);
+    if (type === 'thumbnail') {
+      setSelectedThumbnail(file)
+      setPreviewURL(URL.createObjectURL(file))
+    }else if (type === 'video'){
+      setSelectedVideo(file)
     }
-    setUploading(false);
+
+    // setUploading(true);
+    // try {
+      
+    //   if (type === 'thumbnail') {
+    //     const file_key = await uploadFileToS3({file, type, isPrivate: false});
+    //     setFormData(prev => ({ ...prev, thumbnail_storage_key: file_key }));
+    //   } else {
+    //     const file_key = await uploadFileToS3({file, type});
+    //     setFormData(prev => ({ ...prev, video_storage_key: file_key }));
+    //   }
+    //   toast.success(`${type === 'thumbnail' ? 'Thumbnail' : 'Video'} uploaded`);
+    // } catch (error) {
+    //   toast.error('Failed to upload file');
+    //   setUploading(false);
+    // }
+    // setUploading(false);
   };
 
   const handleSubmit = async () => {
+    setUploading(true);
+    let finalFormData = { ...formData };
+    try {
+      
+      if (selectedThumbnail) {
+        const file_key = await uploadFileToS3({file: selectedThumbnail, type: selectedThumbnail.type, isPrivate: false});
+        finalFormData.thumbnail_storage_key= file_key;
+        toast.success(`Thumbnail uploaded`);
+      } 
+       if (selectedVideo) {
+        const file_key = await uploadFileToS3({file: selectedVideo, type: selectedVideo.type});
+        finalFormData.video_storage_key= file_key;
+        toast.success(`Video uploaded`);
+      }    
+
+
     if (selectedCourse) {
       await updateMutation.mutateAsync({ id: selectedCourse.id, data: formData });
     } else {
       await createMutation.mutateAsync(formData);
+    }} catch (error) {
+      toast.error('Failed to upload file');
+      setUploading(false);
+    }finally {
+      setUploading(false);
+      setSelectedThumbnail(null);
+      setSelectedVideo(null);
+      URL.revokeObjectURL(previewURL);
+      setPreviewURL(null);
     }
+
   };
    const handleThumbnailError = async (courseId, error) => {
       console.log(`Retrieving theumbnail for ${courseId} failed:`, error);
@@ -359,8 +395,16 @@ export default function AdminCourses() {
               <div className="col-span-2">
                 <Label>Thumbnail</Label>
                 <div className="mt-1 flex items-center gap-4">
-                  {formData.thumbnail_storage_key && (
-                    <PublicImage docKey={formData.thumbnail_storage_key} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
+                  {previewURL && (
+                    <div  className="relative group">
+                    <img src={previewURL} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
+                    <button
+                        onClick={() => URL.revokeObjectURL(previewURL)}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      </div>
                   )}
                   <label
                     htmlFor="thumbnail-upload"
@@ -368,14 +412,14 @@ export default function AdminCourses() {
                   >
                     <Upload className="h-4 w-4" />
                     Upload Thumbnail
-                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'thumbnail')} className="hidden" id="thumbnail-upload" disabled={uploading} />
+                    <input type="file" accept="image/*" onChange={(e) => handleFileSelection(e, 'thumbnail')} className="hidden" id="thumbnail-upload" disabled={uploading} />
                   </label>
                 </div>
               </div>
               <div className="col-span-2">
                 <Label>Video</Label>
                 <div className="mt-1 flex items-center gap-4">
-                  {formData.video_storage_key && (
+                  {(formData.video_storage_key || selectedVideo) && (
                     <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
                       <Play className="h-4 w-4" />
                       Video ready
@@ -387,7 +431,7 @@ export default function AdminCourses() {
                   >
                     <Upload className="h-4 w-4" />
                     {uploading ? 'Uploading...' : 'Upload Video'}
-                    <input type="file" accept="video/*" onChange={(e) => handleFileUpload(e, 'video')} className="hidden" id="video-upload" disabled={uploading} />
+                    <input type="file" accept="video/*" onChange={(e) => handleFileSelection(e, 'video')} className="hidden" id="video-upload" disabled={uploading} />
                   </label>
                 </div>
                 <Input

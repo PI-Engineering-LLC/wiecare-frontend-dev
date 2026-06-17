@@ -157,9 +157,11 @@ export default function AdminQuotes() {
     const subtotal = formData.items.reduce((sum, item) => sum + (item.total || 0), 0);
     const packing = parseFloat(formData.packing) || 0;
     const exportDecl = parseFloat(formData.export_declaration) || 0;
-    const discountAmount = showDiscount ? subtotal * ((parseFloat(formData.discount_percent) || 0) / 100) : 0;
+    const rawDiscountAmount = showDiscount ? subtotal * ((parseFloat(formData.discount_percent) || 0) / 100) : 0;
+    const discountAmount = Math.round(rawDiscountAmount * 100) / 100
     const taxableBase = subtotal - discountAmount;
-    const taxAmount = taxableBase * ((formData.tax_rate || 0) / 100);
+    const rawTaxAmount = taxableBase * ((formData.tax_rate || 0) / 100);
+    const taxAmount = Math.round(rawTaxAmount * 100) / 100
     const total = taxableBase + packing + exportDecl + taxAmount;
     return { subtotal, packing, exportDecl, discountAmount, taxAmount, total };
   };

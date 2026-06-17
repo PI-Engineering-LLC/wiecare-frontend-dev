@@ -38,6 +38,7 @@ export default function AdminMaintenance() {
   const [inspectionReport, setInspectionReport] = useState(null);
   const [uploadingReport, setUploadingReport] = useState(false);
   const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
+  const [pdfFile, setPdfFile] = useState(null);
   const { uploadFileToS3, isUploading } = useUpload();
   const fileInputRef = useRef(null);
 
@@ -72,20 +73,28 @@ export default function AdminMaintenance() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setPdfFile(e.target.files[0])
     setUploadingReport(true);
-    try{
-    const file_key = await uploadFileToS3({client_id: selectedRequest?.client_id, file, type:'inspection_report'})     
-    setInspectionReport({ file, fileKey: file_key });
-    setUploadingReport(false);
-    }catch(error){
-      toast.error('Failed to upload file');
-      setUploadingReport(false);
-    }
+    // try{
+    // const file_key = await uploadFileToS3({client_id: selectedRequest?.client_id, file, type:'inspection_report'})     
+    // setInspectionReport({ file, fileKey: file_key });
+    // setUploadingReport(false);
+    // }catch(error){
+    //   toast.error('Failed to upload file');
+    //   setUploadingReport(false);
+    // }
   };
 
   const handleUpdate = async () => {
     let reportStorageKey = selectedRequest.inspection_report_key || null;
-
+ setUploadingReport(true);
+    try{
+      if (pdfFile) {
+    const file_key = await uploadFileToS3({client_id: selectedRequest?.client_id, file:pdfFile, type:'inspection_report'})     
+    setInspectionReport({ file:pdfFile, fileKey: file_key });
+    reportStorageKey = file_key;
+    setUploadingReport(false);
+      }
     // If a new report was uploaded and status is completed, save it
     if (inspectionReport?.fileKey && updateData.status === 'completed') {
       reportStorageKey = inspectionReport.fileKey;
@@ -97,7 +106,8 @@ export default function AdminMaintenance() {
         category: 'inspection_report',
         coaster_name: selectedRequest.coaster_name || 'General',
         file_storage_key: reportStorageKey,
-        file_type: 'pdf',
+        file_type: pdfFile.type,
+        file_size: pdfFile.size,
         client_id: selectedRequest.client_id,
         is_public: false,
         tags: ['inspection', 'report'],
@@ -113,6 +123,13 @@ export default function AdminMaintenance() {
         ...(reportStorageKey && { inspection_report_key: reportStorageKey })
       }
     });
+  }catch(error){
+      toast.error('Failed to upload file');
+      setUploadingReport(false);
+    }finally{
+      setUploadingReport(false);
+      setPdfFile(null)
+    }
   };
 
   const filteredRequests = requests.filter(req => {
@@ -361,7 +378,7 @@ export default function AdminMaintenance() {
                     className="hidden"
                     onChange={handleFileChange}
                   />
-                  {selectedRequest?.inspection_report_key && !inspectionReport ? (
+                  {selectedRequest?.inspection_report_key && !pdfFile ? (
                     <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
                         <FileText className="h-4 w-4 text-green-600" />
                         <span className="text-sm text-green-700 flex-1">Report already uploaded</span>

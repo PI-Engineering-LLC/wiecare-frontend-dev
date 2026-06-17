@@ -201,7 +201,7 @@ const {activeClientId} = useClient()
   ];
 
   const maintenanceTypes = [
-    { value: 'service_call', label: 'Service Call' },
+    { value: 'service_call', label: 'Service Visit' },
     { value: 'inspection', label: 'Inspection' },
   ];
 

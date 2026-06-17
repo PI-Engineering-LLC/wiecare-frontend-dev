@@ -256,10 +256,10 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           <div className="hidden md:flex items-center gap-1">
-            <Link to={createPageUrl('Quotes')}>
+            <Link to={createPageUrl(isInternalAdmin ? 'AdminQuotes' : 'Quotes')}>
               <Button variant="ghost" size="sm" className="text-slate-500 hover:text-[#005f27] rounded-xl text-xs font-medium h-8">Quotes</Button>
             </Link>
-            <Link to={createPageUrl('Invoices')}>
+            <Link to={createPageUrl(isInternalAdmin ? 'AdminInvoices' : 'Invoices')}>
               <Button variant="ghost" size="sm" className="text-slate-500 hover:text-[#005f27] rounded-xl text-xs font-medium h-8">Invoices</Button>
             </Link>
           </div>
@@ -357,6 +357,14 @@ export default function Layout({ children, currentPageName }) {
                 {isInternalAdmin ? 'Send Quote' : 'Request Quote'}
               </Button>
             </Link>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all text-xs font-medium border border-slate-200 ml-1"
+              title="Log out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </header>
 

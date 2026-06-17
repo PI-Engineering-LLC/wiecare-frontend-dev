@@ -275,6 +275,9 @@ export default function AdminInvoices() {
     }}catch(error){
       toast.error('Error occured');
       setUploadingPdf(false);
+    }finally{
+      setUploadingPdf(false);
+      setPdfFile(null)
     }
   };
 

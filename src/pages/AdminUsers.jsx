@@ -82,6 +82,7 @@ export default function AdminUsers() {
   const isSuperAdmin = usePlatformRole('super_admin');
   const isPlatformAdmin = usePlatformRole('platform_admin');
   const isInternalAdmin = isSuperAdmin || isPlatformAdmin;
+  const SYSTEM_ROLES = ['platform_admin', 'super_admin'];
 
   const canInviteClientUser = usePermission('client:users.invite');
   const canInvitePlatformUser = isInternalAdmin;
@@ -230,7 +231,7 @@ export default function AdminUsers() {
       payload.role_ids = inviteData.roleIds;
     } else if (inviteData.inviteType === 'platform') {
       if (!inviteData.platformRole) {
-        toast.error('Platform role is required for platform invite.');
+        toast.error('Internal role is required for internal member invite.');
         return;
       }
     }
@@ -310,7 +311,7 @@ export default function AdminUsers() {
         <div className="flex flex-col gap-0.5">
           {row.platform_role && (
             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-              {row.platform_role.replace(/_/g, ' ')}
+              {row.platform_role.replace(/\bplatform\b/gi, 'internal').replace(/_/g, ' ')}
             </span>
           )}
           {row.memberships.map(m => (
@@ -413,8 +414,8 @@ export default function AdminUsers() {
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value="super_admin">Super Admin</SelectItem>
-                  <SelectItem value="platform_admin">Platform Admin</SelectItem>
-                  <SelectItem value="platform_user">Platform User</SelectItem>
+                  <SelectItem value="platform_admin">Internal Admin</SelectItem>
+                  <SelectItem value="platform_user">Internal User</SelectItem>
                   {roles.map(r => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
                 </SelectContent>
               </Select>
@@ -465,14 +466,14 @@ export default function AdminUsers() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="platform">Platform User </SelectItem>
+                    <SelectItem value="platform">Internal User </SelectItem>
                     <SelectItem value="client">Client User</SelectItem>
                   </SelectContent>
                 </Select>
               </div>}
               {isInternalAdmin && inviteData.inviteType === 'platform' && (
                 <div>
-                  <Label> Platform Role</Label>
+                  <Label> Internal Role</Label>
                   <Select value={inviteData.platformRole} onValueChange={(v) => { 
                     setInviteData({ ...inviteData, platformRole: v })}}>
                     <SelectTrigger className="mt-1">
@@ -480,14 +481,14 @@ export default function AdminUsers() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="platform_admin">Platform Admin</SelectItem>
-                      <SelectItem value="platform_user">Platform User</SelectItem>
+                      <SelectItem value="platform_admin">Internal Admin</SelectItem>
+                      <SelectItem value="platform_user">Internal User</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-slate-500 mt-1">
-                    {inviteData.platformRole === 'super_admin' ? 'Highest platform access.' :
-                     inviteData.platformRole === 'platform_admin' ? 'Full platform access.' :
-                    'Standard platform user access.'}
+                    {inviteData.platformRole === 'super_admin' ? 'Highest internal access.' :
+                     inviteData.platformRole === 'platform_admin' ? 'Full internal access.' :
+                    'Standard internal user access.'}
                   </p>
                 </div>
               )}
@@ -503,7 +504,9 @@ export default function AdminUsers() {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {roles.map(r => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
+                        {roles
+                        .filter(r => !SYSTEM_ROLES.includes(r.name))
+                        .map(r => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-slate-500 mt-1">
@@ -609,12 +612,12 @@ export default function AdminUsers() {
                       onValueChange={(v) => setSelectedUser({ ...selectedUser, platform_role: v })}
                     >
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Select platform role" />
+                        <SelectValue placeholder="Select internal role" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
-                        <SelectItem value="platform_admin">Platform Admin</SelectItem>
-                        <SelectItem value="platform_user">Platform User</SelectItem>
+                        <SelectItem value="platform_admin">Internal Admin</SelectItem>
+                        <SelectItem value="platform_user">Internal User</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -673,7 +676,7 @@ export default function AdminUsers() {
                             <PopoverContent className="w-[200px] p-0">
                               <Command>
                                 <CommandGroup>
-                                  {roles?.filter(r => r.client_id == null || r.client_id === membership.client_id).map(role => {
+                                  {roles?.filter(r => ( !SYSTEM_ROLES.includes(r.name)&&(r.client_id == null || r.client_id === membership.client_id))).map(role => {
                                     const isSelected = membership.roles.some(mr => mr.id === role.id);
                                     return (
                                       <CommandItem
@@ -760,7 +763,7 @@ export default function AdminUsers() {
                             <PopoverContent className="w-[200px] p-0">
                               <Command>
                                 <CommandGroup>
-                                  {roles?.filter(r => r.client_id == null || r.client_id === addingClientId).map(role => (
+                                  {roles?.filter(r => (!SYSTEM_ROLES.includes(r.name) &&(r.client_id == null || r.client_id === addingClientId))).map(role => (
                                     <CommandItem
                                       key={role.id}
                                       onSelect={() => {

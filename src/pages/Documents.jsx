@@ -108,6 +108,7 @@ export default function Documents() {
     { value: 'invoice', label: 'Invoices' },
     { value: 'warranty', label: 'Warranty' },
     { value: 'manual', label: 'Manuals' },
+    { value: 'service_ticket', label: 'Service Tickets' },
     { value: 'other', label: 'Other' },
   ];
 
@@ -128,6 +129,7 @@ export default function Documents() {
   const invoiceDocs = filteredDocuments.filter(d => d.category === 'invoice');
   const inspectionDocs = filteredDocuments.filter(d => d.category === 'inspection_report');
   const warrantyDocs = filteredDocuments.filter(d => d.category === 'warranty');
+  const serviceTicketDocs = filteredDocuments.filter(d => d.category === 'service_tickets');
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -171,15 +173,15 @@ export default function Documents() {
       <PageHeader
         title="Documents"
         subtitle="Access equipment drawings, manuals, and documentation"
-        actions={
-          <Button
-            onClick={() => setShowUploadDialog(true)}
-            className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Document
-          </Button>
-        }
+        // actions={
+        //   <Button
+        //     onClick={() => setShowUploadDialog(true)}
+        //     className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
+        //   >
+        //     <Upload className="h-4 w-4 mr-2" />
+        //     Upload Document
+        //   </Button>
+        // }
       />
 
       {/* Filters */}
@@ -217,6 +219,7 @@ export default function Documents() {
         <TabsList className="flex flex-wrap gap-1 h-auto p-1">
           <TabsTrigger value="all" className="flex-shrink-0">All ({filteredDocuments.length})</TabsTrigger>
           <TabsTrigger value="inspection" className="flex-shrink-0">🔍 Inspection Reports ({inspectionDocs.length})</TabsTrigger>
+          <TabsTrigger value="inspection" className="flex-shrink-0">🔍 Service Tickets ({serviceTicketDocs.length})</TabsTrigger>
           <TabsTrigger value="invoices" className="flex-shrink-0">🧾 Invoices ({invoiceDocs.length})</TabsTrigger>
           <TabsTrigger value="warranty" className="flex-shrink-0">🛡️ Warranty ({warrantyDocs.length})</TabsTrigger>
           <TabsTrigger value="manuals" className="flex-shrink-0">📖 Manuals ({manuals.length})</TabsTrigger>
@@ -227,6 +230,9 @@ export default function Documents() {
         </TabsContent>
         <TabsContent value="inspection" className="mt-4">
           <DocumentGrid documents={inspectionDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
+        </TabsContent>
+        <TabsContent value="inspection" className="mt-4">
+          <DocumentGrid documents={serviceTicketDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="invoices" className="mt-4">
           <DocumentGrid documents={invoiceDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />

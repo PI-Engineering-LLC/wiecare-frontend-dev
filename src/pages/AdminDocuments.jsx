@@ -158,6 +158,7 @@ export default function AdminDocuments() {
       toast.error('Failed to upload file');
     }finally {
       setUploading(false);
+      setSelectedFile(null);
     }
 
     
