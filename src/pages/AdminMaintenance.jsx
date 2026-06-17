@@ -74,7 +74,7 @@ export default function AdminMaintenance() {
     const file = e.target.files[0];
     if (!file) return;
     setPdfFile(e.target.files[0])
-    setUploadingReport(true);
+    // setUploadingReport(true);
     // try{
     // const file_key = await uploadFileToS3({client_id: selectedRequest?.client_id, file, type:'inspection_report'})     
     // setInspectionReport({ file, fileKey: file_key });
