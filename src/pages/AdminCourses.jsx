@@ -406,7 +406,7 @@ export default function AdminCourses() {
               <div className="col-span-2">
                 <Label>Thumbnail</Label>
                 <div className="mt-1 flex items-center gap-4">
-                  {previewURL && (
+                  {selectedThumbnail && (
                     <div  className="relative group">
                     <img src={previewURL} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
                     <button
@@ -415,7 +415,7 @@ export default function AdminCourses() {
                             setSelectedThumbnail(null);
                             if(previewURL){
                               URL.revokeObjectURL(previewURL);
-                              // setPreviewURL(null);
+                              setPreviewURL(null);
 
                             }
                            
