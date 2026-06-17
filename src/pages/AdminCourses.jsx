@@ -399,7 +399,10 @@ export default function AdminCourses() {
                     <div  className="relative group">
                     <img src={previewURL} alt="Thumbnail" className="w-24 h-16 object-cover rounded-lg" />
                     <button
-                        onClick={() => URL.revokeObjectURL(previewURL)}
+                        onClick={() => { 
+                          URL.revokeObjectURL(previewURL)
+                          setPreviewURL(null)
+                        }}
                         className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="h-3 w-3" />
