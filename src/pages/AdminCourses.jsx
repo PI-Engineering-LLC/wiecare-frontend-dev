@@ -133,6 +133,11 @@ export default function AdminCourses() {
       return;
     }
     if (type === 'thumbnail') {
+      if(previewURL){
+        URL.revokeObjectURL(previewURL);
+        setPreviewURL(null);
+
+      }
       setSelectedThumbnail(file)
       setPreviewURL(URL.createObjectURL(file))
     } else if (type === 'video') {
@@ -413,11 +418,11 @@ export default function AdminCourses() {
                         onClick={() => { 
                           if(selectedThumbnail){
                             setSelectedThumbnail(null);
-                            if(previewURL){
-                              URL.revokeObjectURL(previewURL);
-                              setPreviewURL(null);
+                            // if(previewURL){
+                            //   URL.revokeObjectURL(previewURL);
+                            //   setPreviewURL(null);
 
-                            }
+                            // }
                            
                           }
                          
