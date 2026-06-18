@@ -172,6 +172,7 @@ export default function Invoices() {
                         size="sm"
                         className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
                         onClick={async (e) => {
+                          e.stopPropagation();
                           try {
                             await handleSecureView(e, row.pdf_storage_key, true)
           
