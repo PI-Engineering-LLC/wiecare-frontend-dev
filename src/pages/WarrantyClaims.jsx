@@ -402,7 +402,7 @@ export default function WarrantyClaims() {
             </Button>
             <Button 
               onClick={handleSubmitClaim}
-              disabled={!newClaim.equipment_info || !newClaim.issue_description || !activeClientId || createClaimMutation.isPending || (warrantyStatus && !warrantyStatus.valid)}
+              disabled={!clientData && !warrantyStatus?.valid && (!newClaim.equipment_info || !newClaim.issue_description || !activeClientId || createClaimMutation.isPending || (warrantyStatus && !warrantyStatus.valid))}
               className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
             >
               {createClaimMutation.isPending ? 'Submitting...' : 'Submit Claim'}
