@@ -216,7 +216,6 @@ export default function Layout({ children, currentPageName }) {
       </div>
     </div>
   );
-
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#f4f5f0' }}>
       <style>{`
@@ -333,10 +332,15 @@ export default function Layout({ children, currentPageName }) {
                             className="px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100"
                             onClick={async () => {
                               setNotifOpen(false);
+                              queryClient.setQueryData(['notif-panel', user?.id], (old ) => 
+                                (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
+                              );
                               await api.markRead(`${notif.id}`);
                               // loadNotifications();
                               setNotifications(prev => prev.filter(n => n.id !== notif.id));
-                              if (notif.link) window.location.href = notif.link;
+                              
+                              // if (notif.link) window.location.href = notif.link;
+                              if (notif.link) navigate(notif.link)
                             }}>
                             <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
                             <p className="text-sm text-slate-500 mt-1 line-clamp-3">{notif.message}</p>
