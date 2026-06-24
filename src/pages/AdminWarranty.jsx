@@ -49,7 +49,7 @@ export default function AdminWarranty() {
     if (!c) return null;
     if (c.no_warranty) return { valid: false, label: 'No Warranty', color: 'text-slate-500' };
     if (!c.warranty_start_date) return { valid: false, label: 'Not Set', color: 'text-amber-600' };
-    const expiry = addYears(parseISO(c.warranty_start_date), c.subscription_tier === 'basic' ? 1 : 2);
+    const expiry = addYears(parseISO(c.warranty_start_date), c.subscription_tier === 'basic' ? 1 : 1);
     const valid = isAfter(expiry, new Date());
     return {
       valid,

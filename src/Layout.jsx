@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { api } from '@/api/apiClient';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -101,9 +101,9 @@ export default function Layout({ children, currentPageName }) {
     ...(isClientAdmin ? [{ name: 'Org Dashboard', icon: Users, page: 'ClientAdminDashboard' }] : []),
   ];
   const clientNavGroups = [
-    { label: 'Finance', icon: FileText, items: [
+    { label: 'Orders', icon: FileText, items: [
       { name: 'Quotes', icon: FileText, page: 'Quotes' },
-      { name: 'Orders', icon: ShoppingCart, page: 'Orders' },
+      { name: 'Order Summary', icon: ShoppingCart, page: 'Orders' },
       { name: 'Invoices', icon: FileText, page: 'Invoices' },
     ]},
     { label: 'Operations', icon: Wrench, items: [
@@ -121,9 +121,9 @@ export default function Layout({ children, currentPageName }) {
       { name: 'Clients', icon: Building2, page: 'AdminClients' },
       { name: 'Users', icon: Users, page: 'AdminUsers' },
     ]},
-    { label: 'Finance', icon: FileText, items: [
+    { label: 'Orders', icon: FileText, items: [
       { name: 'Quotes', icon: FileText, page: 'AdminQuotes' },
-      { name: 'Orders', icon: ShoppingCart, page: 'AdminOrders' },
+      { name: 'Order Summary', icon: ShoppingCart, page: 'AdminOrders' },
       { name: 'Parts', icon: Package, page: 'AdminParts' },
       { name: 'Invoices', icon: FileText, page: 'AdminInvoices' },
     ]},
@@ -157,7 +157,7 @@ export default function Layout({ children, currentPageName }) {
             <span className="text-white font-bold text-base">W</span>
           </div>
           <div>
-            <span className="font-bold text-slate-900 text-base leading-none">WieCare</span>
+            <span className="font-bold text-slate-900 text-base leading-none">Wiegand USA Customer Portal</span>
             {isInternalAdmin && <p className="text-[10px] text-[#005f27] font-semibold mt-0.5">Admin Portal</p>}
           </div>
         </Link>
@@ -310,7 +310,8 @@ export default function Layout({ children, currentPageName }) {
                             onClick={async () => {
                               setNotifOpen(false);
                               await api.markRead(`${notif.id}`);
-                              loadNotifications();
+                              // loadNotifications();
+                              setNotifications(prev => prev.filter(n => n.id !== notif.id));
                               if (notif.link) window.location.href = notif.link;
                             }}>
                             <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
@@ -347,6 +348,10 @@ export default function Layout({ children, currentPageName }) {
                 <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
                   {user?.platform_role ? user.platform_role.replace(/_/g, ' ') :
                    (user?.memberships?.find(m => m.clientId === activeClientId)?.roles[0]?.name?.replace(/_/g, ' ') || 'User')}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+                  {user?.platform_role ? 'Internal' :
+                   (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
                 </p>
               </div>
             </div>
@@ -452,14 +457,16 @@ function RightPanel({ user}) {
   const overdue = invoices.filter(i => i.status === 'overdue');
   const pending = maintenance.filter(m => m.status === 'pending');
 
-  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} />;
-  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} />;
+  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} />;
+  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} />;
 }
 
 // ── AdminRightPanel & ClientRightPanel ────────────────────────
-function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending }) {
+function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user}) {
   const drafts = invoices.filter(i => i.status === 'draft').length;
   const inProgress = maintenance.filter(m => m.status === 'in_progress').length;
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   return (
     <div className="p-5 space-y-6 flex-1">
       <div className="grid grid-cols-2 gap-3">
@@ -491,8 +498,10 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
          notifications?.map(n => (
            <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
            onClick={async () => {
-          await api.markRead(`${n.id}`);
-          if (n.link) window.location.href = n.link;
+          await api.markRead(`${n.id}`); //is_read: true 
+          // if (n.link) window.location.href = n.link;
+          queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+          if (n.link) navigate(n.link)
         }}>
              <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
              <div className="min-w-0">
@@ -533,9 +542,11 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
   );
 }
 
-function ClientRightPanel({ notifications, maintenance, overdue, pending }) {
+function ClientRightPanel({ notifications, maintenance, overdue, pending, user }) {
   // Use usePlatformRole or useClientRoles to decide what content is visible
   const isClientAdmin = useClientRoles(['client_admin']); // Check if the current user is a client admin
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return (
     <div className="p-5 space-y-6 flex-1">
@@ -560,7 +571,8 @@ function ClientRightPanel({ notifications, maintenance, overdue, pending }) {
           <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
           onClick={async () => {
             await api.markRead(`${n.id}`);
-            if (n.link) window.location.href = n.link;
+            queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+            if (n.link) navigate(n.link)
           }}>
             <div className="w-2 h-2 rounded-full bg-[#005f27] flex-shrink-0 mt-1.5" />
             <div className="min-w-0">

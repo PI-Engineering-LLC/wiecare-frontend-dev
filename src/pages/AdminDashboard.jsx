@@ -136,13 +136,15 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {quotes.slice(0, 5).map(quote => (
-                  <div key={quote.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <Link key={quote.id} to={createPageUrl('AdminQuotes')} className="block">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{quote.client_name || 'Unknown Client'}</p>
                       <p className="text-sm text-slate-500">{quote.title}</p>
                     </div>
                     <StatusBadge status={quote.status} />
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -165,7 +167,8 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {maintenance.slice(0, 5).map(req => (
-                  <div key={req.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <Link key={req.id} to={createPageUrl('AdminMaintenance')} className="block">
+                  <div  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{req.client_name || 'Unknown Client'}</p>
                       <p className="text-sm text-slate-500">{req.title}</p>
@@ -175,6 +178,7 @@ export default function AdminDashboard() {
                       <StatusBadge status={req.status} />
                     </div>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -197,13 +201,15 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {overdueInvoices.slice(0, 5).map(invoice => (
-                  <div key={invoice.id} className="flex items-center justify-between p-3 bg-rose-50 rounded-lg">
+                  <Link key={invoice.id} to={createPageUrl('AdminInvoices')} className="block">
+                  <div className="flex items-center justify-between p-3 bg-rose-50 rounded-lg">
                     <div>
                       <p className="font-medium text-slate-900">{invoice.client_name}</p>
                       <p className="text-sm text-slate-500">Due: {invoice.due_date ? formatInTimeZone(new Date(invoice.due_date),'UTC', 'MMM d, yyyy') : 'N/A'}</p>
                     </div>
                     <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString() || invoice.total_amount?.toLocaleString()}</p>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -222,12 +228,11 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {['basic', 'pro_1_5', 'pro_2_0', 'advanced'].map(tier => {
+              {['basic', 'default', 'advanced'].map(tier => {
                 const count = clients.filter(c => c.subscription_tier === tier).length;
                 const tierLabels = {
                   basic: 'Basic',
-                  pro_1_5: 'Pro 1.5',
-                  pro_2_0: 'Pro 2.0',
+                  default: 'Default',
                   advanced: 'Advanced'
                 };
                 return (

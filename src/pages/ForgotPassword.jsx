@@ -55,7 +55,7 @@ export default function ForgotPassword() {
           <span className="flex shrink-0 overflow-hidden rounded-full h-20 w-20 sm:h-24 sm:w-24 shadow-lg ring-4 ring-white/50">
             <img
               className="aspect-square h-full w-full object-cover"
-              alt="WieCare logo"
+              alt="Wiegand USA Customer Portal logo"
               src="/wiecare_logo.png"
             />
           </span>

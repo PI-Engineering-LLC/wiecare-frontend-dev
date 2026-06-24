@@ -37,7 +37,7 @@ export default function ResetPassword() {
           </div>
         </div>
         <p className="text-xl font-bold text-slate-900">Account Password Reset!</p>
-        <p className="text-slate-500 mt-2 text-sm">You can now sign in to your WieCare account.</p>
+        <p className="text-slate-500 mt-2 text-sm">You can now sign in to your Wiegand USA Customer Portal account.</p>
         <Button
           className="mt-6 w-full h-11 font-semibold text-white"
           style={{ backgroundColor: '#005f27' }}
@@ -56,14 +56,14 @@ export default function ResetPassword() {
           <span className="flex shrink-0 overflow-hidden rounded-full h-16 w-16 shadow-lg ring-4 ring-white/50">
             <img
               className="aspect-square h-full w-full object-cover"
-              alt="WieCare logo"
+              alt="Wiegand USA Customer Portal logo"
               src="wiecare_logo.png"
             />
           </span>
         </div>
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-2xl font-bold text-slate-900">Set Your Password</CardTitle>
-          <CardDescription className="text-slate-500">Create a password for your WieCare account</CardDescription>
+          <CardDescription className="text-slate-500">Create a password for your Wiegand USA Customer Portal account</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">
           <form onSubmit={handleSubmit} className="space-y-4">

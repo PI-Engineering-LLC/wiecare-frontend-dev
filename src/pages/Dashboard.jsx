@@ -158,8 +158,8 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2">
                 {invoices.slice(0, 5).map(invoice => (
+                  <Link key={invoice.id} to={createPageUrl('Invoices')} className="block">
                   <div
-                    key={invoice.id}
                     className="flex flex-col p-3 bg-slate-50 rounded-lg gap-1 min-h-[44px]"
                   >
                     <p className="font-medium text-slate-900 text-sm truncate">{invoice.invoice_number || invoice.title}</p>
@@ -173,6 +173,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -201,8 +202,8 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2">
                 {trainings.slice(0, 5).map(training => (
+                  <Link key={training.id} to={createPageUrl('Training')} className="block">
                   <div
-                    key={training.id}
                     className="flex items-center justify-between gap-2 p-3 bg-slate-50 rounded-lg min-h-[44px]"
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -221,6 +222,7 @@ export default function Dashboard() {
                       <StatusBadge status={training.is_mandatory ? 'mandatory' : training.category} />
                     </div>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -255,8 +257,8 @@ export default function Dashboard() {
               </div>
             </div>
             {maintenance.slice(0, 3).map(req => (
+              <Link key={req.id} to={createPageUrl('Maintenance')} className="block">
               <div
-                key={req.id}
                 className="flex items-center justify-between gap-2 p-3 border-b last:border-0 min-h-[44px]"
               >
                 <div className="min-w-0 flex-1">
@@ -267,6 +269,7 @@ export default function Dashboard() {
                   <StatusBadge status={req.status} />
                 </div>
               </div>
+              </Link>
             ))}
           </CardContent>
         </Card>
@@ -301,8 +304,8 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2">
                 {courseProgress.map(progress => (
+                   <Link key={progress.id} to={createPageUrl('Courses')} className="block">
                   <div
-                    key={progress.id}
                     className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg min-h-[44px]"
                   >
                     <div className="w-9 h-9 bg-[#005f27]/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -321,6 +324,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}

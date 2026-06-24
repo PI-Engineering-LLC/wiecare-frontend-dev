@@ -126,7 +126,7 @@ export default function WarrantyClaims() {
     if (clientData.no_warranty) return { valid: false, reason: 'no_warranty' };
     if (!clientData.warranty_start_date) return { valid: false, reason: 'not_set' };
     const start = parseISO(clientData.warranty_start_date);
-    const years = clientData.subscription_tier === 'basic' ? 1 : 2;
+    const years = clientData.subscription_tier === 'basic' ? 1 : 1;
     const expiry = addYears(start, years);
     return isAfter(expiry, new Date())
       ? { valid: true, expiry, years }
@@ -159,6 +159,12 @@ export default function WarrantyClaims() {
     const matchesStatus = statusFilter === 'all' || claim.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const tierLabels = {
+    basic: 'Basic',
+    default: 'Default',
+    advanced: 'Advanced'
+  };
 
   const columns = [
     {
@@ -237,7 +243,8 @@ export default function WarrantyClaims() {
                 <>
                   <p className="text-sm font-semibold text-emerald-800">✓ Warranty Active</p>
                   <p className="text-xs text-emerald-700 mt-0.5">
-                    {clientData.subscription_tier === 'basic' ? '1-year' : '2-year'} coverage · expires{' '}
+                    {tierLabels[clientData.subscription_tier] || 'Basic'}
+                    {clientData.subscription_tier === 'basic' ? '1-year' : '1-year'} coverage · expires{' '}
                     {warrantyStatus.expiry.toLocaleDateString()}
                   </p>
                 </>

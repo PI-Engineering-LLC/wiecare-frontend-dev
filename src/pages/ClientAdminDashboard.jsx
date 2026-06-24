@@ -287,7 +287,8 @@ export default function ClientAdminDashboard() {
             ) : (
               <div className="space-y-2">
                 {invoices.slice(0, 5).map(inv => (
-                  <div key={inv.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <Link key={inv.id} to={createPageUrl('Invoices')} className="block">
+                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-slate-900 truncate">{inv.invoice_number || inv.title}</p>
                       <p className="text-xs text-slate-500">
@@ -299,6 +300,7 @@ export default function ClientAdminDashboard() {
                       <StatusBadge status={inv.status} />
                     </div>
                   </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -319,10 +321,12 @@ export default function ClientAdminDashboard() {
                 <Link to={createPageUrl('Maintenance')}><Button variant="ghost" size="sm" className="h-6 text-xs text-[#005f27] px-2">View all</Button></Link>
               </div>
               {maintenance.slice(0, 3).map(m => (
-                <div key={m.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                <Link key={m.id} to={createPageUrl('Maintenance')} className="block">
+                <div className="flex items-center justify-between py-2 border-b last:border-0">
                   <p className="text-sm text-slate-700 truncate flex-1 mr-2">{m.title}</p>
                   <StatusBadge status={m.status} />
                 </div>
+                </Link>
               ))}
               {maintenance.length === 0 && <p className="text-xs text-slate-400 py-2">No maintenance requests</p>}
             </div>
@@ -335,10 +339,12 @@ export default function ClientAdminDashboard() {
                 <Link to={createPageUrl('WarrantyClaims')}><Button variant="ghost" size="sm" className="h-6 text-xs text-[#005f27] px-2">View all</Button></Link>
               </div>
               {warrantyClaims.slice(0, 3).map(c => (
-                <div key={c.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                <Link key={c.id} to={createPageUrl('WarrantyClaims')} className="block">
+                <div className="flex items-center justify-between py-2 border-b last:border-0">
                   <p className="text-sm text-slate-700 truncate flex-1 mr-2">{c.claim_number || 'Claim'}</p>
                   <StatusBadge status={c.status} />
                 </div>
+                </Link>
               ))}
               {warrantyClaims.length === 0 && <p className="text-xs text-slate-400 py-2">No warranty claims</p>}
             </div>

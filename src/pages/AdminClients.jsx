@@ -112,7 +112,8 @@ export default function AdminClients() {
     if (client.no_warranty) return { label: 'No Warranty', color: 'text-slate-500', valid: false };
     if (!client.warranty_start_date) return { label: 'Not Set', color: 'text-amber-600', valid: false };
     const start = parseISO(client.warranty_start_date);
-    const years = client.subscription_tier === 'basic' ? 1 : 2; // Assuming basic is 1 year, others are 2
+    // const years = client.subscription_tier === 'basic' ? 1 : 2; // Assuming basic is 1 year, others are 2
+    const years =  1;
     const expiry = addYears(start, years);
     const isValid = isAfter(expiry, new Date());
     return {
@@ -170,8 +171,7 @@ export default function AdminClients() {
 
   const tierLabels = {
     basic: 'Basic',
-    pro_1_5: 'Pro 1.5',
-    pro_2_0: 'Pro 2.0',
+    default: 'Default',
     advanced: 'Advanced'
   };
 
@@ -367,8 +367,7 @@ export default function AdminClients() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="pro_1_5">Pro 1.5</SelectItem>
-                    <SelectItem value="pro_2_0">Pro 2.0</SelectItem>
+                    <SelectItem value="default">Default</SelectItem>
                     <SelectItem value="advanced">Advanced</SelectItem>
                   </SelectContent>
                 </Select>
@@ -479,9 +478,9 @@ export default function AdminClients() {
                     />
                     {formData.warranty_start_date && (
                        <p className="text-xs text-slate-500 mt-1">
-                       {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : 'Pro: 2 year warranty'}
+                       {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : formData.subscription_tier === 'default' ? 'Default: 1 year warranty':'Pro: 1 year warranty'}
                        {' — '}expires{' '}
-                       {formatInTimeZone(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 2),'UTC', 'MMM d, yyyy')}
+                       {formatInTimeZone(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 1),'UTC', 'MMM d, yyyy')}
                        </p>
                     )}
                   </div>
