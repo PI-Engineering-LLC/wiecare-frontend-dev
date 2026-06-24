@@ -259,6 +259,23 @@ export default function Layout({ children, currentPageName }) {
                 </SelectContent>
               </Select>
             )}
+            {(user?.memberships && user.memberships.length === 1) && (
+              <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+              {
+               (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
+            </p>
+
+            )
+
+            }
+            {(user?.platform_role && user?.memberships.length === 0) && (
+              <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+             'Internal' 
+            </p>
+
+            )
+
+            }
           </div>
 
           <div className="hidden md:flex items-center gap-1">
@@ -355,10 +372,10 @@ export default function Layout({ children, currentPageName }) {
                   {user?.platform_role ? user.platform_role.replace(/_/g, ' ') :
                    (user?.memberships?.find(m => m.clientId === activeClientId)?.roles[0]?.name?.replace(/_/g, ' ') || 'User')}
                 </p>
-                <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+                {/* <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
                   {user?.platform_role ? 'Internal' :
                    (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
-                </p>
+                </p> */}
               </div>
             </div>
 
