@@ -270,7 +270,7 @@ export default function Layout({ children, currentPageName }) {
             }
             {(user?.platform_role && user?.memberships.length === 0) && (
               <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
-             'Internal' 
+             Internal 
             </p>
 
             )
