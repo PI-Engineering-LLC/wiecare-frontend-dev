@@ -68,7 +68,7 @@ export default function Layout({ children, currentPageName }) {
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
   const isClientAdmin = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
   const isCoasterAdmin = isInternalAdmin || isClientAdmin; // Broader admin check for UI purposes
-
+  const navigate = useNavigate();
   // Load unread notifications
   const loadNotifications = async () => {
     try {
@@ -89,6 +89,7 @@ export default function Layout({ children, currentPageName }) {
     setNotifications(prev => [notif, ...prev].slice(0, 10)); // Add new notification and keep list limited
     loadNotifications(); // Reload to get updated unread status
   });
+  
 
   const handleLogout = async () => {
     await logout();
@@ -479,13 +480,21 @@ function RightPanel({ user}) {
 
   const overdue = invoices.filter(i => i.status === 'overdue');
   const pending = maintenance.filter(m => m.status === 'pending');
+  const navigate = useNavigate();
+  const handleNotifRead = async (n) => {
+    queryClient.setQueryData(['notif-panel', user?.id], (old ) => 
+      (Array.isArray(old) ? old : []).filter(item => item.id !== n.id)
+    );
+    await api.markRead(`${n.id}`);
+    if (n.link) navigate(n.link)
+  };
 
-  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} />;
-  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} />;
+  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} onNotifRead={handleNotifRead} />;
+  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} onNotifRead={handleNotifRead} />;
 }
 
 // ── AdminRightPanel & ClientRightPanel ────────────────────────
-function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user}) {
+function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user, onNotifRead}) {
   const drafts = invoices.filter(i => i.status === 'draft').length;
   const inProgress = maintenance.filter(m => m.status === 'in_progress').length;
   const queryClient = useQueryClient();
@@ -520,12 +529,15 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
         ) :
          notifications?.map(n => (
            <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
-           onClick={async () => {
-          await api.markRead(`${n.id}`); //is_read: true 
-          // if (n.link) window.location.href = n.link;
-          queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
-          if (n.link) navigate(n.link)
-        }}>
+           onClick={
+            onNotifRead(n)
+        //     async () => {
+        //   await api.markRead(`${n.id}`); //is_read: true 
+        //   // if (n.link) window.location.href = n.link;
+        //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+        //   if (n.link) navigate(n.link)
+        // }
+      }>
              <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
              <div className="min-w-0">
                <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
@@ -565,7 +577,7 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
   );
 }
 
-function ClientRightPanel({ notifications, maintenance, overdue, pending, user }) {
+function ClientRightPanel({ notifications, maintenance, overdue, pending, user, onNotifRead }) {
   // Use usePlatformRole or useClientRoles to decide what content is visible
   const isClientAdmin = useClientRoles(['client_admin']); // Check if the current user is a client admin
   const navigate = useNavigate();
@@ -592,11 +604,14 @@ function ClientRightPanel({ notifications, maintenance, overdue, pending, user }
           </div>
         ) : notifications?.map(n => (
           <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
-          onClick={async () => {
-            await api.markRead(`${n.id}`);
-            queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
-            if (n.link) navigate(n.link)
-          }}>
+          onClick={
+            onNotifRead(n)
+          //   async () => {
+          //   await api.markRead(`${n.id}`);
+          //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+          //   if (n.link) navigate(n.link)
+          // }
+        }>
             <div className="w-2 h-2 rounded-full bg-[#005f27] flex-shrink-0 mt-1.5" />
             <div className="min-w-0">
               <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
