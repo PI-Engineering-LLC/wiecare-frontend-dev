@@ -154,7 +154,13 @@ export default function Layout({ children, currentPageName }) {
       <div className="px-5 pt-6 pb-4 flex-shrink-0">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
           <div className="w-9 h-9 bg-gradient-to-br from-[#005f27] to-[#436a36] rounded-xl flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-base">W</span>
+            <span className="text-white font-bold text-base">
+            <img
+              className="aspect-square h-full w-full object-cover"
+              alt="Wiegand USA Customer Portal logo"
+              src="/wiecare_logo.png"
+            />
+            </span>
           </div>
           <div>
             <span className="font-bold text-slate-900 text-base leading-none">Wiegand USA Customer Portal</span>
