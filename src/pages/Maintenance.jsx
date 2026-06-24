@@ -366,6 +366,7 @@ const {activeClientId} = useClient()
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
+                      fixedWeeks
                       selected={newRequest.preferred_date_1}
                       onSelect={(date) => setNewRequest({ ...newRequest, preferred_date_1: date })}
                       disabled={(date) => date < new Date()}
@@ -393,6 +394,7 @@ const {activeClientId} = useClient()
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
+                      fixedWeeks
                       selected={newRequest.preferred_date_2}
                       onSelect={(date) => setNewRequest({ ...newRequest, preferred_date_2: date })}
                       disabled={(date) => date < new Date()}
