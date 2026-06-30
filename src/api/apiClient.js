@@ -2,6 +2,8 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // @ts-ignore
 const request = async (method, path, { data, params } = {}, isFormData = false) => {
+  console.log("Is FormData?", data instanceof FormData);
+// console.log("Data entries:", [...data.entries()]);
   const url = new URL(`${BASE_URL}${path}`);
   if (params) {
     Object.entries(params).forEach(([k, v]) => v != null && url.searchParams.set(k, v));
@@ -11,7 +13,7 @@ const request = async (method, path, { data, params } = {}, isFormData = false) 
   if (activeClientId) { 
     headers.set('X-Tenant-Id', activeClientId);
   }
-  if (!isFormData) headers.set('Content-Type', 'application/json');
+  if (!isFormData) headers.set('Content-Type', 'application/json'); //multipart/form-data for csv
   let res = await fetch(url.toString(), {
     method,
     credentials: 'include',
@@ -165,6 +167,17 @@ export const api = {
   deletePart: (id) => request('DELETE', `/parts/${id}`),
   getPartOrders: (params) => request('GET', '/parts/orders', { params }),
   createPartOrder: (data) => request('POST', '/parts/orders', { data }),
+  // Batch parts import
+  importParts: async (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    // for (let key of form.entries()) {
+    //   console.log('FormData entry:', key[0], key[1]);
+    // }
+    return request('POST', '/parts/imports', {  data: form }, true);
+  },
+  // Import status
+  getPartImport: (id) => request('GET', `/parts/imports/${id}`),
 
   // Maintenance
   getMaintenance: (params) => request('GET', '/maintenance', { params }),

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '@/api/apiClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload, CheckCircle2, AlertCircle, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Progress } from "@/components/ui/progress";
+
 
 function parseCsv(text) {
   const lines = text.trim().split('\n');
@@ -60,6 +62,12 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
   const [preview, setPreview] = useState([]);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
+  // const [progress, setProgress] = useState({ status: 'idle', processed: 0, failed: 0 });
+  const [importProgress, setImportProgress] = useState({ 
+    status: 'idle', 
+    processed_rows: 0, 
+    failed_rows: 0 
+  })
 
   const handleFileChange = (e) => {
     const f = e.target.files?.[0];
@@ -76,43 +84,100 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
     reader.readAsText(f);
   };
 
-  const [importProgress, setImportProgress] = useState(0);
+  
+  // useEffect(() => {
+  //   if (!open) return; // Only poll when open
+
+  //   const interval = setInterval(async () => {
+  //     const response = await api.getPartImport(importId);
+  //     const data = await response.json();
+  //     setProgress(data);
+
+  //     if (data.status === 'completed' || data.status === 'failed') {
+  //       clearInterval(interval);
+  //     }
+  //   }, 2000);
+
+  //   return () => clearInterval(interval); // Clean up on unmount or close
+  // }, [open]);
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   const handleImport = async () => {
-    if (!preview.length) return;
+    // if (!preview.length) return;
+    if (!file) return;
     setImporting(true);
-    setImportProgress(0);
-    let success = 0, failed = 0;
+    // setImportProgress(0);
+    // let success = 0, failed = 0;
 
-    for (let i = 0; i < preview.length; i++) {
-      try {
-        await 	api.createParts(preview[i]);
-        success++;
-      } catch {
-        failed++;
+    // 1. Send single multipart request
+  // const formData = new FormData();
+  // formData.append('file', file);
+  try{
+    console.log(file)
+    const data = await api.importParts(file)
+    console.log("@@@@@", data)
+    const importId = data.import_id;
+     // 2. Poll for status
+     const poll = setInterval(async () => { 
+      try{
+      const status  = await api.getPartImport(importId);
+      console.log("@@@@@Stat", status)
+      // Update progress bar
+      // setImportProgress(status.processed_rows);
+      setImportProgress(status);
+
+      if (status.status === 'completed' || status.status === 'failed') {
+        clearInterval(poll);
+        setImporting(false);
+        setResults({ 
+          success: status.processed_rows, 
+          failed: status.failed_rows 
+        });
+        toast.success("Import complete!");
+        onImported?.()
       }
-      setImportProgress(i + 1);
-      // Small delay to avoid rate limiting
-      await sleep(300);
+    }catch (err) {
+      clearInterval(poll);
+      setImporting(false);
+      toast.error("Error polling import status");
     }
 
+     }, 2000); // Poll every 2 seconds
+  }catch(error){
     setImporting(false);
-    setResults({ success, failed });
-    if (success > 0) {
-      toast.success(`Imported ${success} parts successfully`);
-      onImported?.();
-    }
-    if (failed > 0) toast.error(`${failed} parts failed to import`);
+    toast.error("Failed to start import");
+  }
+
+    // for (let i = 0; i < preview.length; i++) {
+    //   try {
+    //     await 	api.createParts(preview[i]);
+    //     success++;
+    //   } catch {
+    //     failed++;
+    //   }
+    //   setImportProgress(i + 1);
+    //   // Small delay to avoid rate limiting
+    //   await sleep(300);
+    // }
+
+    // setImporting(false);
+    // setResults({ success, failed });
+    // if (success > 0) {
+    //   toast.success(`Imported ${success} parts successfully`);
+    //   onImported?.();
+    // }
+    // if (failed > 0) toast.error(`${failed} parts failed to import`);
   };
 
   const handleClose = () => {
     setFile(null);
     setPreview([]);
     setResults(null);
+    setImportProgress({ status: 'idle', processed_rows: 0, failed_rows: 0 });
     onOpenChange(false);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -123,7 +188,16 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
             Import Parts from CSV
           </DialogTitle>
         </DialogHeader>
-
+        {/* Unified Progress UI */}
+        {importing && (
+          <div className="space-y-2 py-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600">Importing parts...</span>
+              <span className="font-mono">{importProgress.processed_rows} success / {importProgress.failed_rows} failed</span>
+            </div>
+            <Progress value={preview.length > 0 ? (importProgress.processed_rows / preview.length) * 100 : 0} />
+          </div>
+        )}
         <div className="space-y-4 py-2">
           {/* Upload area */}
           <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-[#005f27]/40 transition-colors">
@@ -142,7 +216,7 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
           </div>
 
           {/* Preview */}
-          {preview.length > 0 && !results && (
+          {/* {preview.length > 0 && !results && (
             <div>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-semibold text-slate-700">Preview — {preview.length} parts found</p>
@@ -178,7 +252,39 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
                 )}
               </div>
             </div>
-          )}
+          )} */}
+          {!importing && !results && preview.length > 0 && (
+  <div>
+    <div className="flex items-center justify-between mb-2">
+      <p className="text-sm font-semibold text-slate-700">Preview — {preview.length} parts found</p>
+      <Badge className="bg-[#edf0be] text-[#005f27]">{preview.length} rows</Badge>
+    </div>
+    <div className="border rounded-xl overflow-hidden">
+      <table className="w-full text-xs">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Part #</th>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-500">EZ #</th>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Name</th>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Price</th>
+                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Category</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.slice(0, 8).map((p, i) => (
+                      <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
+                        <td className="px-3 py-2 font-mono text-slate-600">{p.part_number}</td>
+                        <td className="px-3 py-2 text-slate-500">{p.ez_number || '—'}</td>
+                        <td className="px-3 py-2 text-slate-800 max-w-[180px] truncate">{p.name}</td>
+                        <td className="px-3 py-2">{p.unit_price > 0 ? `$${p.unit_price}` : '—'}</td>
+                        <td className="px-3 py-2 capitalize text-slate-500">{p.category}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+      </table>
+    </div>
+  </div>
+)}
 
           {/* Results */}
           {results && (
@@ -202,16 +308,19 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
         </div>
 
         <DialogFooter>
+        {!importing && (
           <Button variant="outline" onClick={handleClose}>
             {results ? 'Close' : 'Cancel'}
           </Button>
-          {!results && (
+        )}
+          {!results && !importing && (
             <Button
               onClick={handleImport}
-              disabled={preview.length === 0 || importing}
+              disabled={!file || importing}
               className="bg-[#005f27] hover:bg-[#436a36]"
             >
-              {importing ? `Importing ${importProgress}/${preview.length}...` : `Import ${preview.length} Parts`}
+              Import {preview.length} Parts
+              {/* {importing ? `Importing ${importProgress}/${preview.length}...` : `Import ${preview.length} Parts`} */}
             </Button>
           )}
         </DialogFooter>
