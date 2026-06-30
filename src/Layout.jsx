@@ -557,25 +557,76 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
             <p className="text-xs">All caught up!</p>
           </div>
         ) :
-         notifications?.map(n => (
-           <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
-      //      onClick={
-      //       // onNotifRead(n)
-      //   //     async () => {
-      //   //   await api.markRead(`${n.id}`); //is_read: true 
-      //   //   // if (n.link) window.location.href = n.link;
-      //   //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
-      //   //   if (n.link) navigate(n.link)
-      //   // }
-      // }
-      >
-             <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
-             <div className="min-w-0">
-               <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
-               <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
-             </div>
-           </div>
-         ))
+      //    notifications?.map(n => (
+      //      <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
+      // //      onClick={
+      // //       // onNotifRead(n)
+      // //   //     async () => {
+      // //   //   await api.markRead(`${n.id}`); //is_read: true 
+      // //   //   // if (n.link) window.location.href = n.link;
+      // //   //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+      // //   //   if (n.link) navigate(n.link)
+      // //   // }
+      // // }
+      // >
+      //        <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
+      //        <div className="min-w-0">
+      //          <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
+      //          <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+      //        </div>
+      //      </div>
+      //    ))
+      notifications?.map(n => {
+        // 1. Unified Click/Link Handler
+        const handleNotifClick = async () => {
+          queryClient.setQueryData(['notif-panel', user?.id], (old) => 
+            (Array.isArray(old) ? old : []).filter(item => item.id !== n.id)
+          );
+          await api.markRead(`${n.id}`);
+          
+          // If it's a div, the onClick handles the navigation; 
+          // if it's a Link, the 'to' prop handles it automatically.
+          if (n.link) navigate(n.link);
+        };
+      
+        // 2. Shared styling
+        const commonClasses = "flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors mb-2";
+        
+        // 3. Shared content
+        const content = (
+          <>
+            <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
+              <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+            </div>
+          </>
+        );
+      
+        // 4. Conditional Rendering
+        if (n.link) {
+          return (
+            <Link
+              key={n.id}
+              to={n.link}
+              className={`${commonClasses} block`}
+              onClick={handleNotifClick}
+            >
+              {content}
+            </Link>
+          );
+        }
+      
+        return (
+          <div
+            key={n.id}
+            className={commonClasses}
+            onClick={handleNotifClick}
+          >
+            {content}
+          </div>
+        );
+      })
 
         }
       </div>
