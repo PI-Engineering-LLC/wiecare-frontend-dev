@@ -149,6 +149,8 @@ export default function Layout({ children, currentPageName }) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  
+
   // ── Sidebar ───────────────────────────────────────────────────────────────
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -327,25 +329,48 @@ export default function Layout({ children, currentPageName }) {
                           <p className="text-sm">No new notifications</p>
                         </div>
                       ) : (
-                        notifications?.map(notif => (
-                          <div key={notif.id}
-                            className="px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100"
-                            onClick={async () => {
-                              setNotifOpen(false);
-                              queryClient.setQueryData(['notif-panel', user?.id], (old ) => 
-                                (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
-                              );
-                              await api.markRead(`${notif.id}`);
-                              // loadNotifications();
-                              setNotifications(prev => prev.filter(n => n.id !== notif.id));
-                              
-                              // if (notif.link) window.location.href = notif.link;
-                              // if (notif.link) navigate(notif.link)
-                            }}>
-                            <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
-                            <p className="text-sm text-slate-500 mt-1 line-clamp-3">{notif.message}</p>
-                          </div>
-                        ))
+                        notifications?.map(notif => {
+                          // Define common logic
+                          const handleMarkRead = async () => {
+                            setNotifOpen(false);
+                            queryClient.setQueryData(['notif-panel', user?.id], (old) =>
+                              (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
+                            );
+                            await api.markRead(`${notif.id}`);
+                            setNotifications(prev => prev.filter(n => n.id !== notif.id));
+                          };
+                        
+                          const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
+                          const content = (
+                            <>
+                              <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
+                              <p className="text-sm text-slate-500 mt-1 line-clamp-3">{notif.message}</p>
+                            </>
+                          );
+                        
+                          if (notif.link) {
+                            return (
+                              <Link
+                                key={notif.id}
+                                to={notif.link}
+                                className={commonClasses}
+                                onClick={handleMarkRead}
+                              >
+                                {content}
+                              </Link>
+                            );
+                          }
+                        
+                          return (
+                            <div
+                              key={notif.id}
+                              className={commonClasses}
+                              onClick={handleMarkRead}
+                            >
+                              {content}
+                            </div>
+                          );
+                        })
                       )}
                     </div>
                     <div className="p-4 border-t border-slate-100 flex-shrink-0">
