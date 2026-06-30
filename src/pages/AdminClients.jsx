@@ -178,6 +178,7 @@ export default function AdminClients() {
   const columns = [
     {
       header: 'Company',
+      sortKey: 'company_name',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#1e3a5f]/10 rounded-lg flex items-center justify-center">
