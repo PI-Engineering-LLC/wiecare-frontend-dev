@@ -459,7 +459,7 @@ export default function Layout({ children, currentPageName }) {
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <RightPanel user={user} />
+            <RightPanel user={user} setNotifications={setNotifications} />
           </div>
         ) : (
           <div className="flex flex-col items-center pt-5">
@@ -475,7 +475,7 @@ export default function Layout({ children, currentPageName }) {
 }
 
 // ── RightPanel ────────────────────────────────────────────────────────────────
-function RightPanel({ user}) {
+function RightPanel({ user, setNotifications}) {
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
   const { activeClientId } = useClient(); // Corrected to destructure activeClientId
   const queryClient = useQueryClient();
@@ -519,12 +519,12 @@ function RightPanel({ user}) {
     // if (n.link) window.location.href = n.link;
   };
 
-  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} onNotifRead={handleNotifRead} />;
-  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} onNotifRead={handleNotifRead} />;
+  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} />;
+  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} />;
 }
 
 // ── AdminRightPanel & ClientRightPanel ────────────────────────
-function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user, onNotifRead}) {
+function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user, setNotifications}) {
   const drafts = invoices.filter(i => i.status === 'draft').length;
   const inProgress = maintenance.filter(m => m.status === 'in_progress').length;
   const queryClient = useQueryClient();
@@ -576,57 +576,101 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
       //        </div>
       //      </div>
       //    ))
-      notifications?.map(n => {
-        // 1. Unified Click/Link Handler
-        const handleNotifClick = async () => {
-          queryClient.setQueryData(['notif-panel', user?.id], (old) => 
-            (Array.isArray(old) ? old : []).filter(item => item.id !== n.id)
-          );
-          await api.markRead(`${n.id}`);
+      // notifications?.map(n => {
+      //   // 1. Unified Click/Link Handler
+      //   const handleNotifClick = async () => {
+      //     queryClient.setQueryData(['notif-panel', user?.id], (old) => 
+      //       (Array.isArray(old) ? old : []).filter(item => item.id !== n.id)
+      //     );
+      //     await api.markRead(`${n.id}`);
           
-          // If it's a div, the onClick handles the navigation; 
-          // if it's a Link, the 'to' prop handles it automatically.
-          if (n.link) navigate(n.link);
-        };
+      //     // If it's a div, the onClick handles the navigation; 
+      //     // if it's a Link, the 'to' prop handles it automatically.
+      //     if (n.link) navigate(n.link);
+      //   };
       
-        // 2. Shared styling
-        const commonClasses = "flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors mb-2";
+      //   // 2. Shared styling
+      //   const commonClasses = "flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors mb-2";
         
-        // 3. Shared content
-        const content = (
-          <>
-            <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
-              <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
-            </div>
-          </>
-        );
+      //   // 3. Shared content
+      //   const content = (
+      //     <>
+      //       <div className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 mt-1.5" />
+      //       <div className="min-w-0">
+      //         <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
+      //         <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+      //       </div>
+      //     </>
+      //   );
       
-        // 4. Conditional Rendering
-        if (n.link) {
+      //   // 4. Conditional Rendering
+      //   if (n.link) {
+      //     return (
+      //       <Link
+      //         key={n.id}
+      //         to={n.link}
+      //         className={`${commonClasses} block`}
+      //         onClick={handleNotifClick}
+      //       >
+      //         {content}
+      //       </Link>
+      //     );
+      //   }
+      
+      //   return (
+      //     <div
+      //       key={n.id}
+      //       className={commonClasses}
+      //       onClick={handleNotifClick}
+      //     >
+      //       {content}
+      //     </div>
+      //   );
+      // })
+      (
+        notifications?.map(notif => {
+          // Define common logic
+          const handleMarkRead = async () => {
+            // setNotifOpen(false);
+            queryClient.setQueryData(['notif-panel', user?.id], (old) =>
+              (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
+            );
+            await api.markRead(`${notif.id}`);
+            setNotifications(prev => prev.filter(n => n.id !== notif.id));
+          };
+        
+          const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
+          const content = (
+            <>
+              <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
+              <p className="text-sm text-slate-500 mt-1 line-clamp-3">{notif.message}</p>
+            </>
+          );
+        
+          if (notif.link) {
+            return (
+              <Link
+                key={notif.id}
+                to={notif.link}
+                className={commonClasses}
+                onClick={handleMarkRead}
+              >
+                {content}
+              </Link>
+            );
+          }
+        
           return (
-            <Link
-              key={n.id}
-              to={n.link}
-              className={`${commonClasses} block`}
-              onClick={handleNotifClick}
+            <div
+              key={notif.id}
+              className={commonClasses}
+              onClick={handleMarkRead}
             >
               {content}
-            </Link>
+            </div>
           );
-        }
-      
-        return (
-          <div
-            key={n.id}
-            className={commonClasses}
-            onClick={handleNotifClick}
-          >
-            {content}
-          </div>
-        );
-      })
+        })
+      )
 
         }
       </div>
@@ -659,7 +703,7 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
   );
 }
 
-function ClientRightPanel({ notifications, maintenance, overdue, pending, user, onNotifRead }) {
+function ClientRightPanel({ notifications, maintenance, overdue, pending, user, setNotifications }) {
   // Use usePlatformRole or useClientRoles to decide what content is visible
   const isClientAdmin = useClientRoles(['client_admin']); // Check if the current user is a client admin
   const navigate = useNavigate();
@@ -684,23 +728,69 @@ function ClientRightPanel({ notifications, maintenance, overdue, pending, user, 
             <Bell className="h-8 w-8 mx-auto mb-2 opacity-40" />
             <p className="text-xs">All caught up!</p>
           </div>
-        ) : notifications?.map(n => (
-          <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
-          onClick={
-            onNotifRead(n)
-          //   async () => {
-          //   await api.markRead(`${n.id}`);
-          //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
-          //   if (n.link) navigate(n.link)
-          // }
-        }>
-            <div className="w-2 h-2 rounded-full bg-[#005f27] flex-shrink-0 mt-1.5" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
-              <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
-            </div>
-          </div>
-        ))}
+        ) : 
+        // notifications?.map(n => (
+        //   <div key={n.id} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-[#edf0be]/40 transition-colors cursor-pointer mb-2"
+        //   onClick={
+        //     onNotifRead(n)
+        //   //   async () => {
+        //   //   await api.markRead(`${n.id}`);
+        //   //   queryClient.invalidateQueries({ queryKey: ['notif-panel', user?.id] });
+        //   //   if (n.link) navigate(n.link)
+        //   // }
+        // }>
+        //     <div className="w-2 h-2 rounded-full bg-[#005f27] flex-shrink-0 mt-1.5" />
+        //     <div className="min-w-0">
+        //       <p className="text-sm font-medium text-slate-800 truncate">{n.title}</p>
+        //       <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
+        //     </div>
+        //   </div>
+        // ))
+        (
+          notifications?.map(notif => {
+            // Define common logic
+            const handleMarkRead = async () => {
+              // setNotifOpen(false);
+              queryClient.setQueryData(['notif-panel', user?.id], (old) =>
+                (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
+              );
+              await api.markRead(`${notif.id}`);
+              setNotifications(prev => prev.filter(n => n.id !== notif.id));
+            };
+          
+            const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
+            const content = (
+              <>
+                <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
+                <p className="text-sm text-slate-500 mt-1 line-clamp-3">{notif.message}</p>
+              </>
+            );
+          
+            if (notif.link) {
+              return (
+                <Link
+                  key={notif.id}
+                  to={notif.link}
+                  className={commonClasses}
+                  onClick={handleMarkRead}
+                >
+                  {content}
+                </Link>
+              );
+            }
+          
+            return (
+              <div
+                key={notif.id}
+                className={commonClasses}
+                onClick={handleMarkRead}
+              >
+                {content}
+              </div>
+            );
+          })
+        )
+        }
       </div>
       {maintenance.length > 0 && (
         <div>
