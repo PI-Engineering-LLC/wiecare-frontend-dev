@@ -275,7 +275,7 @@ export default function AdminQuotes() {
     },
     {
       header: 'Amount',
-      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toLocaleString()}` : '—'}</span>
+      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toFixed(2)}` : '—'}</span>
     },
     {
       header: 'Status',
@@ -603,7 +603,7 @@ export default function AdminQuotes() {
             <div className="border-t pt-4 space-y-3 max-w-xs ml-auto">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Subtotal</span>
-                <span className="font-medium">${subtotal.toLocaleString()}</span>
+                <span className="font-medium">${subtotal.toFixed(2)}</span>
               </div>
 
               {/* Discount */}
@@ -619,7 +619,7 @@ export default function AdminQuotes() {
                     />
                     <span className="text-slate-600">%</span>
                   </div>
-                  <span className="text-rose-600">-${discountAmount.toLocaleString()}</span>
+                  <span className="text-rose-600">-${discountAmount.toFixed(2)}</span>
                 </div>
               ) : (
                 <button
@@ -660,11 +660,11 @@ export default function AdminQuotes() {
                   />
                   <span className="text-slate-600">%</span>
                 </div>
-                <span>${taxAmount.toLocaleString()}</span>
+                <span>${taxAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>${total.toLocaleString()}</span>
+                <span>${total.toFixed(2)}</span>
               </div>
             </div>
 
