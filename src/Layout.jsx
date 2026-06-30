@@ -339,7 +339,7 @@ export default function Layout({ children, currentPageName }) {
                               // loadNotifications();
                               setNotifications(prev => prev.filter(n => n.id !== notif.id));
                               
-                              if (notif.link) window.location.href = notif.link;
+                              // if (notif.link) window.location.href = notif.link;
                               // if (notif.link) navigate(notif.link)
                             }}>
                             <p className="font-semibold text-sm text-slate-800">{notif.title}</p>
@@ -491,7 +491,7 @@ function RightPanel({ user}) {
     );
     await api.markRead(`${n.id}`);
     // if (n.link) navigate(n.link)
-    if (n.link) window.location.href = n.link;
+    // if (n.link) window.location.href = n.link;
   };
 
   if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} onNotifRead={handleNotifRead} />;
