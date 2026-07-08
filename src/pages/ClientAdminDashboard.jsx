@@ -87,7 +87,7 @@ export default function ClientAdminDashboard() {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }) => api.updateUser(id, data), // This expects data with memberships array
+    mutationFn: ({ id, data }) => api.updateUserClientRoles(id,activeClientId, data), // This expects data with memberships array
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org-users', activeClientId] }); // Invalidate with activeClientId
       setShowEditDialog(false);
