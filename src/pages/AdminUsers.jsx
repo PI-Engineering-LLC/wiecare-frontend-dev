@@ -207,6 +207,7 @@ export default function AdminUsers() {
     mutationFn: (invitePayload) => api.inviteUser(invitePayload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
       toast.success('Invitation sent successfully');
       setShowInviteDialog(false);
       setInviteData({ email: '', roleIds: [], platformRole: '', inviteType: 'client', clientId: '' });

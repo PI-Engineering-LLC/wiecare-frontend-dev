@@ -2,7 +2,6 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // @ts-ignore
 const request = async (method, path, { data, params } = {}, isFormData = false) => {
-  console.log("Is FormData?", data instanceof FormData);
 // console.log("Data entries:", [...data.entries()]);
   const url = new URL(`${BASE_URL}${path}`);
   if (params) {
