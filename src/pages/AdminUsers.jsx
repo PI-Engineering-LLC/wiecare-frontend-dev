@@ -218,7 +218,7 @@ export default function AdminUsers() {
     }
   });
   const resendMutation = useMutation({
-    mutationFn: ({id}) => api.resendInvite(id),
+    mutationFn: (id) => api.resendInvite(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
       toast.success('Invitation resent successfully');
@@ -228,7 +228,7 @@ export default function AdminUsers() {
   
   // Mutation to Cancel (e.g., delete the invite record)
   const revokeMutation = useMutation({
-    mutationFn: ({id}) => api.revokeInvite(id),
+    mutationFn: (id) => api.revokeInvite(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
       toast.success('Invitation revoked');
