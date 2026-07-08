@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // ── CollapsibleGroup) ──────────────────────────────────────────────
 function CollapsibleGroup({ label, icon: Icon, items, currentPageName, onNavigate }) {
   const isAnyActive = items.some(i => i.page === currentPageName);
-  const [open, setOpen] = useState(isAnyActive);
+  const [open, setOpen] = useState(true);
   return (
     <div>
       <button onClick={() => setOpen(!open)}

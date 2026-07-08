@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
 import { Plus, Search, Edit2, Users, Mail } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -25,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PlusIcon, Trash2Icon, ChevronDownIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { formatInTimeZone } from 'date-fns-tz';
 
 
 // --- JSDoc Type Definitions for improved type checking ---
@@ -76,6 +78,7 @@ export default function AdminUsers() {
   const [addingClientId, setAddingClientId] = useState('');
   const [selectedNewRoles, setSelectedNewRoles] = useState([]);
   const [openRoleSelect, setOpenRoleSelect] = useState(false);
+  const [activeTab, setActiveTab] = useState('users');
 
   const queryClient = useQueryClient();
 
@@ -93,7 +96,7 @@ export default function AdminUsers() {
     queryKey: ['admin-users', page, searchTerm, roleFilter],
     queryFn: () => api.getUsers({
       page,
-      limit: 50,
+      limit: 100,
       order: '-created_at',
       search: searchTerm,
       platform_role: roleFilter === 'super_admin' || roleFilter === 'platform_admin' || roleFilter === 'platform_user' ? roleFilter : undefined,
@@ -110,6 +113,11 @@ export default function AdminUsers() {
     },
     enabled: !!selectedUser?.id && showEditDialog,
   });
+  const { data: invitesData = {} , isLoading: isLoadingInvites } = useQuery({
+    queryKey: ['admin-invites'],
+    queryFn: () => api.getInvites({limit: 50, order: '-created_at'}),
+  });
+  const invites = invitesData?.users ?? [];
 
   // Update selectedUser state with detailed data once fetched
   useEffect(() => {
@@ -208,6 +216,35 @@ export default function AdminUsers() {
       toast.error(`Failed to send invitation: ${error.response?.data?.error || error.message}`);
     }
   });
+  const resendMutation = useMutation({
+    mutationFn: ({id}) => api.resendInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
+      toast.success('Invitation resent successfully');
+    },
+    onError: () => toast.error('Failed to resend invitation')
+  });
+  
+  // Mutation to Cancel (e.g., delete the invite record)
+  const revokeMutation = useMutation({
+    mutationFn: ({id}) => api.revokeInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-invites'] });
+      toast.success('Invitation revoked');
+    },
+    onError: () => toast.error('Failed to revoke invitation')
+  });
+  const handleResend = (invite) => {
+    if (confirm(`Are you sure you want to resend the invitation to ${invite.email}?`)) {
+      resendMutation.mutate(invite.id);
+    }
+  };
+  
+  const handleRevoke = (invite) => {
+    if (confirm(`Are you sure you want to revoke the invitation for ${invite.email}?`)) {
+      revokeMutation.mutate(invite.id);
+    }
+  };
 
   const handleInvite = async () => {
     const payload = {
@@ -351,7 +388,72 @@ export default function AdminUsers() {
       )
     },
   ].filter(Boolean);
-
+  
+  const inviteColumns = [
+    {
+      header: 'Email',
+      render: (row) => <span className="font-medium text-slate-900">{row.email}</span>
+    },
+    {
+      header: 'Client',
+      render: (row) => <span className="font-medium text-slate-900">{row.client_name || '-'}</span>
+    },
+    {
+      header: 'Role(s)',
+      render: (row) => (
+        <div className="flex flex-col gap-0.5">
+          {row.platform_role && (
+            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+              {row.platform_role.replace(/\bplatform\b/gi, 'internal').replace(/_/g, ' ')}
+            </span>
+          )}
+          {/* Safety check added here */}
+          {(row.role_ids || []).map(rid => (
+            <span key={rid} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium"> 
+              {/* Removed .join(', ') which caused error on string */}
+              {roles.find(r => r.id === rid)?.name || 'Unknown Role'}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    {
+      header: 'Invited by',
+      render: (row) => <span className="font-medium text-slate-900">{row.invited_by_name || '-'}</span>
+    },
+    {
+      header: 'Sent Date',
+      render: (row) => row.updated_at ? formatInTimeZone(new Date(row.updated_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Expires',
+      render: (row) => row.invite_expires_at ? formatInTimeZone(new Date(row.invite_expires_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Accepted Date',
+      render: (row) => row.accepted_at ? formatInTimeZone(new Date(row.accepted_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Actions',
+      render: (row) => (
+        // Conditional rendering: Only show if accepted_at is empty/falsy
+        !row.accepted_at && (
+          <div className="flex gap-2">
+            <Button 
+            variant="ghost" 
+            size="sm" 
+            disabled={resendMutation.isPending}
+            onClick={() => handleResend(row)}>
+              {resendMutation.isPending ? 'Sending...' : 'Resend'}
+            </Button>
+            <Button variant="ghost" size="sm" disabled={revokeMutation.isPending} className="text-rose-500" onClick={() => handleRevoke(row)}>
+            {revokeMutation.isPending ? 'Revoking...' : 'Revoke'}
+            </Button>
+          </div>
+        )
+      )
+    }
+  ];
   const availableClientsToAdd = clients?.filter(
     (client) => !selectedUser?.memberships.some((m) => m.client_id === client.id)
   );
@@ -395,7 +497,16 @@ export default function AdminUsers() {
           }
         />
 
-        <Card className="border-0 shadow-sm">
+        
+
+<Tabs value={activeTab} onValueChange={setActiveTab}>
+  <TabsList className="mb-4">
+    <TabsTrigger value="users">Users</TabsTrigger>
+    <TabsTrigger value="invites">Pending Invites</TabsTrigger>
+  </TabsList>
+  
+  <TabsContent value="users">
+  <Card className="border-0 shadow-sm">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
@@ -422,8 +533,7 @@ export default function AdminUsers() {
             </div>
           </CardContent>
         </Card>
-
-        {users.length === 0 && !isLoading ? (
+  {users.length === 0 && !isLoading ? (
           <EmptyState
             icon={Users}
             title="No users yet"
@@ -439,6 +549,26 @@ export default function AdminUsers() {
             emptyMessage="No users match your search"
           />
         )}
+  </TabsContent>
+  
+  <TabsContent value="invites">
+  {invites.length === 0 && !isLoadingInvites ? (
+          <EmptyState
+            icon={Users}
+            title="No users yet"
+            description="Invite users to get started"
+            action={() => setShowInviteDialog(true)}
+            actionLabel="Invite User"
+          />
+        ) : ( <DataTable
+    columns={inviteColumns}
+      data={invites} // Assuming you fetch this data via useQuery
+      isLoading={isLoadingInvites}
+      emptyMessage="No pending invites found" />)}
+  </TabsContent>
+</Tabs>
+
+        
 
         {/* Invite Dialog */}
         <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>

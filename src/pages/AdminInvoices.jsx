@@ -336,8 +336,8 @@ export default function AdminInvoices() {
     { header: 'Invoice #', render: (row) => <span className="font-medium">{row.invoice_number || `INV-${row.id?.slice(-6)}`}</span> },
     { header: 'Entity', render: (row) => <span className="text-xs text-slate-500">{row.sending_entity || '—'}</span> },
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
-    { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toLocaleString() || '0'}</span> },
-    { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0).toLocaleString()}</span> },
+    { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount?.toFixed(2) || '0'}</span> },
+    { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0).toFixed(2)}</span> },
     { header: 'Date', render: (row) => row.issue_date ? formatInTimeZone(new Date(row.issue_date),'UTC', 'MMM d, yyyy') : '-' },
     { header: 'Due', render: (row)  => row.due_date ? formatInTimeZone(new Date(row.due_date), 'UTC', 'MMM d, yyyy') : '-' },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
@@ -368,9 +368,9 @@ export default function AdminInvoices() {
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatsCard title="Total Paid" value={`$${totalRevenue.toLocaleString()}`} variant="success" />
-          <StatsCard title="Pending" value={`$${totalPending.toLocaleString()}`} variant="warning" />
-          <StatsCard title="Overdue" value={`$${totalOverdue.toLocaleString()}`} variant="danger" />
+          <StatsCard title="Total Paid" value={`$${totalRevenue.toFixed(2)}`} variant="success" />
+          <StatsCard title="Pending" value={`$${totalPending.toFixed(2)}`} variant="warning" />
+          <StatsCard title="Overdue" value={`$${totalOverdue.toFixed(2)}`} variant="danger" />
         </div>
 
         <Card className="border-0 shadow-sm">
@@ -451,7 +451,7 @@ export default function AdminInvoices() {
                           <>
                             {orders
                               .filter(o => o.client_id === formData.client_id && !o.is_split)
-                              .map(o => <SelectItem key={o.id} value={o.id}>{o.order_number || o.title} — ${o.total_amount?.toLocaleString()}</SelectItem>)
+                              .map(o => <SelectItem key={o.id} value={o.id}>{o.order_number || o.title} — ${o.total_amount?.toFixed(2)}</SelectItem>)
                             }
                             {subOrders.filter(s => s.client_id === formData.client_id).length > 0 && (
                               <>
@@ -461,7 +461,7 @@ export default function AdminInvoices() {
                                 )}
                                 {subOrders
                                   .filter(s => s.client_id === formData.client_id)
-                                  .map(s => <SelectItem key={s.id} value={s.id}>{s.sub_order_number} ({s.supplier_entity}) — ${s.total_amount?.toLocaleString()}</SelectItem>)
+                                  .map(s => <SelectItem key={s.id} value={s.id}>{s.sub_order_number} ({s.supplier_entity}) — ${s.total_amount?.toFixed(2)}</SelectItem>)
                                 }
                               </>
                             )}

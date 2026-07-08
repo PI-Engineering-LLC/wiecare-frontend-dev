@@ -275,7 +275,7 @@ export default function AdminQuotes() {
     },
     {
       header: 'Amount',
-      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toFixed(2)}` : '—'}</span>
+      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount}` : '—'}</span>
     },
     {
       header: 'Status',
