@@ -237,8 +237,15 @@ export default function ClientAdminDashboard() {
       {
         header: 'Role(s)',
         render: (row) => (
+          // const activeClientMembership = u.memberships.find(m => m.client_id === activeClientId)
+          // {activeClientMembership && activeClientMembership.roles.length > 0 && (
+          //   <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
+          //     {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
+          //   </span>
+                       
           <div className="flex flex-col gap-0.5">
             {/* Safety check added here */}
+            {console.log(allRoles)}
             {(row.role_ids || []).map(rid => (
               <span key={rid} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium"> 
                 {/* Removed .join(', ') which caused error on string */}
