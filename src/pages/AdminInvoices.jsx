@@ -337,7 +337,7 @@ export default function AdminInvoices() {
     { header: 'Entity', render: (row) => <span className="text-xs text-slate-500">{row.sending_entity || '—'}</span> },
     { header: 'Client', render: (row) => <span className="font-medium">{row.client_name || '-'}</span> },
     { header: 'Amount', render: (row) => <span className="font-semibold">${row.total_amount || '0'}</span> },
-    { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0).toFixed(2)}</span> },
+    { header: 'Balance', render: (row) => <span className={`font-semibold ${(row.balance_due || 0) > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>${(row.balance_due || 0)}</span> },
     { header: 'Date', render: (row) => row.issue_date ? formatInTimeZone(new Date(row.issue_date),'UTC', 'MMM d, yyyy') : '-' },
     { header: 'Due', render: (row)  => row.due_date ? formatInTimeZone(new Date(row.due_date), 'UTC', 'MMM d, yyyy') : '-' },
     { header: 'Status', render: (row) => <StatusBadge status={row.status} /> },
