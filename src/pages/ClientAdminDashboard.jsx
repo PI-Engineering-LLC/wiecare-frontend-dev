@@ -186,6 +186,7 @@ export default function ClientAdminDashboard() {
         memberships: [{
           clientId: selectedMembershipToEdit.clientId,
           roleIds: selectedMembershipToEdit.roles.map(r => r.id),
+          status: selectedUser.status
         }],
       }
     });
