@@ -117,7 +117,7 @@ export default function AdminUsers() {
     queryKey: ['admin-invites'],
     queryFn: () => api.getInvites({limit: 50, order: '-created_at'}),
   });
-  const invites = invitesData?.users ?? [];
+  const invites = invitesData?.invites ?? [];
 
   // Update selectedUser state with detailed data once fetched
   useEffect(() => {
