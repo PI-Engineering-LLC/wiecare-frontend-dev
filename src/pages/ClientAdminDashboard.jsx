@@ -26,7 +26,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { useClientRoles } from '@/hooks/useClientRoles';
 import { AvatarImg } from '@/components/UserAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import DataTable from '@/components/shared/DataTable';
 
 export default function ClientAdminDashboard() {
   const { user } = useAuth();
