@@ -42,6 +42,7 @@ export default function AdminClients() {
     contract_date: '',
     no_warranty: false,
     on_hold: false,
+    invite_limit: 5,
     notes: ''
   });
 
@@ -50,7 +51,7 @@ export default function AdminClients() {
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['admin-clients', searchTerm, statusFilter], // Include filters in queryKey
     queryFn: () => api.getClients({
-      order: '-created_at', 
+      order: '-created_at',
       limit: 200,
       search: searchTerm,
       status: statusFilter === 'all' ? undefined : statusFilter, // Only send status if not 'all'
@@ -66,8 +67,8 @@ export default function AdminClients() {
       toast.success('Client created successfully');
     },
     onError: (error) => {
-        console.error('Failed to create client:', error);
-        toast.error(`Failed to create client: ${error.response?.data?.error || error.message}`);
+      console.error('Failed to create client:', error);
+      toast.error(`Failed to create client: ${error.response?.data?.error || error.message}`);
     }
   });
 
@@ -80,8 +81,8 @@ export default function AdminClients() {
       toast.success('Client updated successfully');
     },
     onError: (error) => {
-        console.error('Failed to update client:', error);
-        toast.error(`Failed to update client: ${error.response?.data?.error || error.message}`);
+      console.error('Failed to update client:', error);
+      toast.error(`Failed to update client: ${error.response?.data?.error || error.message}`);
     }
   });
 
@@ -103,6 +104,7 @@ export default function AdminClients() {
       contract_date: '',
       no_warranty: false,
       on_hold: false,
+      invite_limit: 5,
       notes: ''
     });
     setSelectedClient(null);
@@ -113,11 +115,11 @@ export default function AdminClients() {
     if (!client.warranty_start_date) return { label: 'Not Set', color: 'text-amber-600', valid: false };
     const start = parseISO(client.warranty_start_date);
     // const years = client.subscription_tier === 'basic' ? 1 : 2; // Assuming basic is 1 year, others are 2
-    const years =  1;
+    const years = 1;
     const expiry = addYears(start, years);
     const isValid = isAfter(expiry, new Date());
     return {
-      label: isValid ? `Valid until ${formatInTimeZone(expiry,'UTC', 'MMM d, yyyy')}` : `Expired ${formatInTimeZone(expiry,'UTC', 'MMM d, yyyy')}`,
+      label: isValid ? `Valid until ${formatInTimeZone(expiry, 'UTC', 'MMM d, yyyy')}` : `Expired ${formatInTimeZone(expiry, 'UTC', 'MMM d, yyyy')}`,
       color: isValid ? 'text-emerald-600' : 'text-rose-600',
       valid: isValid,
       expiry
@@ -143,6 +145,7 @@ export default function AdminClients() {
       contract_date: client.contract_date || '', // Format for date input new Date(client.contract_date + 'T00:00:00') : null,
       no_warranty: client.no_warranty || false,
       on_hold: client.on_hold || false,
+      invite_limit: client.invite_limit || 5,
       notes: client.notes || ''
     });
     setShowDialog(true);
@@ -163,8 +166,8 @@ export default function AdminClients() {
 
   const filteredClients = clients.filter(client => {
     const matchesSearch = client.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.contact_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase());
+      client.contact_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -283,9 +286,9 @@ export default function AdminClients() {
                 <SelectItem value="suspended">Suspended</SelectItem>
               </SelectContent>
             </Select>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
@@ -478,14 +481,23 @@ export default function AdminClients() {
                       className="mt-1"
                     />
                     {formData.warranty_start_date && (
-                       <p className="text-xs text-slate-500 mt-1">
-                       {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : formData.subscription_tier === 'default' ? 'Default: 1 year warranty':'Pro: 1 year warranty'}
-                       {' — '}expires{' '}
-                       {formatInTimeZone(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 1),'UTC', 'MMM d, yyyy')}
-                       </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {formData.subscription_tier === 'basic' ? 'Basic: 1 year warranty' : formData.subscription_tier === 'default' ? 'Default: 1 year warranty' : 'Pro: 1 year warranty'}
+                        {' — '}expires{' '}
+                        {formatInTimeZone(addYears(parseISO(formData.warranty_start_date), formData.subscription_tier === 'basic' ? 1 : 1), 'UTC', 'MMM d, yyyy')}
+                      </p>
                     )}
                   </div>
                 )}
+              </div>
+              <div>
+                <Label>Invite Limit</Label>
+                <Input
+                  type="number"
+                  value={formData.invite_limit}
+                  onChange={(e) => setFormData({ ...formData, invite_limit: parseFloat(e.target.value) || 0 })}
+                  className="mt-1"
+                />
               </div>
 
               <div className="col-span-2">
