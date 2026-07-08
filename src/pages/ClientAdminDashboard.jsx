@@ -50,11 +50,11 @@ export default function ClientAdminDashboard() {
     queryFn: () => api.getRoles({ limit: 200 }),
   });
 
-  const { data: invitesData = {} , isLoading: isLoadingInvites } = useQuery({
-      queryKey: ['invites'],
-      queryFn: () => api.getInvites({limit: 50, order: '-created_at'}),
-    });
-    const invites = invitesData?.invites ?? [];
+  const { data: invitesData = {}, isLoading: isLoadingInvites } = useQuery({
+    queryKey: ['invites'],
+    queryFn: () => api.getInvites({ limit: 50, order: '-created_at' }),
+  });
+  const invites = invitesData?.invites ?? [];
 
 
   const { data: orgUsersData = {}, isLoading: loadingUsers } = useQuery({
@@ -95,7 +95,7 @@ export default function ClientAdminDashboard() {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }) => api.updateUserClientRoles(id,activeClientId, data), // This expects data with memberships array
+    mutationFn: ({ id, data }) => api.updateUserClientRoles(id, activeClientId, data), // This expects data with memberships array
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org-users', activeClientId] }); // Invalidate with activeClientId
       setShowEditDialog(false);
@@ -113,6 +113,7 @@ export default function ClientAdminDashboard() {
     mutationFn: (invitePayload) => api.inviteUser(invitePayload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['org-users', activeClientId] });
+      queryClient.invalidateQueries({ queryKey: ['invites'] });
       toast.success('Invitation sent');
       setShowInviteDialog(false);
       setInviteEmail('');
@@ -124,34 +125,34 @@ export default function ClientAdminDashboard() {
     }
   });
   const resendMutation = useMutation({
-      mutationFn: (id) => api.resendInvite(id),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['invites'] });
-        toast.success('Invitation resent successfully');
-      },
-      onError: () => toast.error('Failed to resend invitation')
-    });
-    
-    // Mutation to Cancel (e.g., delete the invite record)
-    const revokeMutation = useMutation({
-      mutationFn: (id) => api.revokeInvite(id),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['invites'] });
-        toast.success('Invitation revoked');
-      },
-      onError: () => toast.error('Failed to revoke invitation')
-    });
-    const handleResend = (invite) => {
-      if (confirm(`Are you sure you want to resend the invitation to ${invite.email}?`)) {
-        resendMutation.mutate(invite.id);
-      }
-    };
-    
-    const handleRevoke = (invite) => {
-      if (confirm(`Are you sure you want to revoke the invitation for ${invite.email}?`)) {
-        revokeMutation.mutate(invite.id);
-      }
-    };
+    mutationFn: (id) => api.resendInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites'] });
+      toast.success('Invitation resent successfully');
+    },
+    onError: () => toast.error('Failed to resend invitation')
+  });
+
+  // Mutation to Cancel (e.g., delete the invite record)
+  const revokeMutation = useMutation({
+    mutationFn: (id) => api.revokeInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites'] });
+      toast.success('Invitation revoked');
+    },
+    onError: () => toast.error('Failed to revoke invitation')
+  });
+  const handleResend = (invite) => {
+    if (confirm(`Are you sure you want to resend the invitation to ${invite.email}?`)) {
+      resendMutation.mutate(invite.id);
+    }
+  };
+
+  const handleRevoke = (invite) => {
+    if (confirm(`Are you sure you want to revoke the invitation for ${invite.email}?`)) {
+      revokeMutation.mutate(invite.id);
+    }
+  };
 
   const handleInvite = async () => {
     if (!inviteEmail || !activeClientId || inviteRoleIds.length === 0) {
@@ -230,64 +231,59 @@ export default function ClientAdminDashboard() {
   };
 
   const inviteColumns = [
-      {
-        header: 'Email',
-        render: (row) => <span className="font-medium text-slate-900">{row.email}</span>
-      },
-      {
-        header: 'Role(s)',
-        render: (row) => (
-          // const activeClientMembership = u.memberships.find(m => m.client_id === activeClientId)
-          // {activeClientMembership && activeClientMembership.roles.length > 0 && (
-          //   <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
-          //     {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
-          //   </span>
-                       
-          <div className="flex flex-col gap-0.5">
-            {/* Safety check added here */}
-            {console.log(allRoles)}
-            {(row.role_ids || []).map(rid => (
-              <span key={rid} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium"> 
-                {/* Removed .join(', ') which caused error on string */}
-                {allRoles.find(r => r.id === rid)?.name || 'Unknown Role'}
-              </span>
-            ))}
-          </div>
-        )
-      },
-      {
-        header: 'Sent Date',
-        render: (row) => row.updated_at ? formatInTimeZone(new Date(row.updated_at), 'UTC', 'MMM d, yyyy') : '-'
-      },
-      {
-        header: 'Expires',
-        render: (row) => row.invite_expires_at ? formatInTimeZone(new Date(row.invite_expires_at), 'UTC', 'MMM d, yyyy') : '-'
-      },
-      {
-        header: 'Accepted Date',
-        render: (row) => row.accepted_at ? formatInTimeZone(new Date(row.accepted_at), 'UTC', 'MMM d, yyyy') : '-'
-      },
-      {
-        header: 'Actions',
-        render: (row) => (
-          // Conditional rendering: Only show if accepted_at is empty/falsy
-          !row.accepted_at && (
-            <div className="flex gap-2">
-              <Button 
-              variant="ghost" 
-              size="sm" 
+    {
+      header: 'Email',
+      render: (row) => <span className="font-medium text-slate-900">{row.email}</span>
+    },
+    {
+      header: 'Role(s)',
+      render: (row) => (
+
+        <div className="flex flex-col gap-0.5">
+          {/* Safety check added here */}
+          {console.log(allRoles)}
+          {(row.role_ids || []).map(rid => (
+            <span key={rid} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium">
+              {/* Removed .join(', ') which caused error on string */}
+              {allRoles.find(r => r.id === rid)?.name || 'Unknown Role'}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    {
+      header: 'Sent Date',
+      render: (row) => row.updated_at ? formatInTimeZone(new Date(row.updated_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Expires',
+      render: (row) => row.invite_expires_at ? formatInTimeZone(new Date(row.invite_expires_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Accepted Date',
+      render: (row) => row.accepted_at ? formatInTimeZone(new Date(row.accepted_at), 'UTC', 'MMM d, yyyy') : '-'
+    },
+    {
+      header: 'Actions',
+      render: (row) => (
+        // Conditional rendering: Only show if accepted_at is empty/falsy
+        !row.accepted_at && (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={resendMutation.isPending}
               onClick={() => handleResend(row)}>
-                {resendMutation.isPending ? 'Sending...' : 'Resend'}
-              </Button>
-              <Button variant="ghost" size="sm" disabled={revokeMutation.isPending} className="text-rose-500" onClick={() => handleRevoke(row)}>
+              {resendMutation.isPending ? 'Sending...' : 'Resend'}
+            </Button>
+            <Button variant="ghost" size="sm" disabled={revokeMutation.isPending} className="text-rose-500" onClick={() => handleRevoke(row)}>
               {revokeMutation.isPending ? 'Revoking...' : 'Revoke'}
-              </Button>
-            </div>
-          )
+            </Button>
+          </div>
         )
-      }
-    ];
+      )
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -310,92 +306,92 @@ export default function ClientAdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList>
-        <TabsTrigger value="team">Team Members</TabsTrigger>
-        <TabsTrigger value="invites">Pending Invites</TabsTrigger>
-      </TabsList>
+          <TabsList>
+            <TabsTrigger value="team">Team Members</TabsTrigger>
+            <TabsTrigger value="invites">Invites</TabsTrigger>
+          </TabsList>
 
-      <TabsContent value="team">
-        {/* Team Members */}
-        <Card className="border-0 shadow-sm lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5 text-[#005f27]" /> Team Members
-            </CardTitle>
-            <div className="relative w-56">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <Input
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="pl-8 h-8 text-sm"
-              />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loadingUsers ? (
-              <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
-            ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-8">
-                <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">No team members yet</p>
-                <Button onClick={() => setShowInviteDialog(true)} className="mt-3 bg-[#005f27] hover:bg-[#436a36]" size="sm">
-                  <Plus className="h-4 w-4 mr-1" /> Invite First Member
-                </Button>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {filteredUsers.map(u => {
-                  const activeClientMembership = u.memberships.find(m => m.client_id === activeClientId);
-                  return (
-                    <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#005f27]/30 hover:bg-[#edf0be]/30 transition-all">
-                      <AvatarImg avatarKey={u.avatar_storage_key} fallback={getInitials(u.full_name)} />
-
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 text-sm truncate">{u.full_name || 'No Name'}</p>
-                        <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                        {activeClientMembership && activeClientMembership.roles.length > 0 && (
-                          <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
-                            {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
-                          </span>
-                        )}
-                      </div>
-                      {u.id !== user.id && activeClientMembership && ( // Can only edit if user is a member of the active client
-                        <Button
-                          variant="ghost" size="icon"
-                          className="h-7 w-7 text-slate-400 hover:text-slate-700"
-                          onClick={() => handleEditUser(u)}
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="invites">
-         {invites.length === 0 && !isLoadingInvites ? (
-                  <EmptyState
-                    icon={Users}
-                    title="No users yet"
-                    description="Invite users to get started"
-                    action={() => setShowInviteDialog(true)}
-                    actionLabel="Invite User"
+          <TabsContent value="team">
+            {/* Team Members */}
+            <Card className="border-0 shadow-sm lg:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users className="h-5 w-5 text-[#005f27]" /> Team Members
+                </CardTitle>
+                <div className="relative w-56">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="pl-8 h-8 text-sm"
                   />
-                ) : ( <DataTable
-            columns={inviteColumns}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingUsers ? (
+                  <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-slate-500 text-sm">No team members yet</p>
+                    <Button onClick={() => setShowInviteDialog(true)} className="mt-3 bg-[#005f27] hover:bg-[#436a36]" size="sm">
+                      <Plus className="h-4 w-4 mr-1" /> Invite First Member
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {filteredUsers.map(u => {
+                      const activeClientMembership = u.memberships.find(m => m.client_id === activeClientId);
+                      return (
+                        <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#005f27]/30 hover:bg-[#edf0be]/30 transition-all">
+                          <AvatarImg avatarKey={u.avatar_storage_key} fallback={getInitials(u.full_name)} />
+
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-slate-900 text-sm truncate">{u.full_name || 'No Name'}</p>
+                            <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                            {activeClientMembership && activeClientMembership.roles.length > 0 && (
+                              <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
+                                {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
+                              </span>
+                            )}
+                          </div>
+                          {u.id !== user.id && activeClientMembership && ( // Can only edit if user is a member of the active client
+                            <Button
+                              variant="ghost" size="icon"
+                              className="h-7 w-7 text-slate-400 hover:text-slate-700"
+                              onClick={() => handleEditUser(u)}
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="invites">
+            {invites.length === 0 && !isLoadingInvites ? (
+              <EmptyState
+                icon={Users}
+                title="No users yet"
+                description="Invite users to get started"
+                action={() => setShowInviteDialog(true)}
+                actionLabel="Invite User"
+              />
+            ) : (<DataTable
+              columns={inviteColumns}
               data={invites} // Assuming you fetch this data via useQuery
               isLoading={isLoadingInvites}
               emptyMessage="No pending invites found" />)}
-      </TabsContent>
-    </Tabs>
+          </TabsContent>
+        </Tabs>
 
         {/* Recent Invoices */}
         <Card className="border-0 shadow-sm">
