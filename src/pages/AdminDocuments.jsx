@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, FileBox, Trash2, Upload, File } from 'lucide-react';
+import { Plus, Search, Edit2, FileBox, Trash2, Upload, File, Download } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
+import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 
 export default function AdminDocuments() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,18 +45,18 @@ export default function AdminDocuments() {
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['admin-documents'],
-    queryFn: () => api.getDs({ order: 'title',limit:500}),
+    queryFn: () => api.getDs({ order: 'title', limit: 500 }),
   });
 
   const { data: clients = [] } = useQuery({
     queryKey: ['admin-clients-docs'],
-    queryFn: () => api.getClients({ order: 'company_name', limit: 200}),
+    queryFn: () => api.getClients({ order: 'company_name', limit: 200 }),
   });
 
   const createMutation = useMutation({
     mutationFn: (data) => api.createD(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-documents']});
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
       setShowDialog(false);
       resetForm();
       toast.success('Document uploaded successfully');
@@ -65,7 +66,7 @@ export default function AdminDocuments() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => api.updateD(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-documents']});
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
       setShowDialog(false);
       resetForm();
       toast.success('Document updated successfully');
@@ -75,7 +76,7 @@ export default function AdminDocuments() {
   const deleteMutation = useMutation({
     mutationFn: (id) => api.deleteD(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-documents']});
+      queryClient.invalidateQueries({ queryKey: ['admin-documents'] });
       toast.success('Document deleted');
     },
   });
@@ -130,43 +131,43 @@ export default function AdminDocuments() {
 
   const handleSubmit = async () => {
 
-    
+
 
 
     setUploading(true);
     let finalFormData = { ...formData };
     try {
       if (selectedFile) {
-      const file_key = await uploadFileToS3({ client_id: formData?.client_id, file: selectedFile });
-      finalFormData.file_storage_key = file_key;
-      finalFormData.file_type = selectedFile.type;
-      // finalFormData.file_size = selectedFile.size;
-      // setFormData(prev => ({
-      //   ...prev,
-      //   file_storage_key: file_key,
-      //   file_type: file.type,
-      //   file_size: file.size
-      // }));
-      // toast.success('File uploaded');
-      if (selectedDocument) {
-        await updateMutation.mutateAsync({ id: selectedDocument.id, data: {...finalFormData,file_size:selectedFile.size} });
-      } else {
-        await createMutation.mutateAsync({...finalFormData,file_size:selectedFile.size});
+        const file_key = await uploadFileToS3({ client_id: formData?.client_id, file: selectedFile });
+        finalFormData.file_storage_key = file_key;
+        finalFormData.file_type = selectedFile.type;
+        // finalFormData.file_size = selectedFile.size;
+        // setFormData(prev => ({
+        //   ...prev,
+        //   file_storage_key: file_key,
+        //   file_type: file.type,
+        //   file_size: file.size
+        // }));
+        // toast.success('File uploaded');
+        if (selectedDocument) {
+          await updateMutation.mutateAsync({ id: selectedDocument.id, data: { ...finalFormData, file_size: selectedFile.size } });
+        } else {
+          await createMutation.mutateAsync({ ...finalFormData, file_size: selectedFile.size });
+        }
       }
-    }
     } catch (error) {
       toast.error('Failed to upload file');
-    }finally {
+    } finally {
       setUploading(false);
       setSelectedFile(null);
     }
 
-    
+
   };
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase());
+      doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -178,7 +179,7 @@ export default function AdminDocuments() {
     { value: 'manual', label: 'Manual' },
     { value: 'other', label: 'Other' },
   ];
-
+  const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
   const columns = [
     {
       header: 'Document',
@@ -224,6 +225,42 @@ export default function AdminDocuments() {
       header: 'Actions',
       render: (row) => (
         <div className="flex items-center gap-1">
+          {row.file_storage_key && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  await handleSecureView(e, row.file_storage_key)
+
+                } catch (error) {
+                  if (error.message === "FILE_MISSING_IN_STORAGE") {
+                    toast.error('File Not Found');
+                    try {
+                      await updateMutation.mutateAsync({
+                        id: row.id,
+                        data: { status: 'archived' }
+                      });
+                    } catch (error) {
+                      toast.error('Error occured');
+                    }
+                  } else {
+                    toast.error('Failed to download, please try again');
+
+                  }
+                }
+
+              }
+
+              }
+            >
+              <Download className="h-3.5 w-3.5 mr-1" />
+              {currentlyLoadingKey === row.file_storage_key ? 'Authorizing Access...' : 'Report'}
+
+            </Button>
+          )}
           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
             <Edit2 className="h-4 w-4" />
           </Button>
@@ -237,196 +274,196 @@ export default function AdminDocuments() {
 
   return (
     <AdminOnly>
-    <div className="space-y-6">
-      <PageHeader
-        title="Documents"
-        subtitle="Manage equipment drawings, manuals, and documentation"
-        actions={
-          <Button 
-            onClick={() => { resetForm(); setShowDialog(true); }}
-            className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Upload Document
-          </Button>
-        }
-      />
-
-      <Card className="border-0 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search documents..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(cat => (
-                  <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {documents.length === 0 && !isLoading ? (
-        <EmptyState
-          icon={FileBox}
-          title="No documents yet"
-          description="Upload your first document"
-          action={() => { resetForm(); setShowDialog(true); }}
-          actionLabel="Upload Document"
-        />
-      ) : (
-        <DataTable columns={columns} data={filteredDocuments} isLoading={isLoading} />
-      )}
-
-      <Dialog open={showDialog} onOpenChange={(open) => { if (!open) resetForm(); setShowDialog(open); }}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{selectedDocument ? 'Edit Document' : 'Upload Document'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* File upload */}
-              <div className="col-span-2">
-                <Label>File *</Label>
-                <div className="mt-1">
-                  {selectedFile ?
-                  (
-                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                      <File className="h-5 w-5 text-slate-600" />
-                      <span className="text-sm truncate flex-1">File uploaded</span>
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
-                        Change
-                      </Button>
-                    </div>
-                  )  
-                  // (
-                  //   <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                  //     <File className="h-5 w-5 text-slate-600" />
-                  //     <span className="text-sm truncate flex-1">File uploaded</span>
-                  //     <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, file_storage_key: '' })}>
-                  //       Change
-                  //     </Button>
-                  //   </div>
-                  // ) 
-                  : (
-                    <>
-                      <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
-                      <label htmlFor="doc-upload">
-                        <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
-                          <Upload className="h-5 w-5 text-slate-400" />
-                          <span className="text-sm text-slate-500">
-                            {uploading ? 'Uploading...' : 'Click to upload file'}
-                          </span>
-                        </div>
-                      </label>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Client selector */}
-              <div className="col-span-2">
-                <Label>Client *</Label>
-                <Select value={formData.client_id} onValueChange={handleClientChange}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select a client..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.company_name} {c.coaster_name ? `— ${c.coaster_name}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Title */}
-              <div className="col-span-2">
-                <Label>Title *</Label>
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <Label>Category</Label>
-                <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Equipment model */}
-              <div>
-                <Label>Equipment Model</Label>
-                <Input
-                  value={formData.equipment_model}
-                  onChange={(e) => setFormData({ ...formData, equipment_model: e.target.value })}
-                  className="mt-1"
-                  placeholder="e.g., Model XYZ"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="col-span-2">
-                <Label>Description</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="mt-1"
-                  rows={2}
-                />
-              </div>
-
-              {/* Public toggle */}
-              <div className="col-span-2 flex items-center justify-between">
-                <div>
-                  <Label>Also visible to all clients with same coaster</Label>
-                  <p className="text-sm text-slate-500">If off, only this client can see it</p>
-                </div>
-                <Switch
-                  checked={formData.is_public}
-                  onCheckedChange={(v) => setFormData({ ...formData, is_public: v })}
-                />
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={!formData.title || !formData.client_id || !selectedFile || uploading}
+      <div className="space-y-6">
+        <PageHeader
+          title="Documents"
+          subtitle="Manage equipment drawings, manuals, and documentation"
+          actions={
+            <Button
+              onClick={() => { resetForm(); setShowDialog(true); }}
               className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
             >
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedDocument ? 'Update' : 'Upload'}
+              <Plus className="h-4 w-4 mr-2" />
+              Upload Document
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          }
+        />
+
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search documents..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {documents.length === 0 && !isLoading ? (
+          <EmptyState
+            icon={FileBox}
+            title="No documents yet"
+            description="Upload your first document"
+            action={() => { resetForm(); setShowDialog(true); }}
+            actionLabel="Upload Document"
+          />
+        ) : (
+          <DataTable columns={columns} data={filteredDocuments} isLoading={isLoading} />
+        )}
+
+        <Dialog open={showDialog} onOpenChange={(open) => { if (!open) resetForm(); setShowDialog(open); }}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{selectedDocument ? 'Edit Document' : 'Upload Document'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* File upload */}
+                <div className="col-span-2">
+                  <Label>File *</Label>
+                  <div className="mt-1">
+                    {selectedFile ?
+                      (
+                        <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                          <File className="h-5 w-5 text-slate-600" />
+                          <span className="text-sm truncate flex-1">File uploaded</span>
+                          <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                            Change
+                          </Button>
+                        </div>
+                      )
+                      // (
+                      //   <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
+                      //     <File className="h-5 w-5 text-slate-600" />
+                      //     <span className="text-sm truncate flex-1">File uploaded</span>
+                      //     <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, file_storage_key: '' })}>
+                      //       Change
+                      //     </Button>
+                      //   </div>
+                      // ) 
+                      : (
+                        <>
+                          <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
+                          <label htmlFor="doc-upload">
+                            <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
+                              <Upload className="h-5 w-5 text-slate-400" />
+                              <span className="text-sm text-slate-500">
+                                {uploading ? 'Uploading...' : 'Click to upload file'}
+                              </span>
+                            </div>
+                          </label>
+                        </>
+                      )}
+                  </div>
+                </div>
+
+                {/* Client selector */}
+                <div className="col-span-2">
+                  <Label>Client *</Label>
+                  <Select value={formData.client_id} onValueChange={handleClientChange}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select a client..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map(c => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.company_name} {c.coaster_name ? `— ${c.coaster_name}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Title */}
+                <div className="col-span-2">
+                  <Label>Title *</Label>
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Category */}
+                <div>
+                  <Label>Category</Label>
+                  <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Equipment model */}
+                <div>
+                  <Label>Equipment Model</Label>
+                  <Input
+                    value={formData.equipment_model}
+                    onChange={(e) => setFormData({ ...formData, equipment_model: e.target.value })}
+                    className="mt-1"
+                    placeholder="e.g., Model XYZ"
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="col-span-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+
+                {/* Public toggle */}
+                <div className="col-span-2 flex items-center justify-between">
+                  <div>
+                    <Label>Also visible to all clients with same coaster</Label>
+                    <p className="text-sm text-slate-500">If off, only this client can see it</p>
+                  </div>
+                  <Switch
+                    checked={formData.is_public}
+                    onCheckedChange={(v) => setFormData({ ...formData, is_public: v })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={!formData.title || !formData.client_id || !selectedFile || uploading}
+                className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
+              >
+                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedDocument ? 'Update' : 'Upload'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </AdminOnly>
   );
 }
