@@ -22,8 +22,8 @@ import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useClient } from '@/lib/ClientContext';
-import { usePermission } from '@/hooks/usePermission'; 
-import { useClientRoles } from '@/hooks/useClientRoles'; 
+import { usePermission } from '@/hooks/usePermission';
+import { useClientRoles } from '@/hooks/useClientRoles';
 import { AvatarImg } from '@/components/UserAvatar';
 
 export default function ClientAdminDashboard() {
@@ -34,7 +34,7 @@ export default function ClientAdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRoleIds, setInviteRoleIds] = useState([]); 
+  const [inviteRoleIds, setInviteRoleIds] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedMembershipToEdit, setSelectedMembershipToEdit] = useState(null); // To hold the specific membership being edited
@@ -43,7 +43,7 @@ export default function ClientAdminDashboard() {
   // Assuming 'client:admin.dashboard.view' or the 'client_admin' role itself
   const isAuthorized = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
 
-  const { data: allRoles = [] } = useQuery({ 
+  const { data: allRoles = [] } = useQuery({
     queryKey: ['all-roles'],
     queryFn: () => api.getRoles({ limit: 200 }),
   });
@@ -52,12 +52,12 @@ export default function ClientAdminDashboard() {
   const { data: orgUsersData = {}, isLoading: loadingUsers } = useQuery({
     queryKey: ['org-users', activeClientId],
     queryFn: () => api.getUsers({
-      client_id: activeClientId, 
+      client_id: activeClientId,
       order: '-created_at',
       limit: 200,
-      search: searchTerm, 
+      search: searchTerm,
     }),
-    enabled: !!activeClientId && isAuthorized, 
+    enabled: !!activeClientId && isAuthorized,
   });
   const orgUsers = orgUsersData?.users ?? [];
 
@@ -96,8 +96,8 @@ export default function ClientAdminDashboard() {
       toast.success('User updated');
     },
     onError: (error) => {
-        console.error('Failed to update user:', error);
-        toast.error(`Failed to update user: ${error.response?.data?.error || error.message}`);
+      console.error('Failed to update user:', error);
+      toast.error(`Failed to update user: ${error.response?.data?.error || error.message}`);
     }
   });
 
@@ -111,25 +111,25 @@ export default function ClientAdminDashboard() {
       setInviteRoleIds([]);
     },
     onError: (error) => {
-        console.error('Failed to send invitation:', error);
-        toast.error(`Failed to send invitation: ${error.response?.data?.error || error.message}`);
+      console.error('Failed to send invitation:', error);
+      toast.error(`Failed to send invitation: ${error.response?.data?.error || error.message}`);
     }
   });
 
   const handleInvite = async () => {
     if (!inviteEmail || !activeClientId || inviteRoleIds.length === 0) {
-        toast.error('Email, client, and role are required.');
-        return;
+      toast.error('Email, client, and role are required.');
+      return;
     }
     try {
-        await inviteUserMutation.mutateAsync({
-            email: inviteEmail,
-            inviteType: 'client',
-            clientId: activeClientId,
-            role_ids: inviteRoleIds, 
-        });
+      await inviteUserMutation.mutateAsync({
+        email: inviteEmail,
+        inviteType: 'client',
+        clientId: activeClientId,
+        role_ids: inviteRoleIds,
+      });
     } catch (error) {
-        // Error handling is in mutationFn's onError
+      // Error handling is in mutationFn's onError
     }
   };
 
@@ -164,13 +164,13 @@ export default function ClientAdminDashboard() {
 
   const handleEditUser = (userToEdit) => {
     // When editing, find the specific membership for the activeClientId
-    const membership = userToEdit.memberships.find(m => m.clientId === activeClientId);
+    const membership = userToEdit.memberships.find(m => m.client_id === activeClientId);
     if (membership) {
-        setSelectedUser(userToEdit);
-        setSelectedMembershipToEdit(membership); // Store the membership being edited
-        setShowEditDialog(true);
+      setSelectedUser(userToEdit);
+      setSelectedMembershipToEdit(membership); // Store the membership being edited
+      setShowEditDialog(true);
     } else {
-        toast.error('User is not a member of the active client.');
+      toast.error('User is not a member of the active client.');
     }
   };
 
@@ -185,7 +185,7 @@ export default function ClientAdminDashboard() {
         // Can update other user fields here if needed in the dialog
         memberships: [{
           clientId: selectedMembershipToEdit.clientId,
-          roleIds: selectedMembershipToEdit.roles.map(r => r.id), 
+          roleIds: selectedMembershipToEdit.roles.map(r => r.id),
         }],
       }
     });
@@ -242,31 +242,31 @@ export default function ClientAdminDashboard() {
             ) : (
               <div className="grid sm:grid-cols-2 gap-3">
                 {filteredUsers.map(u => {
-                    const activeClientMembership = u.memberships.find(m => m.clientId === activeClientId);
-                    return (
-                        <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#005f27]/30 hover:bg-[#edf0be]/30 transition-all">
-                            <AvatarImg avatarKey={u.avatar_storage_key} fallback={getInitials(u.full_name)} />
-                            
-                            <div className="flex-1 min-w-0">
-                                <p className="font-medium text-slate-900 text-sm truncate">{u.full_name || 'No Name'}</p>
-                                <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                                {activeClientMembership && activeClientMembership.roles.length > 0 && (
-                                    <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
-                                        {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
-                                    </span>
-                                )}
-                            </div>
-                            {u.id !== user.id && activeClientMembership && ( // Can only edit if user is a member of the active client
-                                <Button
-                                    variant="ghost" size="icon"
-                                    className="h-7 w-7 text-slate-400 hover:text-slate-700"
-                                    onClick={() => handleEditUser(u)}
-                                >
-                                    <Edit2 className="h-3.5 w-3.5" />
-                                </Button>
-                            )}
-                        </div>
-                    );
+                  const activeClientMembership = u.memberships.find(m => m.client_id === activeClientId);
+                  return (
+                    <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#005f27]/30 hover:bg-[#edf0be]/30 transition-all">
+                      <AvatarImg avatarKey={u.avatar_storage_key} fallback={getInitials(u.full_name)} />
+
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-900 text-sm truncate">{u.full_name || 'No Name'}</p>
+                        <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                        {activeClientMembership && activeClientMembership.roles.length > 0 && (
+                          <span className="inline-block text-[10px] px-1.5 py-0.5 mt-0.5 rounded bg-slate-100 text-slate-600 capitalize">
+                            {activeClientMembership.roles.map(r => r.name.replace(/_/g, ' ')).join(', ')}
+                          </span>
+                        )}
+                      </div>
+                      {u.id !== user.id && activeClientMembership && ( // Can only edit if user is a member of the active client
+                        <Button
+                          variant="ghost" size="icon"
+                          className="h-7 w-7 text-slate-400 hover:text-slate-700"
+                          onClick={() => handleEditUser(u)}
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  );
                 })}
               </div>
             )}
@@ -288,18 +288,18 @@ export default function ClientAdminDashboard() {
               <div className="space-y-2">
                 {invoices.slice(0, 5).map(inv => (
                   <Link key={inv.id} to={createPageUrl('Invoices')} className="block">
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm text-slate-900 truncate">{inv.invoice_number || inv.title}</p>
-                      <p className="text-xs text-slate-500">
-                      {inv.due_date ? formatInTimeZone(new Date(inv.due_date),'UTC', 'MMM d, yyyy') : 'No due date'}
-                      </p>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm text-slate-900 truncate">{inv.invoice_number || inv.title}</p>
+                        <p className="text-xs text-slate-500">
+                          {inv.due_date ? formatInTimeZone(new Date(inv.due_date), 'UTC', 'MMM d, yyyy') : 'No due date'}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-sm font-semibold text-slate-800">${inv.total_amount?.toLocaleString()}</span>
+                        <StatusBadge status={inv.status} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-sm font-semibold text-slate-800">${inv.total_amount?.toLocaleString()}</span>
-                      <StatusBadge status={inv.status} />
-                    </div>
-                  </div>
                   </Link>
                 ))}
               </div>
@@ -322,10 +322,10 @@ export default function ClientAdminDashboard() {
               </div>
               {maintenance.slice(0, 3).map(m => (
                 <Link key={m.id} to={createPageUrl('Maintenance')} className="block">
-                <div className="flex items-center justify-between py-2 border-b last:border-0">
-                  <p className="text-sm text-slate-700 truncate flex-1 mr-2">{m.title}</p>
-                  <StatusBadge status={m.status} />
-                </div>
+                  <div className="flex items-center justify-between py-2 border-b last:border-0">
+                    <p className="text-sm text-slate-700 truncate flex-1 mr-2">{m.title}</p>
+                    <StatusBadge status={m.status} />
+                  </div>
                 </Link>
               ))}
               {maintenance.length === 0 && <p className="text-xs text-slate-400 py-2">No maintenance requests</p>}
@@ -340,10 +340,10 @@ export default function ClientAdminDashboard() {
               </div>
               {warrantyClaims.slice(0, 3).map(c => (
                 <Link key={c.id} to={createPageUrl('WarrantyClaims')} className="block">
-                <div className="flex items-center justify-between py-2 border-b last:border-0">
-                  <p className="text-sm text-slate-700 truncate flex-1 mr-2">{c.claim_number || 'Claim'}</p>
-                  <StatusBadge status={c.status} />
-                </div>
+                  <div className="flex items-center justify-between py-2 border-b last:border-0">
+                    <p className="text-sm text-slate-700 truncate flex-1 mr-2">{c.claim_number || 'Claim'}</p>
+                    <StatusBadge status={c.status} />
+                  </div>
                 </Link>
               ))}
               {warrantyClaims.length === 0 && <p className="text-xs text-slate-400 py-2">No warranty claims</p>}
@@ -368,18 +368,18 @@ export default function ClientAdminDashboard() {
               />
             </div>
             <div>
-                <Label>Role for this Client</Label>
-                {/* For simplicity, assuming single role selection for invite here */}
-                <Select value={inviteRoleIds[0] || ''} onValueChange={(v) => setInviteRoleIds([v])}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allRoles.map(r => ( // Filter out system roles if not applicable for client invites
-                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Label>Role for this Client</Label>
+              {/* For simplicity, assuming single role selection for invite here */}
+              <Select value={inviteRoleIds[0] || ''} onValueChange={(v) => setInviteRoleIds([v])}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allRoles.map(r => ( // Filter out system roles if not applicable for client invites
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg">
               They will be added as a member of this organization with the selected role.
@@ -424,8 +424,21 @@ export default function ClientAdminDashboard() {
                   <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {allRoles.map(r => ( // Filter out system roles
-                        <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+                <Label>Account Status</Label>
+                <Select
+                  value={selectedUser.status || 'active'}
+                  onValueChange={(v) => setSelectedUser({ ...selectedUser, status: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

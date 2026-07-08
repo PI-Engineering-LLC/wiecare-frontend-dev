@@ -503,7 +503,7 @@ export default function AdminUsers() {
 <Tabs value={activeTab} onValueChange={setActiveTab}>
   <TabsList className="mb-4">
     <TabsTrigger value="users">Users</TabsTrigger>
-    <TabsTrigger value="invites">Pending Invites</TabsTrigger>
+    <TabsTrigger value="invites">Invites</TabsTrigger>
   </TabsList>
   
   <TabsContent value="users">
