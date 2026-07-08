@@ -25,6 +25,8 @@ import { useClient } from '@/lib/ClientContext';
 import { usePermission } from '@/hooks/usePermission';
 import { useClientRoles } from '@/hooks/useClientRoles';
 import { AvatarImg } from '@/components/UserAvatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 export default function ClientAdminDashboard() {
   const { user } = useAuth();
@@ -38,7 +40,7 @@ export default function ClientAdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedMembershipToEdit, setSelectedMembershipToEdit] = useState(null); // To hold the specific membership being edited
-
+  const [activeTab, setActiveTab] = useState('team');
   // Check if current user has permission to view this dashboard
   // Assuming 'client:admin.dashboard.view' or the 'client_admin' role itself
   const isAuthorized = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
@@ -47,6 +49,12 @@ export default function ClientAdminDashboard() {
     queryKey: ['all-roles'],
     queryFn: () => api.getRoles({ limit: 200 }),
   });
+
+  const { data: invitesData = {} , isLoading: isLoadingInvites } = useQuery({
+      queryKey: ['invites'],
+      queryFn: () => api.getInvites({limit: 50, order: '-created_at'}),
+    });
+    const invites = invitesData?.invites ?? [];
 
 
   const { data: orgUsersData = {}, isLoading: loadingUsers } = useQuery({
@@ -115,6 +123,35 @@ export default function ClientAdminDashboard() {
       toast.error(`Failed to send invitation: ${error.response?.data?.error || error.message}`);
     }
   });
+  const resendMutation = useMutation({
+      mutationFn: (id) => api.resendInvite(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['invites'] });
+        toast.success('Invitation resent successfully');
+      },
+      onError: () => toast.error('Failed to resend invitation')
+    });
+    
+    // Mutation to Cancel (e.g., delete the invite record)
+    const revokeMutation = useMutation({
+      mutationFn: (id) => api.revokeInvite(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['invites'] });
+        toast.success('Invitation revoked');
+      },
+      onError: () => toast.error('Failed to revoke invitation')
+    });
+    const handleResend = (invite) => {
+      if (confirm(`Are you sure you want to resend the invitation to ${invite.email}?`)) {
+        resendMutation.mutate(invite.id);
+      }
+    };
+    
+    const handleRevoke = (invite) => {
+      if (confirm(`Are you sure you want to revoke the invitation for ${invite.email}?`)) {
+        revokeMutation.mutate(invite.id);
+      }
+    };
 
   const handleInvite = async () => {
     if (!inviteEmail || !activeClientId || inviteRoleIds.length === 0) {
@@ -192,6 +229,59 @@ export default function ClientAdminDashboard() {
     });
   };
 
+  const inviteColumns = [
+      {
+        header: 'Email',
+        render: (row) => <span className="font-medium text-slate-900">{row.email}</span>
+      },
+      {
+        header: 'Role(s)',
+        render: (row) => (
+          <div className="flex flex-col gap-0.5">
+            {/* Safety check added here */}
+            {(row.role_ids || []).map(rid => (
+              <span key={rid} className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-medium"> 
+                {/* Removed .join(', ') which caused error on string */}
+                {allRoles.find(r => r.id === rid)?.name || 'Unknown Role'}
+              </span>
+            ))}
+          </div>
+        )
+      },
+      {
+        header: 'Sent Date',
+        render: (row) => row.updated_at ? formatInTimeZone(new Date(row.updated_at), 'UTC', 'MMM d, yyyy') : '-'
+      },
+      {
+        header: 'Expires',
+        render: (row) => row.invite_expires_at ? formatInTimeZone(new Date(row.invite_expires_at), 'UTC', 'MMM d, yyyy') : '-'
+      },
+      {
+        header: 'Accepted Date',
+        render: (row) => row.accepted_at ? formatInTimeZone(new Date(row.accepted_at), 'UTC', 'MMM d, yyyy') : '-'
+      },
+      {
+        header: 'Actions',
+        render: (row) => (
+          // Conditional rendering: Only show if accepted_at is empty/falsy
+          !row.accepted_at && (
+            <div className="flex gap-2">
+              <Button 
+              variant="ghost" 
+              size="sm" 
+              disabled={resendMutation.isPending}
+              onClick={() => handleResend(row)}>
+                {resendMutation.isPending ? 'Sending...' : 'Resend'}
+              </Button>
+              <Button variant="ghost" size="sm" disabled={revokeMutation.isPending} className="text-rose-500" onClick={() => handleRevoke(row)}>
+              {revokeMutation.isPending ? 'Revoking...' : 'Revoke'}
+              </Button>
+            </div>
+          )
+        )
+      }
+    ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -213,6 +303,14 @@ export default function ClientAdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList>
+        <TabsTrigger value="team">Team Members</TabsTrigger>
+        <TabsTrigger value="invites">Pending Invites</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="team">
         {/* Team Members */}
         <Card className="border-0 shadow-sm lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -273,6 +371,24 @@ export default function ClientAdminDashboard() {
             )}
           </CardContent>
         </Card>
+      </TabsContent>
+
+      <TabsContent value="invites">
+         {invites.length === 0 && !isLoadingInvites ? (
+                  <EmptyState
+                    icon={Users}
+                    title="No users yet"
+                    description="Invite users to get started"
+                    action={() => setShowInviteDialog(true)}
+                    actionLabel="Invite User"
+                  />
+                ) : ( <DataTable
+            columns={inviteColumns}
+              data={invites} // Assuming you fetch this data via useQuery
+              isLoading={isLoadingInvites}
+              emptyMessage="No pending invites found" />)}
+      </TabsContent>
+    </Tabs>
 
         {/* Recent Invoices */}
         <Card className="border-0 shadow-sm">
