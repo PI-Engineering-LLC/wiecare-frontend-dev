@@ -22,10 +22,10 @@ const NOTIF_PREFS = [
 ];
 
 export default function Settings() {
-  const { user, updateMe, api, refreshUser } = useAuth(); 
+  const { user, updateMe, api, refreshUser } = useAuth();
 
   useEffect(() => {
-    if (user?.mfa_enabled) { 
+    if (user?.mfa_enabled) {
       setMfaStep('done');
     }
   }, [user]);
@@ -55,9 +55,11 @@ export default function Settings() {
   const [mfaStep, setMfaStep] = useState('idle'); // idle | scanning | done | disabling
   const [mfaCodeError, setMfaCodeError] = useState('');
   const [disableCode, setDisableCode] = useState('');
+  const [backupCodes, setBackupCodes] = useState(null);
+  const [showBackupCodes, setShowBackupCodes] = useState(false);
 
-  const { activeClientId } = useClient(); 
-  const { uploadFileToS3 } = useUpload(); 
+  const { activeClientId } = useClient();
+  const { uploadFileToS3 } = useUpload();
 
   const startSetup = async () => {
     try {
@@ -70,32 +72,37 @@ export default function Settings() {
     }
   };
 
-  const verifyCode = async () => { 
+  const verifyCode = async () => {
     try {
       const res = await api.verifyMfa({
         code: mfaCode,
       });
-      refreshUser(); 
-      setMfaStep('done');
-      toast.success('2FA enabled successfully!');
+      if (res.backup_codes && res.backup_codes.length > 0) {
+        setBackupCodes(res.backup_codes);
+        setShowBackupCodes(true);
+      } else {
+        refreshUser();
+        setMfaStep('done');
+        toast.success('2FA enabled successfully!');
+      }
     } catch (err) {
       setMfaCodeError('Invalid code. Try again.');
       console.error("MFA verification failed:", err);
     }
   };
 
-  const disableMfa = async () => { 
+  const disableMfa = async () => {
     setMfaStep('disabling');
     setDisableCode('');
   };
 
-  const confirmDisableMfa = async () => { 
+  const confirmDisableMfa = async () => {
     setMfaCodeError('');
     try {
       await api.disableMfa({
         code: disableCode,
       });
-      refreshUser(); 
+      refreshUser();
       setMfaStep('idle');
       setDisableCode('');
       toast.info('2FA has been disabled.');
@@ -104,12 +111,17 @@ export default function Settings() {
       console.error("MFA disable failed:", err);
     }
   };
+  const handleDone = () => {
+    refreshUser();
+    setMfaStep('done');
+    toast.success('2FA enabled successfully!');
+  }
 
   const updateProfileMutation = useMutation({
     mutationFn: (data) => updateMe(data),
     onSuccess: () => {
       toast.success('Profile updated');
-      refreshUser(); 
+      refreshUser();
     },
     onError: (err) => {
       console.error("Profile update failed:", err);
@@ -122,12 +134,12 @@ export default function Settings() {
     if (!file) return;
     setUploading(true);
     try {
-      const file_key = await uploadFileToS3({client_id: activeClientId, file, type:'avatar', isPrivate: false})
+      const file_key = await uploadFileToS3({ client_id: activeClientId, file, type: 'avatar', isPrivate: false })
 
       const newStorageKey = file_key;
       setProfile(prev => ({ ...prev, avatar_storage_key: newStorageKey }));
       await updateMe({ avatar_storage_key: newStorageKey });
-      refreshUser(); 
+      refreshUser();
       toast.success('Photo updated');
     } catch (err) {
       console.error("Avatar upload failed:", err);
@@ -143,7 +155,7 @@ export default function Settings() {
     try {
       await updateMe({ [key]: value });
       toast.success('Preference saved');
-      refreshUser(); 
+      refreshUser();
     } catch (err) {
       // Revert on error
       setPrefs(prev => ({ ...prev, [key]: !value }));
@@ -399,7 +411,29 @@ export default function Settings() {
                       maxLength={6}
                     />
                     {mfaCodeError && <p className="text-red-500 text-sm">{mfaCodeError}</p>}
-                    <div className="flex gap-2">
+                    {showBackupCodes ? (
+                      <>
+                        <div className="w-12 h-12 bg-[#005f27]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                          <CheckCircle2 className="h-6 w-6 text-[#005f27]" />
+                        </div>
+                        <h1 className="text-xl font-bold text-slate-900 mb-1">MFA Enabled!</h1>
+                        <p className="text-sm text-slate-500 mb-6">
+                          Please save these backup codes in a safe place. They are your only way to
+                          access your account if you lose your authenticator device.
+                        </p>
+                        <div className="bg-slate-100 p-4 rounded-lg text-left mb-6">
+                          <h2 className="text-sm font-semibold text-slate-700 mb-2">Your Backup Codes:</h2>
+                          <ul className="grid grid-cols-2 gap-2 text-sm font-mono text-slate-800">
+                            {backupCodes.map((bc, index) => (
+                              <li key={index}>{bc}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <Button onClick={handleDone} className="w-full bg-[#005f27] hover:bg-[#436a36] text-white h-10">
+                          Done
+                        </Button>
+                      </>
+                    ) : (<div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => { setMfaStep('idle'); setMfaCode(''); }}>
                         Cancel
                       </Button>
@@ -410,7 +444,7 @@ export default function Settings() {
                       >
                         Verify & Enable
                       </Button>
-                    </div>
+                    </div>)}
                   </>
                 )}
 
@@ -479,7 +513,7 @@ export default function Settings() {
                 Your account role:{' '}
                 <span className="font-medium capitalize">
                   {user?.platform_role ? user.platform_role.replace(/_/g, ' ') :
-                   activeClientRole ? activeClientRole.replace(/_/g, ' ') : 'User'}
+                    activeClientRole ? activeClientRole.replace(/_/g, ' ') : 'User'}
                 </span>
               </p>
             </CardContent>
