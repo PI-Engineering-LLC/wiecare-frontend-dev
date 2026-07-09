@@ -391,7 +391,29 @@ export default function Settings() {
 
                 {/* ── SETUP: scan QR + enter code ── */}
                 {mfaStep === 'scanning' && (
-                  <>
+                  showBackupCodes ? (
+                    <>
+                      <div className="w-12 h-12 bg-[#005f27]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle2 className="h-6 w-6 text-[#005f27]" />
+                      </div>
+                      <h1 className="text-xl font-bold text-slate-900 mb-1">MFA Enabled!</h1>
+                      <p className="text-sm text-slate-500 mb-6">
+                        Please save these backup codes in a safe place. They are your only way to
+                        access your account if you lose your authenticator device.
+                      </p>
+                      <div className="bg-slate-100 p-4 rounded-lg text-left mb-6">
+                        <h2 className="text-sm font-semibold text-slate-700 mb-2">Your Backup Codes:</h2>
+                        <ul className="grid grid-cols-2 gap-2 text-sm font-mono text-slate-800">
+                          {backupCodes.map((bc, index) => (
+                            <li key={index}>{bc}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <Button onClick={handleDone} className="w-full bg-[#005f27] hover:bg-[#436a36] text-white h-10">
+                        Done
+                      </Button>
+                    </>
+                  ) : (<>
                     <p className="text-sm text-slate-600 font-medium">Step 1 — Scan this QR code with your authenticator app</p>
                     <div className="flex justify-center">
                       <img
@@ -411,29 +433,7 @@ export default function Settings() {
                       maxLength={6}
                     />
                     {mfaCodeError && <p className="text-red-500 text-sm">{mfaCodeError}</p>}
-                    {showBackupCodes ? (
-                      <>
-                        <div className="w-12 h-12 bg-[#005f27]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                          <CheckCircle2 className="h-6 w-6 text-[#005f27]" />
-                        </div>
-                        <h1 className="text-xl font-bold text-slate-900 mb-1">MFA Enabled!</h1>
-                        <p className="text-sm text-slate-500 mb-6">
-                          Please save these backup codes in a safe place. They are your only way to
-                          access your account if you lose your authenticator device.
-                        </p>
-                        <div className="bg-slate-100 p-4 rounded-lg text-left mb-6">
-                          <h2 className="text-sm font-semibold text-slate-700 mb-2">Your Backup Codes:</h2>
-                          <ul className="grid grid-cols-2 gap-2 text-sm font-mono text-slate-800">
-                            {backupCodes.map((bc, index) => (
-                              <li key={index}>{bc}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <Button onClick={handleDone} className="w-full bg-[#005f27] hover:bg-[#436a36] text-white h-10">
-                          Done
-                        </Button>
-                      </>
-                    ) : (<div className="flex gap-2">
+                    <div className="flex gap-2">
                       <Button variant="outline" className="flex-1" onClick={() => { setMfaStep('idle'); setMfaCode(''); }}>
                         Cancel
                       </Button>
@@ -444,8 +444,8 @@ export default function Settings() {
                       >
                         Verify & Enable
                       </Button>
-                    </div>)}
-                  </>
+                    </div>
+                  </>)
                 )}
 
                 {/* ── ACTIVE: 2FA enabled ── */}
