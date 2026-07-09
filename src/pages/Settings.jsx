@@ -114,6 +114,7 @@ export default function Settings() {
   const handleDone = () => {
     refreshUser();
     setMfaStep('done');
+    setShowBackupCodes(false);
     toast.success('2FA enabled successfully!');
   }
 

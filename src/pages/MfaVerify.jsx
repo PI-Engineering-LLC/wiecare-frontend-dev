@@ -36,7 +36,8 @@ export default function MfaVerify() {
                 window.location.href = '/'; 
             }
         } catch {
-            setError( 'Invalid code. Please try again.');
+            setError( 'Invalid code. Try a backup code if you lost your device.');
+            toast.error('Invalid code. Try a backup code if you lost your device.');
         }
     };
     const handleContinueToDashboard = () => {
@@ -77,10 +78,10 @@ export default function MfaVerify() {
                 <Input
                     type="text"
                     inputMode="numeric"
-                    placeholder="000 000"
+                    placeholder="000 000 or or A3F9B2C1"
                     value={code}
                     onChange={e => setCode(e.target.value)}
-                    maxLength={6}
+                    maxLength={8}
                     className="text-center text-2xl tracking-widest font-mono h-14"
                     autoFocus
                 />
