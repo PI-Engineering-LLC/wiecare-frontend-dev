@@ -452,7 +452,7 @@ export default function AdminInvoices() {
                           <>
                             {orders
                               .filter(o => o.client_id === formData.client_id && !o.is_split)
-                              .map(o => <SelectItem key={o.id} value={o.id}>{o.order_number || o.title} — ${o.total_amount?.toFixed(2)}</SelectItem>)
+                              .map(o => <SelectItem key={o.id} value={o.id}>{o.order_number || o.title} — ${o.total_amount}</SelectItem>)
                             }
                             {subOrders.filter(s => s.client_id === formData.client_id).length > 0 && (
                               <>
@@ -462,7 +462,7 @@ export default function AdminInvoices() {
                                 )}
                                 {subOrders
                                   .filter(s => s.client_id === formData.client_id)
-                                  .map(s => <SelectItem key={s.id} value={s.id}>{s.sub_order_number} ({s.supplier_entity}) — ${s.total_amount?.toFixed(2)}</SelectItem>)
+                                  .map(s => <SelectItem key={s.id} value={s.id}>{s.sub_order_number} ({s.supplier_entity}) — ${s.total_amount}</SelectItem>)
                                 }
                               </>
                             )}
