@@ -77,7 +77,7 @@ export default function Dashboard() {
 
   const quickActions = [
     { label: 'Request Quote', icon: FileText, page: 'Quotes', action: 'new' },
-    { label: 'Schedule Maintenance', icon: Wrench, page: 'Maintenance', action: 'new' },
+    { label: 'Schedule Service', icon: Wrench, page: 'Maintenance', action: 'new' },
     { label: 'Book Training', icon: GraduationCap, page: 'Training' },
     { label: 'View Documents', icon: FileBox, page: 'Documents' },
   ];

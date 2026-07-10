@@ -175,7 +175,7 @@ export default function Courses() {
     getProgressForCourse(c.id)?.status === 'completed'
   );
 
-  const categories = ['safety', 'operations', 'maintenance', 'business', 'technical'];
+  const categories = ['coaster 2.0', 'operations', 'maintenance', 'coaster 1.5', 'technical'];
 
   const difficultyColors = {
     beginner: 'bg-emerald-100 text-emerald-700',

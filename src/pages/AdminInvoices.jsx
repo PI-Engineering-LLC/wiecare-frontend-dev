@@ -131,6 +131,7 @@ export default function AdminInvoices() {
 
   const isInvoiceOverdue = (invoice) => {
     if (['paid', 'cancelled'].includes(invoice.status)) return false;
+    if ( invoice.due_date && new Date() > new Date(invoice.due_date)) return true;
     if (!invoice.issue_date) return false;
     const daysSinceIssue = differenceInDays(new Date(), new Date(invoice.issue_date));
     return daysSinceIssue > 60;
