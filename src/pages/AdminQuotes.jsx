@@ -551,7 +551,7 @@ export default function AdminQuotes() {
                 <Label>Valid Until *</Label>
                 <Input
                   type="date"
-                  value={formData.valid_until}
+                  value={formData.valid_until?.split('T')[0]}
                   onChange={(e) => setFormData({ ...formData, valid_until: e.target.value })}
                   className="mt-1"
                 />

@@ -438,7 +438,7 @@ export default function AdminClients() {
                 <Label>Contract Date</Label>
                 <Input
                   type="date"
-                  value={formData.contract_date}
+                  value={formData.contract_date?.split('T')[0]}
                   onChange={(e) => setFormData({ ...formData, contract_date: e.target.value })}
                   className="mt-1"
                 />
@@ -476,7 +476,7 @@ export default function AdminClients() {
                     <Label>Warranty Start Date</Label>
                     <Input
                       type="date"
-                      value={formData.warranty_start_date}
+                      value={formData.warranty_start_date?.split('T')[0]}
                       onChange={(e) => setFormData({ ...formData, warranty_start_date: e.target.value })}
                       className="mt-1"
                     />

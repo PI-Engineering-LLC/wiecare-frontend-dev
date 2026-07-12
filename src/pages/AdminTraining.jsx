@@ -578,7 +578,7 @@ export default function AdminTraining() {
                   <Label>Session Date *</Label>
                   <Input
                     type="date"
-                    value={formData.session_date}
+                    value={formData.session_date?.split('T')[0]}
                     onChange={(e) => setFormData({
                       ...formData,
                       session_date: e.target.value,

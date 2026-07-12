@@ -570,7 +570,7 @@ export default function AdminInvoices() {
               </div>
               <div>
                 <Label>Payment Date</Label>
-                <Input type="date" value={paymentData.date} onChange={(e) => setPaymentData({ ...paymentData, date: e.target.value })} className="mt-1" />
+                <Input type="date" value={paymentData.date?.split('T')[0]} onChange={(e) => setPaymentData({ ...paymentData, date: e.target.value })} className="mt-1" />
               </div>
               <div>
                 <Label>Reference</Label>

@@ -167,7 +167,7 @@ export default function SubOrderPanel({ subOrder, isAdmin, invoices = [] }) {
                     </div>
                     <div>
                       <Label className="text-xs">Est. Delivery</Label>
-                      <Input type="date" className="mt-1 h-8 text-xs" value={updateData.estimated_delivery} onChange={(e) => setUpdateData({ ...updateData, estimated_delivery: e.target.value })} />
+                      <Input type="date" className="mt-1 h-8 text-xs" value={updateData.estimated_delivery?.split('T')[0]} onChange={(e) => setUpdateData({ ...updateData, estimated_delivery: e.target.value })} />
                     </div>
                   </div>
                   <div className="flex gap-2">
