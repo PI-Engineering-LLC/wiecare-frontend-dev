@@ -141,14 +141,6 @@ export default function AdminDocuments() {
         const file_key = await uploadFileToS3({ client_id: formData?.client_id, file: selectedFile });
         finalFormData.file_storage_key = file_key;
         finalFormData.file_type = selectedFile.type;
-        // finalFormData.file_size = selectedFile.size;
-        // setFormData(prev => ({
-        //   ...prev,
-        //   file_storage_key: file_key,
-        //   file_type: file.type,
-        //   file_size: file.size
-        // }));
-        // toast.success('File uploaded');
         if (selectedDocument) {
           await updateMutation.mutateAsync({ id: selectedDocument.id, data: { ...finalFormData, file_size: selectedFile.size } });
         } else {
@@ -177,6 +169,7 @@ export default function AdminDocuments() {
     { value: 'invoice', label: 'Invoice' },
     { value: 'warranty', label: 'Warranty' },
     { value: 'manual', label: 'Manual' },
+    { value: 'service_ticket', label: 'Service Tickets' },
     { value: 'other', label: 'Other' },
   ];
   const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
@@ -349,15 +342,6 @@ export default function AdminDocuments() {
                           </Button>
                         </div>
                       )
-                      // (
-                      //   <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                      //     <File className="h-5 w-5 text-slate-600" />
-                      //     <span className="text-sm truncate flex-1">File uploaded</span>
-                      //     <Button variant="ghost" size="sm" onClick={() => setFormData({ ...formData, file_storage_key: '' })}>
-                      //       Change
-                      //     </Button>
-                      //   </div>
-                      // ) 
                       : (
                         <>
                           <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
