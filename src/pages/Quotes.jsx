@@ -574,8 +574,8 @@ export default function Quotes() {
                             <td className="p-3 text-slate-600">{item.ez_number || '-'}</td>
                             <td className="p-3">{item.description}</td>
                             <td className="p-3 text-right">{item.quantity}</td>
-                            <td className="p-3 text-right">${item.unit_price?.toLocaleString()}</td>
-                            <td className="p-3 text-right font-medium">${item.total?.toLocaleString()}</td>
+                            <td className="p-3 text-right">${item.unit_price?.toFixed(2)}</td>
+                            <td className="p-3 text-right font-medium">${item.total?.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
