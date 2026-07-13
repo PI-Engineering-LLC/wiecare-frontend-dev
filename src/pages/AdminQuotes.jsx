@@ -200,7 +200,7 @@ export default function AdminQuotes() {
     }
     if (location.search) {
       navigate(location.pathname, { replace: true });
-    }}
+    }
   };
 
   const handleSend = async (quote) => {
