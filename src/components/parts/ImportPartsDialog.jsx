@@ -62,7 +62,6 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
   const [preview, setPreview] = useState([]);
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState(null);
-  // const [progress, setProgress] = useState({ status: 'idle', processed: 0, failed: 0 });
   const [importProgress, setImportProgress] = useState({ 
     status: 'idle', 
     processed_rows: 0, 
@@ -84,47 +83,19 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
     reader.readAsText(f);
   };
 
-  
-  // useEffect(() => {
-  //   if (!open) return; // Only poll when open
-
-  //   const interval = setInterval(async () => {
-  //     const response = await api.getPartImport(importId);
-  //     const data = await response.json();
-  //     setProgress(data);
-
-  //     if (data.status === 'completed' || data.status === 'failed') {
-  //       clearInterval(interval);
-  //     }
-  //   }, 2000);
-
-  //   return () => clearInterval(interval); // Clean up on unmount or close
-  // }, [open]);
-
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   const handleImport = async () => {
-    // if (!preview.length) return;
     if (!file) return;
     setImporting(true);
-    // setImportProgress(0);
-    // let success = 0, failed = 0;
-
-    // 1. Send single multipart request
-  // const formData = new FormData();
-  // formData.append('file', file);
   try{
-    console.log(file)
     const data = await api.importParts(file)
-    console.log("@@@@@", data)
     const importId = data.import_id;
      // 2. Poll for status
      const poll = setInterval(async () => { 
       try{
       const status  = await api.getPartImport(importId);
-      console.log("@@@@@Stat", status)
       // Update progress bar
-      // setImportProgress(status.processed_rows);
       setImportProgress(status);
 
       if (status.status === 'completed' || status.status === 'failed') {
@@ -149,25 +120,6 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
     toast.error("Failed to start import");
   }
 
-    // for (let i = 0; i < preview.length; i++) {
-    //   try {
-    //     await 	api.createParts(preview[i]);
-    //     success++;
-    //   } catch {
-    //     failed++;
-    //   }
-    //   setImportProgress(i + 1);
-    //   // Small delay to avoid rate limiting
-    //   await sleep(300);
-    // }
-
-    // setImporting(false);
-    // setResults({ success, failed });
-    // if (success > 0) {
-    //   toast.success(`Imported ${success} parts successfully`);
-    //   onImported?.();
-    // }
-    // if (failed > 0) toast.error(`${failed} parts failed to import`);
   };
 
   const handleClose = () => {
@@ -216,43 +168,6 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
           </div>
 
           {/* Preview */}
-          {/* {preview.length > 0 && !results && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-slate-700">Preview — {preview.length} parts found</p>
-                <Badge className="bg-[#edf0be] text-[#005f27]">{preview.length} rows</Badge>
-              </div>
-              <div className="border rounded-xl overflow-hidden">
-                <table className="w-full text-xs">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Part #</th>
-                      <th className="px-3 py-2 text-left font-semibold text-slate-500">EZ #</th>
-                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Name</th>
-                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Price</th>
-                      <th className="px-3 py-2 text-left font-semibold text-slate-500">Category</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {preview.slice(0, 8).map((p, i) => (
-                      <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
-                        <td className="px-3 py-2 font-mono text-slate-600">{p.part_number}</td>
-                        <td className="px-3 py-2 text-slate-500">{p.ez_number || '—'}</td>
-                        <td className="px-3 py-2 text-slate-800 max-w-[180px] truncate">{p.name}</td>
-                        <td className="px-3 py-2">{p.unit_price > 0 ? `$${p.unit_price}` : '—'}</td>
-                        <td className="px-3 py-2 capitalize text-slate-500">{p.category}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {preview.length > 8 && (
-                  <p className="px-3 py-2 text-xs text-slate-400 bg-slate-50 border-t">
-                    + {preview.length - 8} more rows...
-                  </p>
-                )}
-              </div>
-            </div>
-          )} */}
           {!importing && !results && preview.length > 0 && (
   <div>
     <div className="flex items-center justify-between mb-2">
@@ -320,7 +235,6 @@ export default function ImportPartsDialog({ open, onOpenChange, onImported }) {
               className="bg-[#005f27] hover:bg-[#436a36]"
             >
               Import {preview.length} Parts
-              {/* {importing ? `Importing ${importProgress}/${preview.length}...` : `Import ${preview.length} Parts`} */}
             </Button>
           )}
         </DialogFooter>

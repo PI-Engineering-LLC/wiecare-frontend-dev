@@ -240,7 +240,7 @@ export default function Quotes() {
           <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedQuote(row); }}>
             <Eye className="h-4 w-4" />
           </Button>
-          {row.status === 'sent' && (
+          {row.status === 'sent' && (row.valid_until && new Date(row.valid_until) > new Date()) && (
             <>
               <Button variant="ghost" size="icon" className="text-emerald-600" onClick={(e) => { e.stopPropagation(); handleApproveQuote(row); }}>
                 <CheckCircle className="h-4 w-4" />
@@ -629,7 +629,7 @@ export default function Quotes() {
                     </div>
                   )}
                 </div>
-                {selectedQuote.status === 'sent' && (
+                {selectedQuote.status === 'sent' && (selectedQuote.valid_until && new Date(selectedQuote.valid_until) > new Date()) && (
                   <div className="flex flex-wrap gap-2">
                     <Button
                       variant="outline"

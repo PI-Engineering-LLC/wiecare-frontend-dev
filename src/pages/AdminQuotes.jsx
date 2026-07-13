@@ -198,6 +198,9 @@ export default function AdminQuotes() {
         await  updateMutation.mutateAsync({ id: selectedQuote.id, data:{ status: 'converted', converted_to_order_id: newQuote.id }});
       }
     }
+    if (location.search) {
+      navigate(location.pathname, { replace: true });
+    }}
   };
 
   const handleSend = async (quote) => {
