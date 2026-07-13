@@ -184,7 +184,7 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
         ez_number: part.ez_number || item.ez_number,
         z_number: part.ez_number || item.z_number,
         description: part.name || item.description,
-        unit_price: part.unit_price ?? item.unit_price,
+        unit_price: part.unit_price ?? (parseFloat(item.unit_price) || 0),
         amount: (parseFloat(item.quantity) || 1) * (parseFloat(part.unit_price) || 0),
         total: (parseFloat(item.quantity) || 1) * (parseFloat(part.unit_price) || 0),
       };
