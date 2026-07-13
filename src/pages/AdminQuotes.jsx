@@ -98,6 +98,7 @@ export default function AdminQuotes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
       setShowDialog(false);
+      setViewingRequest(null)
       resetForm();
       toast.success('Quote created successfully');
     },onError: () => {
@@ -110,6 +111,7 @@ export default function AdminQuotes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
       setShowDialog(false);
+      setViewingRequest(null)
       resetForm();
       toast.success('Quote updated successfully');
     },
