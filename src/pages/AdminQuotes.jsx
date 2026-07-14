@@ -99,6 +99,7 @@ export default function AdminQuotes() {
       queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
       setShowDialog(false);
       setViewingRequest(null)
+      setHighlightQuoteId(null)
       resetForm();
       if (location.search) {
         navigate(location.pathname, { replace: true });
@@ -115,6 +116,7 @@ export default function AdminQuotes() {
       queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
       setShowDialog(false);
       setViewingRequest(null)
+      setHighlightQuoteId(null)
       resetForm();
       if (location.search) {
         navigate(location.pathname, { replace: true });
@@ -298,6 +300,7 @@ export default function AdminQuotes() {
           <SelectContent>
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="sent">Sent</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
