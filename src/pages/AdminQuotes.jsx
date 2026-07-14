@@ -100,6 +100,9 @@ export default function AdminQuotes() {
       setShowDialog(false);
       setViewingRequest(null)
       resetForm();
+      if (location.search) {
+        navigate(location.pathname, { replace: true });
+      }
       toast.success('Quote created successfully');
     },onError: () => {
       toast.success('Error creating quote.');
@@ -113,6 +116,9 @@ export default function AdminQuotes() {
       setShowDialog(false);
       setViewingRequest(null)
       resetForm();
+      if (location.search) {
+        navigate(location.pathname, { replace: true });
+      }
       toast.success('Quote updated successfully');
     },
     onError: () => {

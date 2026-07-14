@@ -86,7 +86,14 @@ export default function Quotes() {
     mutationFn: ({ id, data }) => api.updateQuote(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quotes'] });
-      setSelectedQuote(null);
+      setShowModifyDialog(false);
+    setModificationRequest('');
+    setQuoteToModify(null);
+    setSelectedQuote(null);
+    setShowRequestDialog(false);
+    if (location.search) {
+      navigate(location.pathname, { replace: true });
+    }
       toast.success('Quote updated successfully');
     },
   });
@@ -184,6 +191,9 @@ export default function Quotes() {
     setModificationRequest('');
     setQuoteToModify(null);
     setSelectedQuote(null);
+    if (location.search) {
+      navigate(location.pathname, { replace: true });
+    }
     toast.success('Modification request sent');
   };
   const handleDeleteQuoteItemByIndex = (indexToDelete, error) => { 
