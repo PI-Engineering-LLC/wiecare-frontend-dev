@@ -17,7 +17,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 
 export default function Invoices() {
@@ -33,23 +33,70 @@ export default function Invoices() {
   
   const queryClient = useQueryClient();
   const { activeClientId, switchClient } = useClient()
+  const location = useLocation()
+    const navigate = useNavigate();
+  // useEffect(() => {
+    
+  //   const responseCode = searchParams.get('responseCode');
+  //   const message = searchParams.get('responseMessage');
+  //   const transactionId = searchParams.get('transactionId');
+  //     const params = new URLSearchParams(window.location.search);
+  //     console.log(searchParams)
+  //     console.log(params)
+  //     if (responseCode === '200') {
+  //       toast.success('Payment recorded successfully!!!');
+  //       // console.log('Payment Successful:', { transactionId, message });
+  //     }else if (responseCode) {
+  //       console.error('Payment Failed:', message);
+  //     toast.success('Payment Error occured!!');
+  //     }
+  //     if (params.get('action') === 'invoices') {toast.success('Payment recorded successfully'); console.log('Payment recorded successfully')};;
+  //     if (params.get('action') === 'retry') {toast.error('Error occured'); console.log('Error occured')}
+  //     if (params.get('action') === 'cancel') {toast.success('Payment cancelled'); console.log('Payment cancelled')}
+  //   }, [searchParams]);
   useEffect(() => {
     
-    const responseCode = searchParams.get('responseCode');
-    const message = searchParams.get('responseMessage');
-    const transactionId = searchParams.get('transactionId');
-      const params = new URLSearchParams(window.location.search);
+    const fixedUrl = location.search.replace(/\?/g, '&');
+    const params = new URLSearchParams(fixedUrl);
+    //     const params = new URLSearchParams(window.location.search);
+
+    const responseCode = params.get('responseCode');
+    const message = params.get('responseMessage');
+    const transactionId = params.get('transactionId');
+      
+     
       if (responseCode === '200') {
-        toast.success('Payment recorded successfully!!!');
+        toast.success('Payment processed. You will receive a confirmation shortly');
         // console.log('Payment Successful:', { transactionId, message });
       }else if (responseCode) {
         console.error('Payment Failed:', message);
       toast.success('Payment Error occured!!');
       }
-      if (params.get('action') === 'invoices') {toast.success('Payment recorded successfully'); console.log('Payment recorded successfully')};;
+      const action = params.get('action')
+      if (params.get('action') === 'invoices' && responseCode === '200') {toast.success('Payment processed. You will receive a confirmation shortly'); console.log('Payment recorded successfully')};;
       if (params.get('action') === 'retry') {toast.error('Error occured'); console.log('Error occured')}
       if (params.get('action') === 'cancel') {toast.success('Payment cancelled'); console.log('Payment cancelled')}
-    }, [searchParams]);
+      console.log(location.search, params, responseCode, message, transactionId, action )
+      if (location.search) {
+        navigate(location.pathname, { replace: true });
+      }
+    }, [location, navigate]);
+
+  const { data: paymentsData = {}, isLoading:isPaymentsLoading } = useQuery({
+      queryKey: ['payments'],
+      queryFn: () => api.getPayments({ client_id: activeClientId , order:'-created_at', limit:200}),
+      enabled: !!activeClientId,
+    });
+    const allPayments = paymentsData?.payments ?? []
+
+    const invoicePayments = selectedInvoice 
+  ? allPayments.filter(p => p.invoice_id === selectedInvoice.id) 
+  : [];
+
+  /**const invoicePayments = useMemo(() => {
+  return allPayments.filter(p => p.invoice_id === selectedInvoice?.id);
+}, [allPayments, selectedInvoice?.id]);  */
+
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ['invoices', activeClientId],
     queryFn: () => api.getInvoices({ client_id: activeClientId , order:'-created_at', limit: 50 }),
@@ -399,7 +446,7 @@ export default function Invoices() {
               }
 
               {/* Payment History */}
-              {selectedInvoice.payment_history && selectedInvoice.payment_history.length > 0 && (
+              {/* {selectedInvoice.payment_history && selectedInvoice.payment_history.length > 0 && (
                 <div>
                   <p className="text-sm text-slate-500 mb-2">Payment History</p>
                   <div className="space-y-2">
@@ -410,6 +457,23 @@ export default function Invoices() {
                           <p className="text-sm text-emerald-600">{formatInTimeZone(new Date(payment.date),'UTC', 'MMM d, yyyy')}</p>
                         </div>
                         <p className="font-semibold text-emerald-700">${payment.amountPaid?.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )} */}
+              {selectedInvoice && invoicePayments.length > 0 && (
+                <div>
+                  <p className="text-sm text-slate-500 mb-2">Payment History</p>
+                  <div className="space-y-2">
+                    {invoicePayments.payment_history.map((payment) => (
+                      <div key={payment.id} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-emerald-800">{payment.reference}</p>
+                          <p className="text-sm text-emerald-600">{payment.paid_at 
+                ? formatInTimeZone(new Date(payment.paid_at),'UTC', 'MMM d, yyyy'): '-'}</p>
+                        </div>
+                        <p className="font-semibold text-emerald-700">${payment.amount?.toLocaleString()}</p>
                       </div>
                     ))}
                   </div>

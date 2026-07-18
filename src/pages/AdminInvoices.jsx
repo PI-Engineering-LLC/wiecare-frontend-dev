@@ -72,6 +72,11 @@ export default function AdminInvoices() {
     queryKey: ['admin-invoices'],
     queryFn: () => api.getInvoices({ order:'-created_at', limit:200}),
   });
+  const { data: paymentsData = {}, isLoading:isPaymentsLoading } = useQuery({
+    queryKey: ['admin-payments'],
+    queryFn: () => api.getPayments({ order:'-created_at', limit:200}),
+  });
+  const payments = paymentsData?.payments ?? []
 
   const { data: clients = [] } = useQuery({
     queryKey: ['clients'],
@@ -112,6 +117,15 @@ export default function AdminInvoices() {
       setShowDialog(false);
       resetForm();
       toast.success('Invoice updated successfully');
+    },
+  });
+  const recordPaymentMutation = useMutation({
+    mutationFn: (data ) => api.recordPayment(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
+      setShowPaymentDialog(false);
+      toast.success('Payment recorded successfully');
     },
   });
 
@@ -302,18 +316,20 @@ export default function AdminInvoices() {
 
   const submitPayment = async () => {
     const amount = parseFloat(paymentData.amount);
-    const newTotalPaid = (selectedInvoice.amount_paid || 0) + amount;
-    const balanceDue = (selectedInvoice.total_amount || 0) - newTotalPaid;
+    // const newTotalPaid = (selectedInvoice.amount_paid || 0) + amount;
+    // const balanceDue = (selectedInvoice.total_amount || 0) - newTotalPaid;
     const paymentHistory = [...(selectedInvoice.payment_history || []), {
       date: paymentData.date,
       amount,
       method: paymentData.method,
       reference: paymentData.reference
     }];
-    const newStatus = balanceDue <= 0 ? 'paid' : newTotalPaid > 0 ? 'partial' : selectedInvoice.status;
-    await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { amount_paid: newTotalPaid, balance_due: balanceDue, payment_history: paymentHistory, status: newStatus } });
-    setShowPaymentDialog(false);
-    toast.success('Payment recorded');
+    await recordPaymentMutation.mutateAsync({ amount, method, invoice_id: selectedInvoice.id, paymentHistory, date});
+    //data:{ amount,method,invoice_id, date, notes, paymentHistory} 
+    // const newStatus = balanceDue <= 0 ? 'paid' : newTotalPaid > 0 ? 'partial' : selectedInvoice.status;
+    // await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { amount_paid: newTotalPaid, balance_due: balanceDue, payment_history: paymentHistory, status: newStatus } });
+    // setShowPaymentDialog(false);
+    // toast.success('Payment recorded');
   };
 
   const invoicesWithOverdueCheck = invoices.map(inv => {
@@ -414,7 +430,7 @@ export default function AdminInvoices() {
               {/* Sending Entity Selector */}
               <div className="flex gap-3">
                 <Label className="self-center shrink-0 font-semibold">Sending Entity:</Label>
-                {['Wiegand Sports GmbH', 'Wiegand Services LLC'].map(entity => (
+                {['Wiegand Sports Gmbh', 'Wiegand Services LLC'].map(entity => (
                   <button
                     key={entity}
                     type="button"

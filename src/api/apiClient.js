@@ -153,12 +153,13 @@ export const api = {
   getInvoice: (id) => request('GET', `/invoices/${id}`),
   createInvoice: (data) => request('POST', '/invoices', { data }),
   updateInvoice: (id, data) => request('PATCH', `/invoices/${id}`, { data }),
-  recordPayment: (id, data) => request('POST', `/invoices/${id}/payment`, { data }),
+  // recordPayment: (id, data) => request('POST', `/invoices/${id}/payment`, { data }),
   deleteInvoice: (id) => request('DELETE', `/invoices/${id}`),
 
   //payments createPaymentSession
   createPaymentSession: (data) => request('POST', '/payments/ipospays/createPaymentSession', { data }),
-
+  recordPayment: (data) => request('POST', '/payments/recordPayment', { data }),
+  getPayments: (params) => request('GET', '/payments', { params }),
   // Parts
   getParts: (params) => request('GET', '/parts', { params }),
   createParts: (data) => request('POST', '/parts', { data }),

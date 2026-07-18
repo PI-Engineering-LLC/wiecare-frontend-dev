@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import { PublicImage } from '@/components/PublicImage';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const EMPTY_ITEM = { item_number: '', z_number: '', description: '', quantity: 1, unit_price: 0, total: 0 };
+const EMPTY_ITEM = { item_number: '', ez_number: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 
 const DEFAULT_FORM = {
   client_id: '',
@@ -722,7 +722,8 @@ export default function AdminQuotes() {
       </Dialog>
 
       {/* View Client Request Dialog */}
-      <Dialog open={!!viewingRequest} onOpenChange={() => setViewingRequest(null)}>
+      <Dialog open={!!viewingRequest} onOpenChange={() => { setHighlightQuoteId(null)
+        setViewingRequest(null)}}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Client Quote Request</DialogTitle>
