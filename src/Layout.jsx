@@ -18,6 +18,7 @@ import { useClient } from './lib/ClientContext';
 import { useSocket } from './hooks/useSocket';
 import { useAuth } from './lib/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 
 // ── CollapsibleGroup) ──────────────────────────────────────────────
@@ -63,6 +64,7 @@ export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
   const { activeClientId, switchClient } = useClient();
   const { user, logout } = useAuth(); // Use logout from useAuth
+  const [selectedNotification, setSelectedNotification] = useState(null)
 
   // Determine user's admin status
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
@@ -73,7 +75,7 @@ export default function Layout({ children, currentPageName }) {
   const loadNotifications = async () => {
     try {
       if (!user?.id) return;
-      const notifs = await api.getNotifications({ limit: 10, is_read: false }); // Request unread notifications
+      const notifs = await api.getNotifications({ limit: 10, is_read: false, recipient_id: user.id }); // Request unread notifications
       setNotifications(notifs);
     } catch (e) {
       console.error("Failed to load notifications:", e);
@@ -86,7 +88,7 @@ export default function Layout({ children, currentPageName }) {
 
   useSocket( (notif) => {
     // onNotification will be called for new notifications
-    setNotifications(prev => [notif, ...prev].slice(0, 10)); // Add new notification and keep list limited
+    // setNotifications(prev => [notif, ...prev].slice(0, 10)); // Add new notification and keep list limited
     loadNotifications(); // Reload to get updated unread status
   });
   
@@ -219,6 +221,7 @@ export default function Layout({ children, currentPageName }) {
     </div>
   );
   return (
+    <>
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#f4f5f0' }}>
       <style>{`
         body { background-color: #f4f5f0; overflow: hidden; }
@@ -337,7 +340,10 @@ export default function Layout({ children, currentPageName }) {
                               (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
                             );
                             await api.markRead(`${notif.id}`);
+                            queryClient.invalidateQueries({ queryKey: ['notifications']}); 
+                            queryClient.invalidateQueries({ queryKey: ['admin-notifications']}); 
                             setNotifications(prev => prev.filter(n => n.id !== notif.id));
+                            setSelectedNotification(notif)
                           };
                         
                           const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
@@ -459,7 +465,7 @@ export default function Layout({ children, currentPageName }) {
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <RightPanel user={user} setNotifications={setNotifications} />
+            <RightPanel user={user} setNotifications={setNotifications} setSelectedNotification={setSelectedNotification} />
           </div>
         ) : (
           <div className="flex flex-col items-center pt-5">
@@ -471,11 +477,25 @@ export default function Layout({ children, currentPageName }) {
         )}
       </aside>
     </div>
+    <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{selectedNotification?.title}</DialogTitle>
+      </DialogHeader>
+      <div className="py-4">
+        <p className="text-sm text-slate-600">{selectedNotification?.message}</p>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={() => setSelectedNotification(null)}>Close</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+  </>
   );
 }
 
 // ── RightPanel ────────────────────────────────────────────────────────────────
-function RightPanel({ user, setNotifications}) {
+function RightPanel({ user, setNotifications, setSelectedNotification}) {
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
   const { activeClientId } = useClient(); // Corrected to destructure activeClientId
   const queryClient = useQueryClient();
@@ -484,7 +504,7 @@ function RightPanel({ user, setNotifications}) {
     queryKey: ['notif-panel', user?.id],
     queryFn:  () => {
         if (!user?.id) return [];
-        return api.getNotifications({ is_read: false, limit: 5 });
+        return api.getNotifications({ is_read: false, limit: 5 , recipient_id: user.id });
       },
     enabled: !!user?.id,
   });
@@ -519,12 +539,12 @@ function RightPanel({ user, setNotifications}) {
     // if (n.link) window.location.href = n.link;
   };
 
-  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} />;
-  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} />;
+  if (isInternalAdmin) return <AdminRightPanel notifications={notifications} maintenance={maintenance} invoices={invoices} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} setSelectedNotification={setSelectedNotification} />;
+  return <ClientRightPanel notifications={notifications} maintenance={maintenance} overdue={overdue} pending={pending} user={user} setNotifications={setNotifications} setSelectedNotification={setSelectedNotification}/>;
 }
 
 // ── AdminRightPanel & ClientRightPanel ────────────────────────
-function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user, setNotifications}) {
+function AdminRightPanel({ notifications, maintenance, invoices, overdue, pending , user, setNotifications, setSelectedNotification}) {
   const drafts = invoices.filter(i => i.status === 'draft').length;
   const inProgress = maintenance.filter(m => m.status === 'in_progress').length;
   const queryClient = useQueryClient();
@@ -636,7 +656,10 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
               (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
             );
             await api.markRead(`${notif.id}`);
+            queryClient.invalidateQueries({ queryKey: ['notifications']}); 
+            queryClient.invalidateQueries({ queryKey: ['admin-notifications']}); 
             setNotifications(prev => prev.filter(n => n.id !== notif.id));
+            setSelectedNotification(notif)
           };
         
           const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
@@ -703,7 +726,7 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
   );
 }
 
-function ClientRightPanel({ notifications, maintenance, overdue, pending, user, setNotifications }) {
+function ClientRightPanel({ notifications, maintenance, overdue, pending, user, setNotifications, setSelectedNotification }) {
   // Use usePlatformRole or useClientRoles to decide what content is visible
   const isClientAdmin = useClientRoles(['client_admin']); // Check if the current user is a client admin
   const navigate = useNavigate();
@@ -755,7 +778,10 @@ function ClientRightPanel({ notifications, maintenance, overdue, pending, user, 
                 (Array.isArray(old) ? old : []).filter(item => item.id !== notif.id)
               );
               await api.markRead(`${notif.id}`);
+              queryClient.invalidateQueries({ queryKey: ['notifications']});
+              queryClient.invalidateQueries({ queryKey: ['admin-notifcations']});  
               setNotifications(prev => prev.filter(n => n.id !== notif.id));
+              setSelectedNotification(notif)
             };
           
             const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";

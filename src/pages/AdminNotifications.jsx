@@ -71,6 +71,7 @@ export default function AdminNotifications() {
     mutationFn: (id) => api.deleteNotif(id),
     onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['admin-notifications']});
+        queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
         toast.success('Notification deleted');
     },
     onError: (error) => {
@@ -102,6 +103,7 @@ export default function AdminNotifications() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-notifications']});
+      queryClient.invalidateQueries({ queryKey: ['notif-panel']}); 
       setShowDialog(false);
       resetForm();
       toast.success('Notification sent');

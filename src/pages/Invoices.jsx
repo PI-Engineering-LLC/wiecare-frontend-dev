@@ -141,11 +141,16 @@ export default function Invoices() {
   const createPaymentSessionMutation = useMutation({
     mutationFn: (data) => api.createPaymentSession(data),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       if(data.url) window.open(data.url, "_blank", "noopener,noreferrer");
+
     },
     onError: (err) => {
       console.error(err);
       alert('Failed to start payment');
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       }
       
   });
@@ -153,8 +158,15 @@ export default function Invoices() {
     if (!selectedInvoice ) return;
     
     const amount = parseFloat(paymentAmount);
-    const paymentInformation = await createPaymentSessionMutation.mutateAsync({ invoiceId: selectedInvoice.id });
+    try{
+      const paymentInformation = await createPaymentSessionMutation.mutateAsync({ invoiceId: selectedInvoice.id });
   
+
+    }catch(err){
+      console.log(err)
+      toast.error('Failed to start payment')
+    }
+    
   };
   
 
@@ -466,7 +478,7 @@ export default function Invoices() {
                 <div>
                   <p className="text-sm text-slate-500 mb-2">Payment History</p>
                   <div className="space-y-2">
-                    {invoicePayments.payment_history.map((payment) => (
+                    {invoicePayments.map((payment) => (
                       <div key={payment.id} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
                         <div>
                           <p className="font-medium text-emerald-800">{payment.reference}</p>

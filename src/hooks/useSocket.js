@@ -26,6 +26,8 @@ export function useSocket(onNotification) {
     const handleNotification = (data) => {
       onNotificationRef.current(data);
       queryClient.invalidateQueries({ queryKey: ['notif-panel'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications']}); 
+      queryClient.invalidateQueries({ queryKey: ['admin-notifications']}); 
     };
 
     const handleConnectError = (err) => {

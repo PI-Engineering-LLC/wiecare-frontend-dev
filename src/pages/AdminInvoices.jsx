@@ -241,7 +241,7 @@ export default function AdminInvoices() {
       sales_tax,
       credit: parseFloat(formData.credit) || 0,
       total_amount,
-      balance_due: total_amount,
+      balance_due: total_amount - selectedInvoice?.amount_paid,
       amount_paid: selectedInvoice?.amount_paid || 0,
       currency: 'USD',
       ...(pdf_storage_key ? { pdf_storage_key } : {}),
@@ -324,7 +324,7 @@ export default function AdminInvoices() {
       method: paymentData.method,
       reference: paymentData.reference
     }];
-    await recordPaymentMutation.mutateAsync({ amount, method, invoice_id: selectedInvoice.id, paymentHistory, date});
+    await recordPaymentMutation.mutateAsync({ amount, method:paymentData.method, invoice_id: selectedInvoice.id, paymentHistory, date: paymentData.date, reference: paymentData.reference});
     //data:{ amount,method,invoice_id, date, notes, paymentHistory} 
     // const newStatus = balanceDue <= 0 ? 'paid' : newTotalPaid > 0 ? 'partial' : selectedInvoice.status;
     // await updateMutation.mutateAsync({ id: selectedInvoice.id, data: { amount_paid: newTotalPaid, balance_due: balanceDue, payment_history: paymentHistory, status: newStatus } });
