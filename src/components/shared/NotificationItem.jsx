@@ -31,15 +31,9 @@ export default function NotificationItem({ notification, icon, categoryStyle, ch
 
   return (
     <>
-      <Card 
-        className={`cursor-pointer transition-all ${!notification.is_read ? 'bg-blue-50/50' : ''}`}
-        onClick={handleClick}
-      >
-        <CardContent className="p-4">
-          {/* Render your existing card content here, passing in icon and categoryStyle */}
-          {children}
-        </CardContent>
-      </Card>
+      <div onClick={handleClick} className="cursor-pointer">
+        {children}
+      </div>
 
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
         <DialogContent>

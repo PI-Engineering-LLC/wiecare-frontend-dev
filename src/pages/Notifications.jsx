@@ -10,6 +10,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
+import NotificationItem from '@/components/shared/NotificationItem';
 
 export default function Notifications() {
   const { user } = useAuth();
@@ -171,64 +172,72 @@ function NotificationList({ notifications, onMarkRead, onDelete, getTypeIcon, ge
       />
     );
   }
-
   return (
+    
     <div className="space-y-3">
       {notifications.map(notification => (
-        <Card
+        <NotificationItem 
           key={notification.id}
+          notification={notification}
+          onMarkRead={onMarkRead}
+          onDelete={onDelete}
+          // No onAfterClick needed here since we don't have a drawer to close
+        >
+          {/* Everything that used to be inside <CardContent> goes here as children */}
+          <Card
           className={`border-0 shadow-sm transition-all ${
             !notification.is_read ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-slate-50'
           }`}
         >
           <CardContent className="p-4">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 mt-1">
-                {getTypeIcon(notification.type)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className={`font-medium ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
-                        {notification.title}
-                      </h3>
-                      {!notification.is_read && (
-                        <span className="w-2 h-2 bg-blue-500 rounded-full" />
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">{notification.message}</p>
-                    <div className="flex items-center gap-3 mt-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${getCategoryColor(notification.category)}`}>
-                        {notification.category}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                      {notification.created_at ? formatInTimeZone(new Date(notification.created_at),'UTC', 'MMM d, yyyy • h:mm a') :  '—' }
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 mt-1">
+              {getTypeIcon(notification.type)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className={`font-medium ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
+                      {notification.title}
+                    </h3>
                     {!notification.is_read && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onMarkRead(notification.id)}
-                        className="h-8 w-8 text-slate-400 hover:text-[#1e3a5f]"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                      </Button>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full" />
                     )}
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">{notification.message}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${getCategoryColor(notification.category)}`}>
+                      {notification.category}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                    {notification.created_at ? formatInTimeZone(new Date(notification.created_at),'UTC', 'MMM d, yyyy • h:mm a') :  '—' }
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {!notification.is_read && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onDelete(notification.id)}
-                      className="h-8 w-8 text-slate-400 hover:text-rose-500"
+                      onClick={(e) => { e.stopPropagation(); onMarkRead(notification.id); }}
+                      className="h-8 w-8 text-slate-400 hover:text-[#1e3a5f]"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <CheckCircle className="h-4 w-4" />
                     </Button>
-                  </div>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
+                    className="h-8 w-8 text-slate-400 hover:text-rose-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                {notification.link && (
+              </div>
+              {/* Note: The 'View details' button is still useful for links, but now the whole card handles popup */}
+              {notification.link && (
                   <Button
                     variant="link"
                     size="sm"
@@ -238,11 +247,86 @@ function NotificationList({ notifications, onMarkRead, onDelete, getTypeIcon, ge
                     <a href={notification.link}>View details →</a>
                   </Button>
                 )}
-              </div>
             </div>
+          </div>
           </CardContent>
-        </Card>
+          </Card>
+        </NotificationItem>
       ))}
     </div>
   );
+
+  // return (
+  //   <div className="space-y-3">
+  //     {notifications.map(notification => (
+  //       <Card
+  //         key={notification.id}
+  //         className={`border-0 shadow-sm transition-all ${
+  //           !notification.is_read ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-slate-50'
+  //         }`}
+  //       >
+  //         <CardContent className="p-4">
+  //           <div className="flex items-start gap-4">
+  //             <div className="flex-shrink-0 mt-1">
+  //               {getTypeIcon(notification.type)}
+  //             </div>
+  //             <div className="flex-1 min-w-0">
+  //               <div className="flex items-start justify-between gap-4">
+  //                 <div>
+  //                   <div className="flex items-center gap-2">
+  //                     <h3 className={`font-medium ${!notification.is_read ? 'text-slate-900' : 'text-slate-700'}`}>
+  //                       {notification.title}
+  //                     </h3>
+  //                     {!notification.is_read && (
+  //                       <span className="w-2 h-2 bg-blue-500 rounded-full" />
+  //                     )}
+  //                   </div>
+  //                   <p className="text-sm text-slate-500 mt-1">{notification.message}</p>
+  //                   <div className="flex items-center gap-3 mt-2">
+  //                     <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${getCategoryColor(notification.category)}`}>
+  //                       {notification.category}
+  //                     </span>
+  //                     <span className="text-xs text-slate-400">
+  //                     {notification.created_at ? formatInTimeZone(new Date(notification.created_at),'UTC', 'MMM d, yyyy • h:mm a') :  '—' }
+  //                     </span>
+  //                   </div>
+  //                 </div>
+  //                 <div className="flex items-center gap-1">
+  //                   {!notification.is_read && (
+  //                     <Button
+  //                       variant="ghost"
+  //                       size="icon"
+  //                       onClick={() => onMarkRead(notification.id)}
+  //                       className="h-8 w-8 text-slate-400 hover:text-[#1e3a5f]"
+  //                     >
+  //                       <CheckCircle className="h-4 w-4" />
+  //                     </Button>
+  //                   )}
+  //                   <Button
+  //                     variant="ghost"
+  //                     size="icon"
+  //                     onClick={() => onDelete(notification.id)}
+  //                     className="h-8 w-8 text-slate-400 hover:text-rose-500"
+  //                   >
+  //                     <Trash2 className="h-4 w-4" />
+  //                   </Button>
+  //                 </div>
+  //               </div>
+  //               {notification.link && (
+  //                 <Button
+  //                   variant="link"
+  //                   size="sm"
+  //                   className="px-0 h-auto text-[#1e3a5f] mt-2"
+  //                   asChild
+  //                 >
+  //                   <a href={notification.link}>View details →</a>
+  //                 </Button>
+  //               )}
+  //             </div>
+  //           </div>
+  //         </CardContent>
+  //       </Card>
+  //     ))}
+  //   </div>
+  // );
 }

@@ -20,6 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext'; 
 import { Switch } from '@/components/ui/switch';
+import NotificationItem from '@/components/shared/NotificationItem';
 
 const categoryConfig = {
   quote:       { icon: FileText,       color: 'text-violet-600', bg: 'bg-violet-50',  label: 'Quote'       },
@@ -134,6 +135,98 @@ export default function AdminNotifications() {
     const today = new Date();
     return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
   }).length;
+  const getAdminLink = (link) => {
+    if (!link) return link;
+
+  //case-insensitive regex or .toLowerCase() check
+  const lowerLink = link.toLowerCase();
+
+  if (lowerLink.startsWith('/quotes')) {
+    return link.replace(/^\/quotes/i, '/AdminQuotes');
+  }
+  
+  if (lowerLink.startsWith('/orders')) {
+    return link.replace(/^\/orders/i, '/AdminOrders');
+  }
+
+  if (lowerLink.startsWith('/invoices')) {
+    return link.replace(/^\/invoices/i, '/AdminInvoices');
+  }
+  if (lowerLink.startsWith('/maintenance')) {
+    return link.replace(/^\/maintenance/i, '/AdminMaintenance');
+  }
+
+  if (lowerLink.startsWith('/warrantyclaims')) {
+    return link.replace(/^\/warrantyclaims/i, '/AdminWarranty');
+  }
+
+  if (lowerLink.startsWith('/training')) {
+    return link.replace(/^\/training/i, '/AdminTraining');
+  }
+
+  if (lowerLink.startsWith('/courses')) {
+    return link.replace(/^\/courses/i, '/AdminCourses');
+  }
+
+  if (lowerLink.startsWith('/documents')) {
+    return link.replace(/^\/documents/i, '/AdminDocuments');
+  }
+    // if (link.startsWith('/Quotes')) return link.replace('/Quotes', '/AdminQuotes');
+    // if (link.startsWith('/Orders')) return link.replace('/Orders', '/AdminOrders');
+    // if (link.startsWith('/Invoices')) return link.replace('/Invoices', '/AdminInvoices');
+    // if (link.startsWith('/Maintenance')) return link.replace('/Maintenance', '/AdminMaintenance');
+    // if (link.startsWith('/WarrantyClaims')) return link.replace('/WarrantyClaims', '/AdminWarranty');
+    // if (link.startsWith('/Training')) return link.replace('/Training', '/AdminTraining');
+    // if (link.startsWith('/Courses')) return link.replace('/Courses', '/AdminCourses');
+    // if (link.startsWith('/Documents')) return link.replace('/Documents', '/AdminDocuments');
+    // Add other mappings
+    return link;
+  };
+  // return (
+  //   <div className="space-y-4">
+  //     {notifications.map(notification => (
+  //       <NotificationItem 
+  //         key={notification.id}
+  //         notification={notification}
+  //         // Admin-specific handlers remain local to this page
+  //         onMarkRead={onMarkRead} 
+  //         onDelete={onDelete}
+  //       >
+  //         {/* Your Admin-specific card content */}
+  //         <div className="flex items-center gap-4">
+  //           <div className="flex-shrink-0">
+  //              {/* Admin icons: maybe show user-related icons or priority icons */}
+  //              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+  //                <User className="h-5 w-5 text-slate-600" />
+  //              </div>
+  //           </div>
+            
+  //           <div className="flex-1">
+  //             <div className="flex items-center justify-between">
+  //                <h3 className="font-semibold text-slate-900">{notification.title}</h3>
+  //                <span className="text-xs text-slate-400">
+  //                {notification.created_at ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true }) : ''}                 </span>
+  //             </div>
+  //             <p className="text-sm text-slate-600 mt-0.5">{notification.message}</p>
+              
+  //             {/* Admin action strip */}
+  //             <div className="flex items-center gap-2 mt-3">
+  //               <Button 
+  //                 variant="outline" 
+  //                 size="sm" 
+  //                 className="text-xs"
+  //                 onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
+  //               >
+  //                 Delete
+  //               </Button>
+  //               {/* Other admin specific buttons */}
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </NotificationItem>
+  //     ))}
+  //   </div>
+  // );
 
   return (
     <AdminOnly>
@@ -196,9 +289,115 @@ export default function AdminNotifications() {
               const CatIcon = cat.icon;
               const recipient = users.find(u => u.id === n.recipient_id); // Find recipient user for display
               const client = clients.find(c => c.id === n.client_id); // Find client for display
+              // const adminNotification = n.link? { ...n, link: getAdminLink(n.link) } : n;
+              const adminNotification =  { ...n, link: getAdminLink(n.link) };
+
 
               return (
-                <Card key={n.id} className={`border-0 shadow-sm transition-all ${!n.is_read ? 'border-l-4 border-l-blue-400' : ''}`}>
+                
+            //     <NotificationItem 
+            //     key={n.id}
+            //     notification={n}
+            //     // Admin-specific handlers remain local to this page
+            //     onMarkRead={onMarkRead} 
+            //     onDelete={onDelete}
+            //   >
+            //     {/* Your Admin-specific card content */}
+            //     <div className="flex items-center gap-4">
+            //       <div className="flex-shrink-0">
+            //          {/* Admin icons: maybe show user-related icons or priority icons */}
+            //          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+            //            <User className="h-5 w-5 text-slate-600" />
+            //          </div>
+            //       </div>
+                  
+            //       <div className="flex-1">
+            //         <div className="flex items-center justify-between">
+            //            <h3 className="font-semibold text-slate-900">{n.title}</h3>
+            //            <span className="text-xs text-slate-400">
+            //            {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}                 </span>
+            //         </div>
+            //         <p className="text-sm text-slate-600 mt-0.5">{n.message}</p>
+                    
+            //         {/* Admin action strip */}
+            //         <div className="flex items-center gap-2 mt-3">
+            //           <Button 
+            //             variant="outline" 
+            //             size="sm" 
+            //             className="text-xs"
+            //             onClick={(e) => { e.stopPropagation(); onDelete(n.id); }}
+            //           >
+            //             Delete
+            //           </Button>
+            //           {/* Other admin specific buttons */}
+            //         </div>
+            //       </div>
+            //     </div>
+
+            //     <Card key={n.id} className={`border-0 shadow-sm transition-all ${!n.is_read ? 'border-l-4 border-l-blue-400' : ''}`}>
+            //   <CardContent className="p-4">
+            //     <div className="flex items-start gap-3">
+            //       <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${cat.bg}`}>
+            //         <CatIcon className={`h-4 w-4 ${cat.color}`} />
+            //       </div>
+            //       <div className="flex-1 min-w-0">
+            //         <div className="flex items-start justify-between gap-2">
+            //           <div className="min-w-0">
+            //             <div className="flex items-center gap-2 flex-wrap">
+            //               <p className="font-medium text-slate-900 text-sm">{n.title}</p>
+            //               {typeIcon[n.type]}
+            //               {!n.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
+            //             </div>
+            //             <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+            //             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+            //               <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${cat.bg} ${cat.color}`}>
+            //                 {cat.label}
+            //               </span>
+            //               {(recipient || n.recipient_email) && (
+            //                 <span className="text-[11px] text-slate-400 flex items-center gap-1">
+            //                   <MailCheck className="h-3 w-3" />
+            //                   {recipient?.full_name || n.recipient_email}
+            //                 </span>
+            //               )}
+            //               {client && (
+            //                 <span className="text-[11px] text-slate-400">
+            //                   for {client.company_name}
+            //                 </span>
+            //               )}
+            //               <span className="text-[11px] text-slate-400">
+            //                 {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}
+            //               </span>
+            //               <span className={`text-[11px] font-semibold ${n.is_read ? 'text-emerald-600' : 'text-slate-400'}`}>
+            //                 {n.is_read ? '✓ Read' : 'Unread'}
+            //               </span>
+            //             </div>
+            //           </div>
+            //           <div className="flex items-center gap-1 flex-shrink-0">
+            //             {n.link && (
+            //               <a href={n.link} className="text-[11px] text-[#1e3a5f] hover:underline whitespace-nowrap">
+            //                 View →
+            //               </a>
+            //             )}
+            //             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-rose-500" onClick={() => deleteMutation.mutate(n.id)}>
+            //               <Trash2 className="h-3.5 w-3.5" />
+            //             </Button>
+            //           </div>
+            //         </div>
+            //       </div>
+            //     </div>
+            //   </CardContent>
+            // </Card>
+            //   </NotificationItem>
+
+            <NotificationItem 
+            key={adminNotification.id}
+            notification={adminNotification}
+            // // Admin-specific handlers remain local to this page
+            // onMarkRead={null} 
+            // onDelete={(id) => deleteMutation.mutate(id)}
+            // //() => deleteMutation.mutate(n.id)
+          >
+                <Card className={`border-0 shadow-sm transition-all ${!adminNotification.is_read ? 'border-l-4 border-l-blue-400' : ''}`}>
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${cat.bg}`}>
@@ -208,19 +407,19 @@ export default function AdminNotifications() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-medium text-slate-900 text-sm">{n.title}</p>
-                              {typeIcon[n.type]}
-                              {!n.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
+                              <p className="font-medium text-slate-900 text-sm">{adminNotification.title}</p>
+                              {typeIcon[adminNotification.type]}
+                              {!adminNotification.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
                             </div>
-                            <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+                            <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">{adminNotification.message}</p>
                             <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                               <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${cat.bg} ${cat.color}`}>
                                 {cat.label}
                               </span>
-                              {(recipient || n.recipient_email) && (
+                              {(recipient || adminNotification.recipient_email) && (
                                 <span className="text-[11px] text-slate-400 flex items-center gap-1">
                                   <MailCheck className="h-3 w-3" />
-                                  {recipient?.full_name || n.recipient_email}
+                                  {recipient?.full_name || adminNotification.recipient_email}
                                 </span>
                               )}
                               {client && (
@@ -229,20 +428,20 @@ export default function AdminNotifications() {
                                 </span>
                               )}
                               <span className="text-[11px] text-slate-400">
-                                {n.created_at ? formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) : ''}
+                                {adminNotification.created_at ? formatDistanceToNow(new Date(adminNotification.created_at), { addSuffix: true }) : ''}
                               </span>
-                              <span className={`text-[11px] font-semibold ${n.is_read ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                {n.is_read ? '✓ Read' : 'Unread'}
+                              <span className={`text-[11px] font-semibold ${adminNotification.is_read ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                {adminNotification.is_read ? '✓ Read' : 'Unread'}
                               </span>
                             </div>
                           </div>
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            {n.link && (
-                              <a href={n.link} className="text-[11px] text-[#1e3a5f] hover:underline whitespace-nowrap">
+                            {adminNotification.link && (
+                              <a href={adminNotification.link} className="text-[11px] text-[#1e3a5f] hover:underline whitespace-nowrap">
                                 View →
                               </a>
                             )}
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-rose-500" onClick={() => deleteMutation.mutate(n.id)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-300 hover:text-rose-500" onClick={(e) => { e.stopPropagation();  deleteMutation.mutate(adminNotification.id); }}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -251,6 +450,7 @@ export default function AdminNotifications() {
                     </div>
                   </CardContent>
                 </Card>
+                </NotificationItem>
               );
             })}
           </div>
@@ -350,3 +550,4 @@ export default function AdminNotifications() {
     </AdminOnly>
   );
 }
+
