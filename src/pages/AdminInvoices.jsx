@@ -103,7 +103,11 @@ export default function AdminInvoices() {
       return invoice;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
+
       setShowDialog(false);
       resetForm();
       toast.success('Invoice created successfully');
@@ -113,7 +117,10 @@ export default function AdminInvoices() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => api.updateInvoice(id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       setShowDialog(false);
       resetForm();
       toast.success('Invoice updated successfully');
@@ -122,6 +129,8 @@ export default function AdminInvoices() {
   const recordPaymentMutation = useMutation({
     mutationFn: (data ) => api.recordPayment(data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       setShowPaymentDialog(false);
@@ -132,7 +141,10 @@ export default function AdminInvoices() {
   const deleteMutation = useMutation({
     mutationFn: (id) => api.deleteInvoice(id),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
+      queryClient.invalidateQueries({ queryKey: ['invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       toast.success('Invoice deleted');
     },
   });

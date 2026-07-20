@@ -70,13 +70,12 @@ export default function Invoices() {
         // console.log('Payment Successful:', { transactionId, message });
       }else if (responseCode) {
         console.error('Payment Failed:', message);
-      toast.success('Payment Error occured!!');
+      toast.error('Payment Error occured!!');
       }
       const action = params.get('action')
       if (params.get('action') === 'invoices' && responseCode === '200') {toast.success('Payment processed. You will receive a confirmation shortly'); console.log('Payment recorded successfully')};;
       if (params.get('action') === 'retry') {toast.error('Error occured'); console.log('Error occured')}
       if (params.get('action') === 'cancel') {toast.success('Payment cancelled'); console.log('Payment cancelled')}
-      console.log(location.search, params, responseCode, message, transactionId, action )
       if (location.search) {
         navigate(location.pathname, { replace: true });
       }
@@ -106,7 +105,10 @@ export default function Invoices() {
   const updateInvoiceMutation = useMutation({
     mutationFn: ({ id, data }) => api.updateInvoice(id, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments']});
       queryClient.invalidateQueries({ queryKey: ['invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       setShowPaymentDialog(false);
       setPaymentAmount('');
       toast.success('Payment recorded successfully');
@@ -143,6 +145,8 @@ export default function Invoices() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['payments']});
       queryClient.invalidateQueries({ queryKey: ['invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       if(data.url) window.open(data.url, "_blank", "noopener,noreferrer");
 
     },
@@ -151,6 +155,8 @@ export default function Invoices() {
       alert('Failed to start payment');
       queryClient.invalidateQueries({ queryKey: ['payments']});
       queryClient.invalidateQueries({ queryKey: ['invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       }
       
   });
