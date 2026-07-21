@@ -1,4 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +12,8 @@ export default function StatsCard({
   trend, 
   trendLabel,
   variant = 'default',
-  className 
+  className,
+  to 
 }) {
   const variants = {
     default: 'bg-white',
@@ -20,10 +24,10 @@ export default function StatsCard({
   };
 
   const isLight = variant === 'default';
-
-  return (
+  const card= (
     <Card className={cn(
       "p-4 border-0 shadow-sm hover:shadow-md transition-shadow",
+      to && "cursor-pointer",
       variants[variant],
       className
     )}>
@@ -75,5 +79,13 @@ export default function StatsCard({
         )}
       </div>
     </Card>
-  );
+  )
+
+
+  if (to) {
+    return <Link to={createPageUrl(to)}>{card}</Link>;
+  }
+  
+  return card;
+  
 }

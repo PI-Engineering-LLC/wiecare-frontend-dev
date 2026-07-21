@@ -36,7 +36,7 @@ export default function AdminClients() {
     state: '',
     zip_code: '',
     country: '',
-    subscription_tier: 'basic',
+    subscription_tier: 'default',
     status: 'active',
     warranty_start_date: '',
     contract_date: '',
@@ -98,7 +98,7 @@ export default function AdminClients() {
       state: '',
       zip_code: '',
       country: '',
-      subscription_tier: 'basic',
+      subscription_tier: 'default',
       status: 'active',
       warranty_start_date: '',
       contract_date: '',
@@ -139,7 +139,7 @@ export default function AdminClients() {
       state: client.state || '',
       zip_code: client.zip_code || '',
       country: client.country || '',
-      subscription_tier: client.subscription_tier || 'basic',
+      subscription_tier: client.subscription_tier || 'default',
       status: client.status || 'active',
       warranty_start_date: client.warranty_start_date || '', // Format for date input
       contract_date: client.contract_date || '', // Format for date input new Date(client.contract_date + 'T00:00:00') : null,
@@ -210,7 +210,7 @@ export default function AdminClients() {
       header: 'Subscription',
       render: (row) => (
         <span className="px-2 py-1 bg-[#1e3a5f]/10 text-[#1e3a5f] rounded text-sm font-medium">
-          {tierLabels[row.subscription_tier] || 'Basic'}
+          {tierLabels[row.subscription_tier] || 'Default'}
         </span>
       )
     },

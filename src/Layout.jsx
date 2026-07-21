@@ -207,8 +207,9 @@ export default function Layout({ children, currentPageName }) {
 
       <div className="px-3 pb-5 flex-shrink-0 space-y-3 border-t border-slate-100 pt-3">
         <div className="flex items-center gap-2.5 px-1">
+        <Link to={createPageUrl('Settings')} onClick={() => setSidebarOpen(false)}>
           <AvatarImg avatarKey={user?.avatar_storage_key} fallback={getInitials(user?.full_name)} />
-
+        </Link>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-800 truncate">{user?.full_name || 'User'}</p>
             <p className="text-xs text-slate-400 truncate">{user?.email}</p>
@@ -401,6 +402,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="w-px h-5 bg-slate-200 mx-1" />
 
             <div className="flex items-center gap-2">
+            <Link to={createPageUrl('Settings')}>
               <AvatarImg avatarKey={user?.avatar_storage_key} fallback={getInitials(user?.full_name)} />
 
               <div className="hidden sm:block">
@@ -414,6 +416,7 @@ export default function Layout({ children, currentPageName }) {
                    (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
                 </p> */}
               </div>
+              </Link>
             </div>
 
             <Link to={createPageUrl(isInternalAdmin ? 'AdminQuotes' : 'Quotes')} className="hidden md:block">

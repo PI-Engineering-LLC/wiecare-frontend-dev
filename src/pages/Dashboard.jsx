@@ -93,23 +93,27 @@ export default function Dashboard() {
           value={isLoading ? '...' : pendingInvoices.length}
           icon={FileText}
           variant={overdueInvoices.length > 0 ? 'danger' : 'default'}
+          to="Invoices"
         />
         <StatsCard
           title="Total Orders"
           value={isLoading ? '...' : orders.length}
           icon={ShoppingCart}
+          to="Orders"
         />
         <StatsCard
           title="Maintenance"
           value={isLoading ? '...' : maintenance.length}
           icon={Wrench}
           variant={pendingMaintenance.length > 0 ? 'warning' : 'default'}
+          to="Maintenance"
         />
         <StatsCard
           title="Amount Due"
           value={isLoading ? '...' : `$${totalDue.toLocaleString()}`}
           icon={AlertCircle}
           variant={overdueInvoices.length > 0 ? 'danger' : 'primary'}
+          to="Invoices"
         />
       </div>
 

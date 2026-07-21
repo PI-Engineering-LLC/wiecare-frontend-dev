@@ -73,10 +73,10 @@ export default function AdminDashboard() {
 
       {/* Main Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="Active Clients" value={clients?.filter(c => c.status === 'active').length} icon={Building2} variant="primary" />
-        <StatsCard title="Pending Quotes" value={pendingQuotes.length} icon={FileText} variant={pendingQuotes.length > 0 ? 'warning' : 'default'} />
-        <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} />
-        <StatsCard title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={TrendingUp} variant="success" />
+        <StatsCard title="Active Clients" value={clients?.filter(c => c.status === 'active').length} icon={Building2} variant="primary" to="AdminClients" />
+        <StatsCard title="Pending Quotes" value={pendingQuotes.length} icon={FileText} variant={pendingQuotes.length > 0 ? 'warning' : 'default'} to="AdminQuotes" />
+        <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} to="AdminInvoices" />
+        <StatsCard title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={TrendingUp} variant="success" to="AdminInvoices" />
       </div>
 
       {/* Action Required Section */}

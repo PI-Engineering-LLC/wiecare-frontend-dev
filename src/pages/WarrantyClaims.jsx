@@ -243,7 +243,7 @@ export default function WarrantyClaims() {
                 <>
                   <p className="text-sm font-semibold text-emerald-800">✓ Warranty Active</p>
                   <p className="text-xs text-emerald-700 mt-0.5">
-                    {tierLabels[clientData.subscription_tier] || 'Basic'}
+                    {tierLabels[clientData.subscription_tier] || 'Default'}
                     {clientData.subscription_tier === 'basic' ? '1-year' : '1-year'} coverage · expires{' '}
                     {warrantyStatus.expiry.toLocaleDateString()}
                   </p>

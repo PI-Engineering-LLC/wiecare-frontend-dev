@@ -299,9 +299,9 @@ export default function ClientAdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard title="Team Members" value={orgUsers.length} icon={Users} variant="primary" />
-        <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} />
-        <StatsCard title="Pending Maintenance" value={pendingMaintenance.length} icon={Wrench} variant={pendingMaintenance.length > 0 ? 'warning' : 'default'} />
-        <StatsCard title="Amount Due" value={`$${totalDue.toLocaleString()}`} icon={FileText} variant={overdueInvoices.length > 0 ? 'danger' : 'default'} />
+        <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} to="Invoices" />
+        <StatsCard title="Pending Maintenance" value={pendingMaintenance.length} icon={Wrench} variant={pendingMaintenance.length > 0 ? 'warning' : 'default'} to="Maintenance" />
+        <StatsCard title="Amount Due" value={`$${totalDue.toLocaleString()}`} icon={FileText} variant={overdueInvoices.length > 0 ? 'danger' : 'default'} to="Invoices" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
