@@ -343,6 +343,7 @@ export default function Layout({ children, currentPageName }) {
                             queryClient.invalidateQueries({ queryKey: ['notifications']}); 
                             queryClient.invalidateQueries({ queryKey: ['admin-notifications']}); 
                             setNotifications(prev => prev.filter(n => n.id !== notif.id));
+                            if(!notif.link)
                             setSelectedNotification(notif)
                           };
                         
@@ -659,7 +660,7 @@ function AdminRightPanel({ notifications, maintenance, invoices, overdue, pendin
             queryClient.invalidateQueries({ queryKey: ['notifications']}); 
             queryClient.invalidateQueries({ queryKey: ['admin-notifications']}); 
             setNotifications(prev => prev.filter(n => n.id !== notif.id));
-            setSelectedNotification(notif)
+            if(!notif.link) setSelectedNotification(notif)
           };
         
           const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
@@ -781,7 +782,7 @@ function ClientRightPanel({ notifications, maintenance, overdue, pending, user, 
               queryClient.invalidateQueries({ queryKey: ['notifications']});
               queryClient.invalidateQueries({ queryKey: ['admin-notifcations']});  
               setNotifications(prev => prev.filter(n => n.id !== notif.id));
-              setSelectedNotification(notif)
+              if(!notif.link)setSelectedNotification(notif)
             };
           
             const commonClasses = "block px-5 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 active:bg-slate-100";
