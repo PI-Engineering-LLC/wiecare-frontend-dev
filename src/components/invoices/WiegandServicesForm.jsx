@@ -53,7 +53,12 @@ export default function WiegandServicesForm({ formData, setFormData, clients }) 
         </div>
         <div>
           <Label>Due Date</Label>
-          <Input type="date" className="mt-1" value={formData.due_date?.split('T')[0] || ''} onChange={(e) => setFormData({ ...formData, due_date: e.target.value })} />
+          <Input type="date" className="mt-1" value={formData.due_date?.split('T')[0] || ''} onChange={(e) => {
+            const dueDate = e.target.value;
+            const issue = dueDate ? new Date(new Date(dueDate).getTime() -( 60 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0] : '';
+            setFormData({ ...formData, issue_date: issue, due_date: e.target.value })}
+
+        } />
         </div>
         <div>
           <Label>Customer ID</Label>
