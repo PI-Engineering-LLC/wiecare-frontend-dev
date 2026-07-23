@@ -345,7 +345,7 @@ export default function AdminInvoices() {
   };
 
   const invoicesWithOverdueCheck = invoices.map(inv => {
-    if (isInvoiceOverdue(inv) && inv.status !== 'overdue') {
+    if (isInvoiceOverdue(inv) && inv.status !== 'overdue' && inv.balance_due>0) {
       return { ...inv, status: 'overdue' };
     }
     return inv;

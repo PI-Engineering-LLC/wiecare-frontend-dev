@@ -30,7 +30,6 @@ export default function AdminTraining() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    coaster_name: '',
     client_id: '',
     category: 'operations',
     instructor: '',
@@ -120,7 +119,6 @@ export default function AdminTraining() {
     setFormData({
       title: '',
       description: '',
-      coaster_name: '',
       client_id: '',
       category: 'operations',
       instructor: '',
@@ -143,7 +141,6 @@ export default function AdminTraining() {
     setFormData({
       title: training.title || '',
       description: training.description || '',
-      coaster_name: training.coaster_name || '',
       client_id: training.client_id || '',
       category: training.category || 'operations',
       instructor: training.instructor || '',
@@ -521,15 +518,6 @@ export default function AdminTraining() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-2">
-                  <Label>Coaster/Ride Name *</Label>
-                  <Input
-                    value={formData.coaster_name}
-                    onChange={(e) => setFormData({ ...formData, coaster_name: e.target.value })}
-                    className="mt-1"
-                    placeholder="e.g., Thunder Mountain, Space Coaster"
-                  />
-                </div>
                 <div>
                   <Label>Category</Label>
                   <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
@@ -669,7 +657,7 @@ export default function AdminTraining() {
               <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!formData.title || !formData.session_date || !formData.coaster_name}
+                disabled={!formData.title || !formData.session_date || !formData.client_id}
                 className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedTraining ? 'Update' : 'Create'}
