@@ -168,7 +168,7 @@ export default function Quotes() {
       id: quote.id,
       data: { status: 'approved' }
     });
-    toast.success('Quote approved and order created');
+    toast.success('Quote accepted and order created');
   };
 
   const handleRejectQuote = async (quote) => {
@@ -313,7 +313,7 @@ export default function Quotes() {
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="sent">Sent</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="approved">Accepted</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
                   <SelectItem value="converted">Converted</SelectItem>
                 </SelectContent>
@@ -662,7 +662,7 @@ export default function Quotes() {
                       className="bg-emerald-600 hover:bg-emerald-700"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Approve
+                      Accept
                     </Button>
                   </div>
                 )}

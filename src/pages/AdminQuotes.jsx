@@ -301,7 +301,7 @@ export default function AdminQuotes() {
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="sent">Sent</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="approved">Accepted</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
             <SelectItem value="converted">Converted</SelectItem>
@@ -439,7 +439,7 @@ export default function AdminQuotes() {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="sent">Sent</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="approved">Accepted</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="converted">Converted</SelectItem>
@@ -580,7 +580,7 @@ export default function AdminQuotes() {
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="sent">Sent</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="approved">Accepted</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                   </SelectContent>
