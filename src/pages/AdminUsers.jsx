@@ -836,7 +836,7 @@ export default function AdminUsers() {
                                               };
                                               setSelectedUser({ ...selectedUser, memberships: updatedMemberships });
 
-                                              updateRolesMutation.mutate({ clientId: membership.client_id, roleIds: updatedRoleIdsArray });
+                                              // updateRolesMutation.mutate({ clientId: membership.client_id, roleIds: updatedRoleIdsArray });
                                             }}
                                           />
                                           <Label>{role.name}</Label>
