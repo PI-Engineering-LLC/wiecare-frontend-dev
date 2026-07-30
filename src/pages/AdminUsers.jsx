@@ -159,10 +159,11 @@ export default function AdminUsers() {
   });
 
   const updateRolesMutation = useMutation({
-    mutationFn: ({ clientId, roleIds }) => api.updateUserClientRoles(
-      currentUserIdInEdit,
-      clientId,
-      {roleIds: roleIds}),
+    mutationFn: ({ clientId, data }) => api.updateUserClientRoles(currentUserIdInEdit, clientId, data),
+    // mutationFn: ({ clientId, roleIds }) => api.updateUserClientRoles(
+    //   currentUserIdInEdit,
+    //   clientId,
+    //   {roleIds: roleIds}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user', currentUserIdInEdit] });
       toast.success("Roles updated successfully!");
@@ -476,7 +477,7 @@ export default function AdminUsers() {
                   Invite User
                 </Button>
               ) : null}
-              {isInternalAdmin && (
+              {false && isInternalAdmin && (
                 <Button
                   onClick={() => setShowAddRoleDialog(true)}
                   className="bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -485,7 +486,7 @@ export default function AdminUsers() {
                   Add Role Type
                 </Button>
               )}
-              {isInternalAdmin && (
+              {false && isInternalAdmin && (
                 <Button
                   onClick={() => setShowAddPermissionsDialog(true)}
                   className="bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -836,7 +837,17 @@ export default function AdminUsers() {
                                               };
                                               setSelectedUser({ ...selectedUser, memberships: updatedMemberships });
 
-                                              // updateRolesMutation.mutate({ clientId: membership.client_id, roleIds: updatedRoleIdsArray });
+                                              // updateRolesMutation.mutate({ clientId: membership.client_id, 
+                                              //   data: {
+                                              //     // Can update other user fields here if needed in the dialog
+                                              //     memberships: [{
+                                              //       clientId: membership.client_id,
+                                              //       roleIds: updatedRoleIdsArray,
+                                              //       status: selectedUser.status
+                                              //     }],
+                                              //   }
+
+                                              // });
                                             }}
                                           />
                                           <Label>{role.name}</Label>

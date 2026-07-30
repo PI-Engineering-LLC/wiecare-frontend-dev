@@ -178,12 +178,16 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
     const { rowIdx } = activeCell;
     const newItems = items.map((item, i) => {
       if (i !== rowIdx) return item;
+      const newEzNumber = (part.ez_number) ?? '';
+      // console.log(newEzNumber, part.ez_number,item.ez_number,item.z_number, part.z_number  )
       return {
         ...item,
-        item_number: part.part_number || item.item_number,
-        ez_number: part.ez_number || item.ez_number,
-        z_number: part.ez_number || item.z_number,
-        description: part.name || item.description,
+        item_number: part.part_number || item.item_number || '',
+        ez_number: newEzNumber,
+        z_number: newEzNumber,
+        // ez_number: part.ez_number || item.ez_number || item.z_number || part.z_number || '' ,
+        // z_number: part.ez_number || item.z_number || '',
+        description: part.name || item.description || '',
         unit_price: part.unit_price ?? (parseFloat(item.unit_price) || 0),
         amount: (parseFloat(item.quantity) || 1) * (parseFloat(part.unit_price) || 0),
         total: (parseFloat(item.quantity) || 1) * (parseFloat(part.unit_price) || 0),
@@ -203,7 +207,19 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
 
   const removeItem = (idx) => {
     closeDropdown();
-    if (items.length > 1) onChange(items.filter((_, i) => i !== idx));
+    // if (items.length > 1) onChange(items.filter((_, i) => i !== idx));
+
+    const newItems = items.filter((_, i) => i !== idx);
+  
+  // If we removed the last item, add a fresh empty one instead of leaving it empty
+  if (newItems.length === 0) {
+    onChange([
+      { line: 1, item_number: '', ez_number: '', z_number: '', description: '', quantity: 1, unit: 'each', unit_price: 0, amount: 0, total: 0, line_type: 'product' }
+    ]);
+  } else {
+    onChange(newItems);
+  }
+    
   };
 
   const updateItemField = (idx, field, value) => {
@@ -265,7 +281,7 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
                 <td className="px-2 py-1.5">
                   <Input
                     className="h-8"
-                    value={item.ez_number || item.z_number || ''}
+                    value={(item.ez_number)??''}
                     placeholder="EZ #"
                     autoComplete="off"
                     onChange={(e) => handleInputChange(e, idx, 'ez_number')}
@@ -323,7 +339,9 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
                   ${((parseFloat(item.amount) || parseFloat(item.total) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </td>
                 <td className="px-2 py-1.5">
-                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)} disabled={items.length === 1}>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)} 
+                  // disabled={items.length === 1}
+                  >
                     <Trash2 className="h-3.5 w-3.5 text-rose-500" />
                   </Button>
                 </td>

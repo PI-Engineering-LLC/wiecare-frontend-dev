@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, FileBox, Trash2, Upload, File, Download } from 'lucide-react';
+import { Plus, Search, Edit2, FileBox, Trash2, Upload, File, Download, FileText } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,7 @@ export default function AdminDocuments() {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const { uploadFileToS3, isUploading } = useUpload();
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -95,10 +96,12 @@ export default function AdminDocuments() {
       status: 'active'
     });
     setSelectedDocument(null);
+    setSelectedFile(null)
   };
 
   const handleEdit = (document) => {
     setSelectedDocument(document);
+    setSelectedFile(null)
     setFormData({
       title: document.title || '',
       description: document.description || '',
@@ -167,6 +170,8 @@ export default function AdminDocuments() {
   const categories = [
     { value: 'inspection_report', label: 'Inspection Report' },
     { value: 'invoice', label: 'Invoice' },
+    { value: 'parts_drawings', label: 'Parts Drawings' },
+    { value: 'electrical_plans', label: 'Electrical Plans' },
     { value: 'warranty', label: 'Warranty' },
     { value: 'manual', label: 'Manual' },
     { value: 'service_ticket', label: 'Service Tickets' },
@@ -332,26 +337,39 @@ export default function AdminDocuments() {
                 <div className="col-span-2">
                   <Label>File *</Label>
                   <div className="mt-1">
-                    {selectedFile ?
+                  <input type="file" ref={fileInputRef} onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
+                         
+                    {formData.file_storage_key && !selectedFile ? (
+                    <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <FileText className="h-4 w-4 text-green-600" />
+                     <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs">
+                                             Replace
+                                           </Button>
+                                         </div>   
+                    
+                    ):selectedFile ?
                       (
                         <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
                           <File className="h-5 w-5 text-slate-600" />
-                          <span className="text-sm truncate flex-1">File uploaded</span>
-                          <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                          <span className="text-sm truncate flex-1">File uploaded {selectedFile.name}</span>
+                          <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="text-xs">
                             Change
                           </Button>
                         </div>
                       )
                       : (
                         <>
-                          <input type="file" onChange={handleFileSelection} className="hidden" id="doc-upload" disabled={uploading} />
-                          <label htmlFor="doc-upload">
-                            <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
-                              <Upload className="h-5 w-5 text-slate-400" />
-                              <span className="text-sm text-slate-500">
+                           <label htmlFor="doc-upload">
+                             <Button type="button" variant="outline" className="w-full mt-1 border-dashed" onClick={() => pdfInputRef.current?.click()}>
+                             <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
+                             
+                                                <Upload className="h-5 w-5 text-slate-400" />
+                                                <span className="text-sm text-slate-500">
                                 {uploading ? 'Uploading...' : 'Click to upload file'}
-                              </span>
-                            </div>
+                              </span></div>
+                                                </Button>
+                              
+                            
                           </label>
                         </>
                       )}
@@ -439,7 +457,7 @@ export default function AdminDocuments() {
               <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!formData.title || !formData.client_id || !selectedFile || uploading}
+                disabled={!formData.title || !formData.client_id || (!(selectedFile || formData.file_storage_key ) ) || uploading}
                 className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedDocument ? 'Update' : 'Upload'}

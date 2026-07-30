@@ -194,16 +194,15 @@ export default function AdminCourses() {
 
   };
    const handleThumbnailError = async (courseId, error) => {
-      console.log(`Retrieving theumbnail for ${courseId} failed:`, error);
-      if (error.status === 404) {
-        console.log("Confirmed 404: File does not exist");
+      console.log(`Retrieving thumbnail for ${courseId} failed:`, error);
+   
+        console.log("Error occured loading thumbnail", error);
     
       await updateMutation.mutateAsync({
         id: courseId,
         data: { thumbnail_storage_key: null }
       });
-      toast.error("Thumbnail not found")
-    }
+    
     };
 
   const filteredCourses = courses.filter(course => {
@@ -228,7 +227,10 @@ export default function AdminCourses() {
           <div className="w-16 h-10 bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
             {row.thumbnail_storage_key ? (
               <PublicImage docKey={row.thumbnail_storage_key} alt={row.title} className="w-full h-full object-cover" onError={(err) => {
-                handleThumbnailError(row.id,err)
+                if(row.thumbnail_storage_key){
+                  handleThumbnailError(row.id,err)
+                }
+                
               }
               } />
             ) : (

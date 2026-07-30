@@ -24,6 +24,7 @@ export function useSocket(onNotification) {
     }
 
     const handleNotification = (data) => {
+      // console.log('New notification:', data);
       onNotificationRef.current(data);
       queryClient.invalidateQueries({ queryKey: ['notif-panel'] });
       queryClient.invalidateQueries({ queryKey: ['notifications']}); 
@@ -46,12 +47,18 @@ export function useSocket(onNotification) {
         queryClient.invalidateQueries({ queryKey: ['admin-trainings'] });
         queryClient.invalidateQueries({ queryKey: ['admin-training-requests'] });
         queryClient.invalidateQueries({ queryKey: ['registrations']});
+        queryClient.invalidateQueries({ queryKey: ['all-registrations']});
         queryClient.invalidateQueries({ queryKey: ['training-requests']})
         queryClient.invalidateQueries({ queryKey: ['trainings'] });
       }
       if (data?.category === 'warranty') {
         queryClient.invalidateQueries({ queryKey: ['admin-warranty']});
         queryClient.invalidateQueries({ queryKey: ['warrantyClaims'] });
+      }
+      if (data?.category === 'course') {
+        queryClient.invalidateQueries({ queryKey: ['admin-courses']});
+        queryClient.invalidateQueries({ queryKey: ['courses']});
+        queryClient.invalidateQueries({ queryKey: ['courseProgress'] });
       }
     };
 
@@ -61,6 +68,7 @@ export function useSocket(onNotification) {
       // queryClient.clear();
       // localStorage.removeItem('activeClientId');
     };
+    socket.on('connect', () => console.log('Connected'));
 
     socket.on('notification:new', handleNotification);
     socket.on('connect_error', handleConnectError);

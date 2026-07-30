@@ -44,6 +44,7 @@ export default function ClientAdminDashboard() {
   // Check if current user has permission to view this dashboard
   // Assuming 'client:admin.dashboard.view' or the 'client_admin' role itself
   const isAuthorized = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
+  const CLIENT_ROLES = ['client_admin', 'general_user'];
 
   const { data: allRoles = [] } = useQuery({
     queryKey: ['all-roles'],
@@ -494,7 +495,9 @@ export default function ClientAdminDashboard() {
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {allRoles.map(r => ( // Filter out system roles if not applicable for client invites
+                  {allRoles
+                  .filter(r => CLIENT_ROLES.includes(r.name))
+                  .map(r => ( // Filter out system roles if not applicable for client invites
                     <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                   ))}
                 </SelectContent>

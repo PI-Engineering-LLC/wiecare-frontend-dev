@@ -156,7 +156,7 @@ export default function AdminInvoices() {
   };
 
   const isInvoiceOverdue = (invoice) => {
-    if (['paid', 'cancelled'].includes(invoice.status)) return false;
+    if (['paid', 'cancelled', 'draft'].includes(invoice.status)) return false;
     if ( invoice.due_date && new Date() > new Date(invoice.due_date)) return true;
     if (!invoice.issue_date) return false;
     const daysSinceIssue = differenceInDays(new Date(), new Date(invoice.issue_date));
@@ -233,6 +233,14 @@ export default function AdminInvoices() {
   };
 
   const handleSubmit = async () => {
+    const hasValidItem = formData.items.some(
+      item => (item.description && item.description.trim() !== '') || (item.item_number && item.item_number.trim() !== '')
+    );
+  
+    if (!hasValidItem) {
+      toast.error('Please add at least one line item with a description or item number.');
+      return;
+    }
     try{
     const client = clients.find(c => c.id === formData.client_id);
     const { subtotal, total_amount, sales_tax } = calculateTotals();
@@ -382,7 +390,10 @@ export default function AdminInvoices() {
       )
     },
   ];
-
+  const isFormValid = formData.client_id && 
+  formData.title && 
+  formData.items.length > 0 && 
+  formData.items.some(i => i.description?.trim() !== '');
   return (
     <AdminOnly>
       <div className="space-y-6">
@@ -562,7 +573,9 @@ export default function AdminInvoices() {
               <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!formData.client_id || !formData.title || createMutation.isPending || updateMutation.isPending || uploadingPdf}
+                disabled={!isFormValid || createMutation.isPending || updateMutation.isPending || uploadingPdf}
+
+                // disabled={!formData.client_id || !formData.title || createMutation.isPending || updateMutation.isPending || uploadingPdf}
                 className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
               >
                 {uploadingPdf ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading PDF...</> : createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedInvoice ? 'Update Invoice' : 'Create Invoice'}

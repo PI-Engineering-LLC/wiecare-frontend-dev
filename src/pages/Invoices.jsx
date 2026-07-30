@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Eye, FileText, AlertCircle, CreditCard, Download } from 'lucide-react';
+import { Search, Eye, FileText, AlertCircle, CreditCard, Download, Printer } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -188,6 +188,18 @@ export default function Invoices() {
   const totalDue = invoices.reduce((sum, inv) => sum + Number(inv.balance_due || (inv.total_amount - (inv.amount_paid || 0) || 0)), 0);
   const pendingInvoices = invoices.filter(i => i.status === 'pending' || i.status === 'partial');
   const overdueInvoices = invoices.filter(i => i.status === 'overdue');
+  const getStatusColors = (status) => {
+    const map = {
+      failed:   { bg: 'bg-red-50',   text: 'text-red-800',   sub: 'text-red-600' },
+      pending:  { bg: 'bg-amber-50', text: 'text-amber-800', sub: 'text-amber-600' },
+      completed:{ bg: 'bg-emerald-50', text: 'text-emerald-800', sub: 'text-emerald-600' },
+      refunded: { bg: 'bg-blue-50',  text: 'text-blue-800',  sub: 'text-blue-600' },
+      orphan:   { bg: 'bg-slate-100', text: 'text-slate-600', sub: 'text-slate-500' }
+    };
+    
+    // Returns the match or a default "neutral" gray theme
+    return map[status] || { bg: 'bg-slate-50', text: 'text-slate-800', sub: 'text-slate-600' };
+  };
 
   const columns = [
     {
@@ -348,9 +360,11 @@ export default function Invoices() {
 
       {/* Invoice Details Dialog */}
       <Dialog open={!!selectedInvoice && !showPaymentDialog} onOpenChange={() => setSelectedInvoice(null)}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="sm:max-w-2xl  max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Invoice Details</DialogTitle>
+            <DialogTitle>Invoice Details <Button variant="outline" onClick={() => window.print()}>
+            <Printer className="h-4 w-4 mr-2" /> 
+</Button></DialogTitle>
           </DialogHeader>
           {selectedInvoice && (
             <div className="space-y-6 py-4">
@@ -463,41 +477,6 @@ export default function Invoices() {
               )
               }
 
-              {/* Payment History */}
-              {/* {selectedInvoice.payment_history && selectedInvoice.payment_history.length > 0 && (
-                <div>
-                  <p className="text-sm text-slate-500 mb-2">Payment History</p>
-                  <div className="space-y-2">
-                    {selectedInvoice.payment_history.map((payment, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-emerald-800">{payment.reference}</p>
-                          <p className="text-sm text-emerald-600">{formatInTimeZone(new Date(payment.date),'UTC', 'MMM d, yyyy')}</p>
-                        </div>
-                        <p className="font-semibold text-emerald-700">${payment.amountPaid?.toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )} */}
-              {selectedInvoice && invoicePayments.length > 0 && (
-                <div>
-                  <p className="text-sm text-slate-500 mb-2">Payment History</p>
-                  <div className="space-y-2">
-                    {invoicePayments.map((payment) => (
-                      <div key={payment.id} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-emerald-800">{payment.reference}</p>
-                          <p className="text-sm text-emerald-600">{payment.paid_at 
-                ? formatInTimeZone(new Date(payment.paid_at),'UTC', 'MMM d, yyyy'): '-'}</p>
-                        </div>
-                        <p className="font-semibold text-emerald-700">${payment.amount?.toLocaleString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="pt-4 border-t space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Subtotal</p>
@@ -550,6 +529,58 @@ export default function Invoices() {
                   </Button>
                 </div>
               )}
+
+
+
+              {/* Payment History */}
+              {/* {selectedInvoice.payment_history && selectedInvoice.payment_history.length > 0 && (
+                <div>
+                  <p className="text-sm text-slate-500 mb-2">Payment History</p>
+                  <div className="space-y-2">
+                    {selectedInvoice.payment_history.map((payment, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-emerald-800">{payment.reference}</p>
+                          <p className="text-sm text-emerald-600">{formatInTimeZone(new Date(payment.date),'UTC', 'MMM d, yyyy')}</p>
+                        </div>
+                        <p className="font-semibold text-emerald-700">${payment.amountPaid?.toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )} */}
+              {selectedInvoice && invoicePayments.length > 0 && (
+                <div>
+                  <p className="text-sm text-slate-500 mb-2">Payment History</p>
+                  <div className="space-y-2">
+                    {invoicePayments.map((payment) => {
+                      // Determine colors based on status
+                      const isFailed = payment.status === 'failed';
+                      const isPending = payment.status === 'pending';
+                      const bgColor = isFailed ? 'bg-red-50' : isPending ? 'bg-amber-50' : 'bg-emerald-50';
+                      const textColor = isFailed ? 'text-red-800' : isPending ? 'text-amber-800' : 'text-emerald-800';
+                      const subTextColor = isFailed ? 'text-red-600' : isPending ? 'text-amber-600' : 'text-emerald-600';
+
+                      const colors = getStatusColors(payment.status);
+
+                      
+                      return (
+                      
+                      <div key={payment.id} className={`flex items-center justify-between p-3 ${colors.bg} rounded-lg`}>
+                        <div>
+                          <p className={`font-medium ${colors.text}`}>{payment.reference}</p>
+                          <p className={`text-sm ${colors.sub}`}>{payment.paid_at 
+                ? formatInTimeZone(new Date(payment.paid_at),'UTC', 'MMM d, yyyy'): '-'}</p>
+                        </div>
+                        <p className={`font-semibold ${colors.text}`}>${payment.amount?.toLocaleString()}</p>
+                      </div>
+                    )
+                  })}
+                  </div>
+                </div>
+              )}
+
+             
             </div>
           )}
         </DialogContent>

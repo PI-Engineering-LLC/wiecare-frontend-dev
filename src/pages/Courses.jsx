@@ -207,6 +207,7 @@ export default function Courses() {
     queryClient.invalidateQueries({ queryKey: ['courses'] });
   }
   };
+  
 
   return (
     <div className="space-y-6">
@@ -300,6 +301,7 @@ export default function Courses() {
             onSelect={setSelectedCourse}
             onStart={handleStartCourse}
             difficultyColors={difficultyColors}
+            updateCourseMutation={updateCourseMutation}
           />
         </TabsContent>
 
@@ -313,6 +315,7 @@ export default function Courses() {
             onSelect={setSelectedCourse}
             onStart={handleStartCourse}
             difficultyColors={difficultyColors}
+            updateCourseMutation={updateCourseMutation}
           />
         </TabsContent>
 
@@ -326,6 +329,7 @@ export default function Courses() {
             onSelect={setSelectedCourse}
             onStart={handleStartCourse}
             difficultyColors={difficultyColors}
+            updateCourseMutation={updateCourseMutation}
           />
         </TabsContent>
       </Tabs>
@@ -425,7 +429,7 @@ export default function Courses() {
   );
 }
 
-function CourseGrid({ courses, progress, onSelect, onStart, difficultyColors }) {
+function CourseGrid({ courses, progress, onSelect, onStart, difficultyColors, updateCourseMutation }) {
   if (courses.length === 0) {
     return (
       <EmptyState
@@ -438,6 +442,17 @@ function CourseGrid({ courses, progress, onSelect, onStart, difficultyColors }) 
 
   const getProgressForCourse = (courseId) => {
     return progress.find(p => p.course_id === courseId);
+  };
+  const handleThumbnailError = async (courseId, error) => {
+    console.log(`Retrieving thumbnail for ${courseId} failed:`, error);
+ 
+      console.log("Error occured loading thumbnail", error);
+  
+    await updateCourseMutation.mutateAsync({
+     courseId,
+      data: { thumbnail_storage_key: null }
+    });
+  
   };
 
   return (
@@ -461,6 +476,12 @@ function CourseGrid({ courses, progress, onSelect, onStart, difficultyColors }) 
                     docKey={course.thumbnail_storage_key}
                     alt={course.title}
                     className="w-full h-full object-cover"
+                    onError={(err) => {
+                      if(course.thumbnail_storage_key){
+                        handleThumbnailError(course.id,err)
+                      }
+                      
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a]">

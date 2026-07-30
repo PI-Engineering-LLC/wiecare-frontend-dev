@@ -106,6 +106,8 @@ export default function Documents() {
   const categories = [
     { value: 'inspection_report', label: 'Inspection Reports' },
     { value: 'invoice', label: 'Invoices' },
+    { value: 'parts_drawings', label: 'Parts Drawings' },
+    { value: 'electrical_plans', label: 'Electrical Plans' },
     { value: 'warranty', label: 'Warranty' },
     { value: 'manual', label: 'Manuals' },
     { value: 'service_ticket', label: 'Service Tickets' },
@@ -130,6 +132,8 @@ export default function Documents() {
   const inspectionDocs = filteredDocuments.filter(d => d.category === 'inspection_report');
   const warrantyDocs = filteredDocuments.filter(d => d.category === 'warranty');
   const serviceTicketDocs = filteredDocuments.filter(d => d.category === 'service_tickets');
+  const partsDrawings = filteredDocuments.filter(d => d.category === 'parts_drawings');
+  const electricalPlans = filteredDocuments.filter(d => d.category === 'electrical_plans');
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -219,10 +223,12 @@ export default function Documents() {
         <TabsList className="flex flex-wrap gap-1 h-auto p-1">
           <TabsTrigger value="all" className="flex-shrink-0">All ({filteredDocuments.length})</TabsTrigger>
           <TabsTrigger value="inspection" className="flex-shrink-0">🔍 Inspection Reports ({inspectionDocs.length})</TabsTrigger>
-          <TabsTrigger value="inspection" className="flex-shrink-0">🔍 Service Tickets ({serviceTicketDocs.length})</TabsTrigger>
+          <TabsTrigger value="serviceTickets" className="flex-shrink-0">🔍 Service Tickets ({serviceTicketDocs.length})</TabsTrigger>
           <TabsTrigger value="invoices" className="flex-shrink-0">🧾 Invoices ({invoiceDocs.length})</TabsTrigger>
           <TabsTrigger value="warranty" className="flex-shrink-0">🛡️ Warranty ({warrantyDocs.length})</TabsTrigger>
           <TabsTrigger value="manuals" className="flex-shrink-0">📖 Manuals ({manuals.length})</TabsTrigger>
+          <TabsTrigger value="partsDrawings" className="flex-shrink-0">📖 Parts Drawings ({partsDrawings.length})</TabsTrigger>
+          <TabsTrigger value="electricalPlans" className="flex-shrink-0">📖 Electrical Plans ({electricalPlans.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-4">
@@ -231,7 +237,7 @@ export default function Documents() {
         <TabsContent value="inspection" className="mt-4">
           <DocumentGrid documents={inspectionDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
-        <TabsContent value="inspection" className="mt-4">
+        <TabsContent value="serviceTickets" className="mt-4">
           <DocumentGrid documents={serviceTicketDocs} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
         <TabsContent value="invoices" className="mt-4">
@@ -242,6 +248,12 @@ export default function Documents() {
         </TabsContent>
         <TabsContent value="manuals" className="mt-4">
           <DocumentGrid documents={manuals} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
+        </TabsContent>
+        <TabsContent value="partsDrawings" className="mt-4">
+          <DocumentGrid documents={partsDrawings} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
+        </TabsContent>
+        <TabsContent value="electricalPlans" className="mt-4">
+          <DocumentGrid documents={electricalPlans} getFileIcon={getFileIcon} formatFileSize={formatFileSize} updateDocumentMutation={updateDocumentMutation} />
         </TabsContent>
       </Tabs>
 

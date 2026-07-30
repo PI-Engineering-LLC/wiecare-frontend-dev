@@ -403,8 +403,8 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-2">
             <Link to={createPageUrl('Settings')}>
+            <div className="flex items-center gap-2">
               <AvatarImg avatarKey={user?.avatar_storage_key} fallback={getInitials(user?.full_name)} />
-
               <div className="hidden sm:block">
                 <p className="text-sm font-semibold text-slate-800 leading-none">{user?.full_name || 'User'}</p>
                 <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
@@ -416,8 +416,10 @@ export default function Layout({ children, currentPageName }) {
                    (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
                 </p> */}
               </div>
+              </div>
               </Link>
             </div>
+            
 
             <Link to={createPageUrl(isInternalAdmin ? 'AdminQuotes' : 'Quotes')} className="hidden md:block">
               <Button size="sm" className="bg-[#005f27] hover:bg-[#436a36] text-white rounded-xl h-8 px-4 gap-1.5 font-semibold text-xs shadow-sm ml-1">
