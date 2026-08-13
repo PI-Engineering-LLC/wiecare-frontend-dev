@@ -84,7 +84,7 @@ export default function Documents() {
     queryKey: ['documents', activeClientId],
     queryFn: async () => {
       const docs = await api.getDs({
-        client_id: activeClientId,
+        // client_id: activeClientId,
         status: 'active',
         order: '-title',
         limit: 200

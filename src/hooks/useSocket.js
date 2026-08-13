@@ -34,6 +34,7 @@ export function useSocket(onNotification) {
       queryClient.invalidateQueries({ queryKey: ['invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-payments']});
+      queryClient.invalidateQueries({ queryKey: ['org-invoices']});
       }
       if (data?.category === 'quote') {
         queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
@@ -42,6 +43,7 @@ export function useSocket(onNotification) {
       if (data?.category === 'maintenance') {
         queryClient.invalidateQueries({ queryKey: ['admin-maintenance']});
         queryClient.invalidateQueries({ queryKey: ['maintenance']});
+        queryClient.invalidateQueries({ queryKey: ['org-maintenance']});
       }
       if (data?.category === 'training') {
         queryClient.invalidateQueries({ queryKey: ['admin-trainings'] });
@@ -54,11 +56,50 @@ export function useSocket(onNotification) {
       if (data?.category === 'warranty') {
         queryClient.invalidateQueries({ queryKey: ['admin-warranty']});
         queryClient.invalidateQueries({ queryKey: ['warrantyClaims'] });
+        queryClient.invalidateQueries({ queryKey: ['org-warranty']});
       }
       if (data?.category === 'course') {
         queryClient.invalidateQueries({ queryKey: ['admin-courses']});
         queryClient.invalidateQueries({ queryKey: ['courses']});
         queryClient.invalidateQueries({ queryKey: ['courseProgress'] });
+      }
+      if (data?.category === 'document') {
+        queryClient.invalidateQueries({ queryKey: ['admin-documents']});
+        queryClient.invalidateQueries({ queryKey: ['documents']});
+      }
+      if (data?.category === 'client') {
+        queryClient.invalidateQueries({ queryKey: ['admin-clients']});
+        queryClient.invalidateQueries({ queryKey: ['clients']});
+        queryClient.invalidateQueries({ queryKey: ['client']});
+      }
+      if (data?.category === 'user') {
+        queryClient.invalidateQueries({ queryKey: ['admin-users']});
+        queryClient.invalidateQueries({ queryKey: ['users']});
+        queryClient.invalidateQueries({ queryKey: ['user']});
+        queryClient.invalidateQueries({ queryKey: ['authUser']});
+        queryClient.invalidateQueries({ queryKey: ['org-users']});
+      }
+      if (data?.category === 'invite') {
+        queryClient.invalidateQueries({ queryKey: ['admin-invites']});
+        queryClient.invalidateQueries({ queryKey: ['invites']});
+      }
+      if (data?.category === 'role') {
+        queryClient.invalidateQueries({ queryKey: ['roles']});
+      }
+      if (data?.category === 'permission') {
+        queryClient.invalidateQueries({ queryKey: ['permissions']});
+      }
+      if (data?.category === 'order') {
+        queryClient.invalidateQueries({ queryKey: ['admin-orders']});
+        queryClient.invalidateQueries({ queryKey: ['orders']});
+        queryClient.invalidateQueries({ queryKey: ['admin-part-orders']});
+        queryClient.invalidateQueries({ queryKey: ['orders-for-invoice']});
+        queryClient.invalidateQueries({ queryKey: ['sub-orders-for-invoice']});
+        queryClient.invalidateQueries({ queryKey: ['org-orders']});
+      }
+      if (data?.category === 'part') {
+        queryClient.invalidateQueries({ queryKey: ['admin-parts']});
+        queryClient.invalidateQueries({ queryKey: ['admin-part-orders']});
       }
     };
 

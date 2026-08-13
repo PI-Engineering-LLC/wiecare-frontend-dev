@@ -40,7 +40,7 @@ export default function AdminWarranty() {
   });
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['admin-clients-warranty'],
+    queryKey: ['clients'],
     queryFn: () => api.getClients({ order: '-created_at', limit: 200 }),
   });
 

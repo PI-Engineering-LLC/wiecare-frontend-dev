@@ -50,7 +50,7 @@ export default function AdminDocuments() {
   });
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['admin-clients-docs'],
+    queryKey: ['clients'],
     queryFn: () => api.getClients({ order: 'company_name', limit: 200 }),
   });
 
@@ -107,7 +107,7 @@ export default function AdminDocuments() {
       description: document.description || '',
       category: document.category || 'manual',
       coaster_name: document.coaster_name || '',
-      client_id: document.client_id || '',
+      client_id: document.client_id || null,
       file_storage_key: document.file_storage_key || '',
       file_type: document.file_type || '',
       equipment_model: document.equipment_model || '',
@@ -117,7 +117,9 @@ export default function AdminDocuments() {
     setShowDialog(true);
   };
 
-  const handleClientChange = (clientId) => {
+  const handleClientChange = (value) => {
+    const clientId = !!value ? value : null ;
+    console.log(clientId)
     const client = clients.find(c => c.id === clientId);
     setFormData(prev => ({
       ...prev,
@@ -136,12 +138,11 @@ export default function AdminDocuments() {
 
 
 
-
     setUploading(true);
     let finalFormData = { ...formData };
     try {
       if (selectedFile) {
-        const file_key = await uploadFileToS3({ client_id: formData?.client_id, file: selectedFile });
+        const file_key = await uploadFileToS3({ isPrivate: true, client_id: formData?.client_id, file: selectedFile });
         finalFormData.file_storage_key = file_key;
         finalFormData.file_type = selectedFile.type;
         if (selectedDocument) {
@@ -149,6 +150,9 @@ export default function AdminDocuments() {
         } else {
           await createMutation.mutateAsync({ ...finalFormData, file_size: selectedFile.size });
         }
+      }
+      else if (fileInputRef && selectedDocument){
+        await updateMutation.mutateAsync({ id: selectedDocument.id, data: { ...finalFormData } });
       }
     } catch (error) {
       toast.error('Failed to upload file');
@@ -360,7 +364,7 @@ export default function AdminDocuments() {
                       : (
                         <>
                            <label htmlFor="doc-upload">
-                             <Button type="button" variant="outline" className="w-full mt-1 border-dashed" onClick={() => pdfInputRef.current?.click()}>
+                             <Button type="button" variant="outline" className="w-full mt-1 border-dashed" onClick={() => fileInputRef.current?.click()}>
                              <div className="flex items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#1e3a5f] transition-colors">
                              
                                                 <Upload className="h-5 w-5 text-slate-400" />
@@ -378,12 +382,14 @@ export default function AdminDocuments() {
 
                 {/* Client selector */}
                 <div className="col-span-2">
-                  <Label>Client *</Label>
-                  <Select value={formData.client_id} onValueChange={handleClientChange}>
+                  <Label>Client </Label>
+                  <Select value={formData.client_id || "none"} onValueChange={handleClientChange}>
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select a client..." />
                     </SelectTrigger>
                     <SelectContent>
+                    {/* <SelectItem value="">None / No Client</SelectItem> */}
+                    <SelectItem value="none">None / No Client</SelectItem>
                       {clients.map(c => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.company_name} {c.coaster_name ? `— ${c.coaster_name}` : ''}
@@ -443,7 +449,7 @@ export default function AdminDocuments() {
                 {/* Public toggle */}
                 <div className="col-span-2 flex items-center justify-between">
                   <div>
-                    <Label>Also visible to all clients with same coaster</Label>
+                    <Label>Also visible to all clients</Label>
                     <p className="text-sm text-slate-500">If off, only this client can see it</p>
                   </div>
                   <Switch
@@ -457,7 +463,9 @@ export default function AdminDocuments() {
               <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!formData.title || !formData.client_id || (!(selectedFile || formData.file_storage_key ) ) || uploading}
+                disabled={!formData.title 
+                  // || !formData.client_id 
+                  || (!(selectedFile || formData.file_storage_key ) ) || uploading}
                 className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'Saving...' : selectedDocument ? 'Update' : 'Upload'}

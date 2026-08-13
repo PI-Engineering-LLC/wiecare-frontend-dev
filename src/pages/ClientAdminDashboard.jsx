@@ -47,7 +47,7 @@ export default function ClientAdminDashboard() {
   const CLIENT_ROLES = ['client_admin', 'general_user'];
 
   const { data: allRoles = [] } = useQuery({
-    queryKey: ['all-roles'],
+    queryKey: ['roles'],
     queryFn: () => api.getRoles({ limit: 200 }),
   });
 

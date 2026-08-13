@@ -58,13 +58,13 @@ export default function AdminNotifications() {
   });
 
   const { data: usersData = { users: [] } } = useQuery({ 
-    queryKey: ['all-users-for-admin-notifs'],
+    queryKey: ['users'],
     queryFn: () => api.getUsers({ order:'full_name', limit: 500}), 
   });
   const users = usersData?.users ?? []; 
 
   const { data: clients = [] } = useQuery({
-    queryKey: ['all-clients-for-admin-notifs'],
+    queryKey: ['clients'],
     queryFn: () => api.getClients({ order: 'company_name', limit: 200}),
   });
 
