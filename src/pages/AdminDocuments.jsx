@@ -166,7 +166,7 @@ export default function AdminDocuments() {
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase());
+      doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase()) || doc.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
