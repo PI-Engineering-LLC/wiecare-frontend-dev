@@ -20,6 +20,8 @@ import { PublicImage } from '@/components/PublicImage';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useClientSuspended, SuspendedNotice, SUSPENDED_MESSAGE } from '@/hooks/useClientSuspended';
+import PartAutocomplete from '@/components/shared/PartAutocomplete';
 
 export default function Quotes() {
   const { user } = useAuth();
@@ -31,8 +33,8 @@ export default function Quotes() {
   const [modificationRequest, setModificationRequest] = useState('');
   const [quoteToModify, setQuoteToModify] = useState(null);
 
-    const navigate = useNavigate();
-    const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation()
 
   const { uploadFileToS3, isUploading } = useUpload();
   const [quoteRequest, setQuoteRequest] = useState({
@@ -43,6 +45,7 @@ export default function Quotes() {
   const [uploadingIdx, setUploadingIdx] = useState(null);
 
   const queryClient = useQueryClient();
+  const isSuspended = useClientSuspended();
 
   const [highlightQuoteId, setHighlightQuoteId] = useState(null);
 
@@ -87,16 +90,26 @@ export default function Quotes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quotes'] });
       setShowModifyDialog(false);
-    setModificationRequest('');
-    setQuoteToModify(null);
-    setSelectedQuote(null);
-    setShowRequestDialog(false);
-    if (location.search) {
-      navigate(location.pathname, { replace: true });
-    }
+      setModificationRequest('');
+      setQuoteToModify(null);
+      setSelectedQuote(null);
+      setShowRequestDialog(false);
+      if (location.search) {
+        navigate(location.pathname, { replace: true });
+      }
       toast.success('Quote updated successfully');
     },
   });
+  const selectPart = (index, part) => {
+    const newItems = [...quoteRequest.items];
+    newItems[index] = {
+      ...newItems[index],
+      ez_number: part.ez_number ?? '',
+      item_number: part.part_number ?? '',
+      description: part.name ?? newItems[index].description,
+    };
+    setQuoteRequest({ ...quoteRequest, items: newItems });
+  };
 
   const updateItem = (index, field, value) => {
     const newItems = [...quoteRequest.items];
@@ -114,13 +127,13 @@ export default function Quotes() {
   const handleItemPhotoUpload = async (idx, file) => {
     if (!file) return;
     setUploadingIdx(idx);
-    try{
-    const file_key = await uploadFileToS3({client_id: activeClientId, file, type:'item_photo', isPrivate: false});
-    const newItems = [...quoteRequest.items];
-    newItems[idx].photo_storage_key = file_key;
-    setQuoteRequest({ ...quoteRequest, items: newItems });
-    setUploadingIdx(null);
-    }catch(error){
+    try {
+      const file_key = await uploadFileToS3({ client_id: activeClientId, file, type: 'item_photo', isPrivate: false });
+      const newItems = [...quoteRequest.items];
+      newItems[idx].photo_storage_key = file_key;
+      setQuoteRequest({ ...quoteRequest, items: newItems });
+      setUploadingIdx(null);
+    } catch (error) {
       toast.error('Failed to upload image');
       setUploadingIdx(null);
     }
@@ -136,6 +149,11 @@ export default function Quotes() {
   };
 
   const handleRequestQuote = async () => {
+    if (isSuspended) {
+      toast.error(SUSPENDED_MESSAGE);
+      return;
+    }
+
     const effectiveClientId = activeClientId;
     if (!effectiveClientId) {
       toast.error('Your account is not linked to a client. Please contact support.');
@@ -196,10 +214,10 @@ export default function Quotes() {
     }
     toast.success('Modification request sent');
   };
-  const handleDeleteQuoteItemByIndex = (indexToDelete, error) => { 
+  const handleDeleteQuoteItemByIndex = (indexToDelete, error) => {
     if (error.status === 404) {
-    setSelectedQuote((prevQuote) => ({ ...prevQuote, items: prevQuote.items.filter((_, i) => i !== indexToDelete) })); 
-  }
+      setSelectedQuote((prevQuote) => ({ ...prevQuote, items: prevQuote.items.filter((_, i) => i !== indexToDelete) }));
+    }
   };
 
   // Split quotes: client's own requests vs admin-sent quotes
@@ -232,12 +250,12 @@ export default function Quotes() {
     {
       header: 'Amount',
       render: (row) => (
-        <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toLocaleString()}` : '—'}</span>
+        <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</span>
       )
     },
     {
       header: 'Valid Until',
-      render: (row) => row.valid_until ? formatInTimeZone(new Date(row.valid_until),'UTC', 'MMM d, yyyy') : '-'
+      render: (row) => row.valid_until ? formatInTimeZone(new Date(row.valid_until), 'UTC', 'MMM d, yyyy') : '-'
     },
     {
       header: 'Status',
@@ -371,7 +389,7 @@ export default function Quotes() {
                       <p className="text-sm text-slate-500 truncate">{req.description}</p>
                     )}
                     <p className="text-xs text-slate-400 mt-0.5">
-                    Submitted {req.created_at ? formatInTimeZone(new Date(req.created_at),'UTC', 'MMM d, yyyy') : ''}
+                      Submitted {req.created_at ? formatInTimeZone(new Date(req.created_at), 'UTC', 'MMM d, yyyy') : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
@@ -393,6 +411,7 @@ export default function Quotes() {
             <DialogTitle>Request a Quote</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            {isSuspended && <SuspendedNotice />}
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Request Title</label>
               <Input
@@ -422,6 +441,14 @@ export default function Quotes() {
                 {quoteRequest.items.map((item, idx) => (
                   <div key={idx} className="p-3 border rounded-lg space-y-2">
                     <div className="grid grid-cols-3 gap-2">
+                      {/* <PartAutocomplete
+                        placeholder="EZ #"
+                        value={item.ez_number}
+                        // onChange={(e) => updateItem(idx, 'ez_number', e.target.value)}
+                        onChange={(v) => updateItem(idx, 'ez_number', v)}
+                        onSelect={(part) => selectPart(idx, part)}
+                        showPrice={false}
+                      /> */}
                       <Input
                         placeholder="EZ #"
                         value={item.ez_number}
@@ -476,11 +503,11 @@ export default function Quotes() {
                       {item.photo_storage_key && uploadingIdx !== idx && (
                         <div className="flex items-center gap-2">
                           {/* <img src={item.photo_storage_key} alt="Item photo" className="h-10 w-10 rounded-md object-cover border border-slate-200" /> */}
-                          <PublicImage docKey={item.photo_storage_key} alt={"Item photo"} className="h-10 w-10 rounded-md object-cover border border-slate-200" 
-                          onError={(err) => {
-                            handleDeleteQuoteItemByIndex(idx,err)
-                          }
-                          }
+                          <PublicImage docKey={item.photo_storage_key} alt={"Item photo"} className="h-10 w-10 rounded-md object-cover border border-slate-200"
+                            onError={(err) => {
+                              handleDeleteQuoteItemByIndex(idx, err)
+                            }
+                            }
                           />
                           <button
                             type="button"
@@ -503,7 +530,7 @@ export default function Quotes() {
             </Button>
             <Button
               onClick={handleRequestQuote}
-              disabled={!quoteRequest.title || createQuoteMutation.isPending}
+              disabled={isSuspended || !quoteRequest.title || createQuoteMutation.isPending}
               className="bg-[#1e3a5f] hover:bg-[#2d5a8a]"
             >
               {createQuoteMutation.isPending ? 'Submitting...' : 'Submit Request'}
@@ -513,12 +540,15 @@ export default function Quotes() {
       </Dialog>
 
       {/* Quote Details Dialog */}
-      <Dialog open={!!selectedQuote} onOpenChange={(open) => { setSelectedQuote(null);
-       if (!open) {setHighlightQuoteId(null);
-        if (location.search) {
-          navigate(location.pathname, { replace: true });
-        }}
-       }}>
+      <Dialog open={!!selectedQuote} onOpenChange={(open) => {
+        setSelectedQuote(null);
+        if (!open) {
+          setHighlightQuoteId(null);
+          if (location.search) {
+            navigate(location.pathname, { replace: true });
+          }
+        }
+      }}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Quote Details</DialogTitle>
@@ -542,7 +572,7 @@ export default function Quotes() {
                   <p className="text-sm text-slate-500">Valid Until</p>
                   <p className="font-medium">
                     {selectedQuote.valid_until
-                      ? formatInTimeZone(new Date(selectedQuote.valid_until),'UTC', 'MMM d, yyyy')
+                      ? formatInTimeZone(new Date(selectedQuote.valid_until), 'UTC', 'MMM d, yyyy')
                       : 'Not specified'}
                   </p>
                 </div>
@@ -565,7 +595,23 @@ export default function Quotes() {
               {selectedQuote.items && selectedQuote.items.length > 0 && (
                 <div>
                   <p className="text-sm text-slate-500 mb-2">Items</p>
-                  <div className="border rounded-lg overflow-hidden">
+                  {/* Mobile: stacked cards */}
+                  <div className="sm:hidden space-y-2">
+                    {(selectedQuote.items || []).map((item, idx) => (
+                      <div key={idx} className="border rounded-lg p-3 text-sm space-y-1">
+                        <p className="font-medium">{item.description || 'Item ' + (idx + 1)}</p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-600 text-xs">
+                          {item.item_number && <span>Item #: {item.item_number}</span>}
+                          {item.z_number && <span>Z #: {item.z_number}</span>}
+                          <span>Qty: {item.quantity}</span>
+                          <span>Price: ${item.unit_price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <p className="text-right font-semibold">${item.total?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Desktop: table */}
+                  <div className="hidden sm:block border rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
                       <thead className="bg-slate-50">
                         <tr>
@@ -584,8 +630,8 @@ export default function Quotes() {
                             <td className="p-3 text-slate-600">{item.ez_number || '-'}</td>
                             <td className="p-3">{item.description}</td>
                             <td className="p-3 text-right">{item.quantity}</td>
-                            <td className="p-3 text-right">${item.unit_price}</td>
-                            <td className="p-3 text-right font-medium">${item.total}</td>
+                            <td className="p-3 text-right">${item.unit_price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                            <td className="p-3 text-right font-medium">${item.total?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -598,35 +644,35 @@ export default function Quotes() {
               <div className="border rounded-lg p-4 bg-slate-50 space-y-2 text-sm max-w-xs ml-auto">
                 <div className="flex justify-between">
                   <span className="text-slate-600">Subtotal</span>
-                  <span>${selectedQuote.subtotal?.toLocaleString() || '0'}</span>
+                  <span>${selectedQuote.subtotal?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0'}</span>
                 </div>
                 {selectedQuote.discount_percent > 0 && (
                   <div className="flex justify-between text-rose-600">
                     <span>Discount ({selectedQuote.discount_percent}%)</span>
-                    <span>-${(selectedQuote.subtotal * selectedQuote.discount_percent / 100).toLocaleString()}</span>
+                    <span>-${(selectedQuote.subtotal * selectedQuote.discount_percent / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</span>
                   </div>
                 )}
                 {selectedQuote.packing > 0 && (
                   <div className="flex justify-between">
                     <span className="text-slate-600">Packing</span>
-                    <span>${selectedQuote.packing?.toLocaleString()}</span>
+                    <span>${selectedQuote.packing?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</span>
                   </div>
                 )}
                 {selectedQuote.export_declaration > 0 && (
                   <div className="flex justify-between">
                     <span className="text-slate-600">Export Declaration</span>
-                    <span>${selectedQuote.export_declaration?.toLocaleString()}</span>
+                    <span>${selectedQuote.export_declaration?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</span>
                   </div>
                 )}
                 {selectedQuote.tax_amount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-slate-600">Tax ({selectedQuote.tax_rate}%)</span>
-                    <span>${selectedQuote.tax_amount?.toLocaleString()}</span>
+                    <span>${selectedQuote.tax_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-base pt-2 border-t">
                   <span>Total</span>
-                  <span>${selectedQuote.total_amount?.toLocaleString() || '0'}</span>
+                  <span>${selectedQuote.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })  || '0'}</span>
                 </div>
               </div>
 

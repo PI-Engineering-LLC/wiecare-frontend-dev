@@ -80,7 +80,28 @@ export default function DataTable({
 
   return (
     <Card className={cn("overflow-hidden border-0 shadow-sm", className)}>
-      <div className="overflow-x-auto">
+      {/* Mobile: stacked cards, no horizontal scroll needed */}
+      <div className="md:hidden divide-y divide-slate-100">
+        {data.map((row, i) => (
+          <div
+            key={row.id || i}
+            onClick={() => onRowClick?.(row)}
+            className={cn("p-4 space-y-2", onRowClick && "cursor-pointer hover:bg-slate-50")}
+          >
+            {columns.map((col, j) => (
+              <div key={j} className="flex items-start justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-500 flex-shrink-0 pt-0.5">{col.header}</span>
+                <div className="text-right min-w-0">
+                  {col.render ? col.render(row) : row[col.accessor]}
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">

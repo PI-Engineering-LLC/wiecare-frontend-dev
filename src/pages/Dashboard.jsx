@@ -110,7 +110,7 @@ export default function Dashboard() {
         />
         <StatsCard
           title="Amount Due"
-          value={isLoading ? '...' : `$${totalDue.toLocaleString()}`}
+          value={isLoading ? '...' : `$${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={AlertCircle}
           variant={overdueInvoices.length > 0 ? 'danger' : 'primary'}
           to="Invoices"
@@ -172,7 +172,7 @@ export default function Dashboard() {
                       {invoice.due_date ? formatInTimeZone(new Date(invoice.due_date),'UTC', 'MMM d, yyyy') : 'No due date'}
                       </p>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <p className="font-semibold text-slate-900 text-xs">${invoice.total_amount?.toLocaleString()}</p>
+                        <p className="font-semibold text-slate-900 text-xs">${invoice.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         <StatusBadge status={invoice.status} />
                       </div>
                     </div>

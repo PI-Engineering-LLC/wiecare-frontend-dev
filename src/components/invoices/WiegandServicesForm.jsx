@@ -113,7 +113,7 @@ export default function WiegandServicesForm({ formData, setFormData, clients }) 
       <div className="border-t pt-4 space-y-2 max-w-sm ml-auto">
         <div className="flex justify-between text-sm">
           <span className="text-slate-600">Subtotal</span>
-          <span className="font-medium">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className="font-medium">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
           <span className="text-slate-600">Sales Tax</span>
@@ -153,12 +153,12 @@ export default function WiegandServicesForm({ formData, setFormData, clients }) 
         {credit > 0 && (
           <div className="flex justify-between text-sm text-emerald-600 font-medium">
             <span>Credit Applied</span>
-            <span>-${credit.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span>-${credit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
         )}
         <div className="flex justify-between font-bold text-base pt-2 border-t">
           <span>Total</span>
-          <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
       </div>
     </div>

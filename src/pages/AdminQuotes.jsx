@@ -31,7 +31,7 @@ const DEFAULT_FORM = {
   packing: 0,
   export_declaration: 0,
   discount_percent: 0,
-  tax_rate: 19,
+  tax_rate: 0,
   valid_until: '',
   notes: '',
   status: 'draft'
@@ -154,7 +154,7 @@ export default function AdminQuotes() {
       packing: quote.packing || 0,
       export_declaration: quote.export_declaration || 0,
       discount_percent: discountPercent,
-      tax_rate: quote.tax_rate ?? 19,
+      tax_rate: quote.tax_rate ?? 0,
       valid_until: quote.valid_until || '',
       notes: quote.notes || '',
       status: quote.status || 'draft'
@@ -250,7 +250,7 @@ export default function AdminQuotes() {
       packing: row.packing || 0,
       export_declaration: row.export_declaration || 0,
       discount_percent: 0,
-      tax_rate: 19,
+      tax_rate: 0,
       valid_until: row.valid_until || '',
       notes: row.notes || '',
       status: 'draft'
@@ -288,7 +288,7 @@ export default function AdminQuotes() {
     },
     {
       header: 'Amount',
-      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount}` : '—'}</span>
+      render: (row) => <span className="font-semibold">{row.total_amount ? `$${row.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</span>
     },
     {
       header: 'Status',
@@ -617,7 +617,7 @@ export default function AdminQuotes() {
             <div className="border-t pt-4 space-y-3 max-w-xs ml-auto">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-600">Subtotal</span>
-                <span className="font-medium">${subtotal.toFixed(2)}</span>
+                <span className="font-medium">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
 
               {/* Discount */}
@@ -633,7 +633,7 @@ export default function AdminQuotes() {
                     />
                     <span className="text-slate-600">%</span>
                   </div>
-                  <span className="text-rose-600">-${discountAmount.toFixed(2)}</span>
+                  <span className="text-rose-600">-${discountAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               ) : (
                 <button
@@ -674,11 +674,11 @@ export default function AdminQuotes() {
                   />
                   <span className="text-slate-600">%</span>
                 </div>
-                <span>${taxAmount.toFixed(2)}</span>
+                <span>${taxAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
 

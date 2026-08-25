@@ -76,7 +76,7 @@ export default function AdminDashboard() {
         <StatsCard title="Active Clients" value={clients?.filter(c => c.status === 'active').length} icon={Building2} variant="primary" to="AdminClients" />
         <StatsCard title="Pending Quotes" value={pendingQuotes.length} icon={FileText} variant={pendingQuotes.length > 0 ? 'warning' : 'default'} to="AdminQuotes" />
         <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} to="AdminInvoices" />
-        <StatsCard title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={TrendingUp} variant="success" to="AdminInvoices" />
+        <StatsCard title="Total Revenue" value={`$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} icon={TrendingUp} variant="success" to="AdminInvoices" />
       </div>
 
       {/* Action Required Section */}
@@ -207,7 +207,7 @@ export default function AdminDashboard() {
                       <p className="font-medium text-slate-900">{invoice.client_name}</p>
                       <p className="text-sm text-slate-500">Due: {invoice.due_date ? formatInTimeZone(new Date(invoice.due_date),'UTC', 'MMM d, yyyy') : 'N/A'}</p>
                     </div>
-                    <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString() || invoice.total_amount?.toLocaleString()}</p>
+                    <p className="font-semibold text-rose-600">${invoice.balance_due?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || invoice.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   </div>
                   </Link>
                 ))}

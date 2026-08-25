@@ -56,7 +56,7 @@ export default function WiegandSportsForm({ formData, setFormData, clients }) {
       <div className="border-t pt-4 space-y-2 max-w-xs ml-auto">
         <div className="flex justify-between text-sm">
           <span className="text-slate-600">Subtotal</span>
-          <span className="font-medium">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className="font-medium">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         {(formData.credit > 0 || formData._showCredit) ? (
           <div className="flex justify-between items-center text-sm gap-2">
@@ -67,7 +67,7 @@ export default function WiegandSportsForm({ formData, setFormData, clients }) {
               <span className="text-xs text-slate-500">$</span>
               <Input type="number" className="w-28 h-7 text-xs text-right" placeholder="0.00" value={formData.credit || ''} onChange={(e) => setFormData({ ...formData, credit: parseFloat(e.target.value) || 0 })} />
             </div>
-            <span className="font-medium text-emerald-600">-${credit.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+            <span className="font-medium text-emerald-600">-${credit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
         ) : (
           <button type="button" className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors" onClick={() => setFormData({ ...formData, _showCredit: true })}>
@@ -82,11 +82,11 @@ export default function WiegandSportsForm({ formData, setFormData, clients }) {
             <Input type="number" className="w-14 h-7 text-xs" value={formData.tax_rate || 0} onChange={(e) => setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })} />
             <span className="text-xs">%</span>
           </div>
-          <span className="font-medium">${vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span className="font-medium">${vatAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <div className="flex justify-between font-bold text-base pt-2 border-t">
           <span>Total</span>
-          <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+          <span>${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
       </div>
 

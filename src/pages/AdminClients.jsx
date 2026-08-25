@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, Building2, Shield, Lock, Unlock } from 'lucide-react';
+import { Plus, Search, Edit2, Building2, Shield, Lock, Unlock, Eye, Trash2, AlertTriangle } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { addYears, isAfter, parseISO } from 'date-fns';
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,12 +19,24 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
 import { formatInTimeZone } from 'date-fns-tz';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 export default function AdminClients() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedClient, setSelectedClient] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
   const [formData, setFormData] = useState({
     company_name: '',
     coaster_name: '',
@@ -71,6 +83,21 @@ export default function AdminClients() {
       toast.error(`Failed to create client: ${error.response?.data?.error || error.message}`);
     }
   });
+  const deleteMutation = useMutation({
+    mutationFn: (id) => api.deleteClient(id),
+    // mutationFn: async (id) => {
+    //   api.deleteClient(id)
+    //   // await base44.entities.User.deleteMany({ client_id: id });
+    //   // await base44.entities.Client.delete(id);
+    // },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-clients'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      setClientToDelete(null);
+      toast.success('Client and its users deleted successfully');
+    },
+  });
+  
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => api.updateClient(id, data),
@@ -240,11 +267,22 @@ export default function AdminClients() {
     },
     {
       header: 'Actions',
+      // render: (row) => (
+      //   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
+      //     <Edit2 className="h-4 w-4" />
+      //   </Button>
+      // )
       render: (row) => (
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
-          <Edit2 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEdit(row); }}>
+            <Edit2 className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setClientToDelete(row); }}>
+            <Trash2 className="h-4 w-4 text-rose-500" />
+          </Button>
+        </div>
       )
+      
     },
   ];
   return (<AdminOnly >
@@ -525,6 +563,28 @@ export default function AdminClients() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!clientToDelete} onOpenChange={(open) => { if (!open) setClientToDelete(null); }}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete client?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Are you sure you want to delete <strong>{clientToDelete?.company_name}</strong>? This will also delete all users belonging to this client. This action cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction
+        className="bg-rose-600 hover:bg-rose-700"
+        onClick={() => deleteMutation.mutate(clientToDelete.id)}
+        disabled={deleteMutation.isPending}
+      >
+        {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
     </div>
   </AdminOnly>);
 }

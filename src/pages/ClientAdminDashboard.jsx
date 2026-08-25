@@ -302,7 +302,7 @@ export default function ClientAdminDashboard() {
         <StatsCard title="Team Members" value={orgUsers.length} icon={Users} variant="primary" />
         <StatsCard title="Overdue Invoices" value={overdueInvoices.length} icon={AlertTriangle} variant={overdueInvoices.length > 0 ? 'danger' : 'success'} to="Invoices" />
         <StatsCard title="Pending Maintenance" value={pendingMaintenance.length} icon={Wrench} variant={pendingMaintenance.length > 0 ? 'warning' : 'default'} to="Maintenance" />
-        <StatsCard title="Amount Due" value={`$${totalDue.toLocaleString()}`} icon={FileText} variant={overdueInvoices.length > 0 ? 'danger' : 'default'} to="Invoices" />
+        <StatsCard title="Amount Due" value={`$${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} icon={FileText} variant={overdueInvoices.length > 0 ? 'danger' : 'default'} to="Invoices" />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -416,7 +416,7 @@ export default function ClientAdminDashboard() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-sm font-semibold text-slate-800">${inv.total_amount?.toLocaleString()}</span>
+                        <span className="text-sm font-semibold text-slate-800">${inv.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         <StatusBadge status={inv.status} />
                       </div>
                     </div>

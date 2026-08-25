@@ -246,7 +246,76 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile: stacked cards */}
+      <div className="sm:hidden space-y-3">
+        {items.map((item, idx) => (
+          <div key={idx} className="border rounded-lg p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Item {idx + 1}</span>
+              <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeItem(idx)} disabled={items.length === 1}>
+                <Trash2 className="h-3.5 w-3.5 text-rose-500" />
+              </Button>
+            </div>
+            <Input
+              value={item.item_number || ''}
+              placeholder="Item #"
+              autoComplete="off"
+              onChange={(e) => handleInputChange(e, idx, 'item_number')}
+              onFocus={(e) => handleInputFocus(e, idx, 'item_number')}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
+            />
+            <Input
+              value={item.ez_number || item.z_number || ''}
+              placeholder="EZ #"
+              autoComplete="off"
+              onChange={(e) => handleInputChange(e, idx, 'ez_number')}
+              onFocus={(e) => handleInputFocus(e, idx, 'ez_number')}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
+            />
+            <Input
+              value={item.description || ''}
+              placeholder="Description"
+              autoComplete="off"
+              onChange={(e) => handleInputChange(e, idx, 'description')}
+              onFocus={(e) => handleInputFocus(e, idx, 'description')}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <span className="text-xs text-slate-500">Qty</span>
+                <Input className="h-8 w-20"  type="number" value={item.quantity ?? 1} onChange={(e) => updateItemField(idx, 'quantity', e.target.value)} />
+              </div>
+              <div>
+                <span className="text-xs text-slate-500">Unit Price</span>
+                <Input type="number" value={item.unit_price ?? 0} onChange={(e) => updateItemField(idx, 'unit_price', e.target.value)} />
+              </div>
+            </div>
+            {showUnit && (
+              <div>
+                <span className="text-xs text-slate-500">Unit</span>
+                <Select value={item.unit || 'each'} onValueChange={(v) => updateItemField(idx, 'unit', v)}>
+                  <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="each">Each</SelectItem>
+                    <SelectItem value="meters">Meters</SelectItem>
+                    <SelectItem value="set">Set</SelectItem>
+                    <SelectItem value="lot">Lot</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <p className="text-right font-semibold text-sm">
+              ${((parseFloat(item.amount) || parseFloat(item.total) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-slate-50 border-b">
@@ -255,7 +324,7 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
               <th className="text-left px-2 py-2 font-medium text-slate-600">EZ No.</th>
               <th className="text-left px-2 py-2 font-medium text-slate-600">Description</th>
               {showLineType && <th className="text-left px-2 py-2 font-medium text-slate-600 w-28">Type</th>}
-              <th className="text-left px-2 py-2 font-medium text-slate-600 w-16">Qty</th>
+              <th className="text-left px-2 py-2 font-medium text-slate-600 w-24">Qty</th>
               {showUnit && <th className="text-left px-2 py-2 font-medium text-slate-600 w-24">Unit</th>}
               <th className="text-left px-2 py-2 font-medium text-slate-600 w-24">Unit Price</th>
               <th className="text-right px-2 py-2 font-medium text-slate-600 w-24">Total</th>
@@ -336,7 +405,7 @@ export default function LineItemsTable({ items, onChange, showUnit = false, show
                   <Input className="h-8" type="number" value={item.unit_price ?? 0} onChange={(e) => updateItemField(idx, 'unit_price', e.target.value)} />
                 </td>
                 <td className="px-2 py-1.5 text-right font-medium">
-                  ${((parseFloat(item.amount) || parseFloat(item.total) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  ${((parseFloat(item.amount) || parseFloat(item.total) || 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
                 <td className="px-2 py-1.5">
                   <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)} 

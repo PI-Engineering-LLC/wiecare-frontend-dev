@@ -24,7 +24,7 @@ function loadParts() {
   return partsPromise;
 }
 
-export default function PartAutocomplete({ value, onChange, onSelect, placeholder, className, parts: partsProp }) {
+export default function PartAutocomplete({ value, onChange, onSelect, placeholder, className, parts: partsProp, showPrice = true  }) {
   const [query, setQuery] = useState(value || '');
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
@@ -186,7 +186,7 @@ export default function PartAutocomplete({ value, onChange, onSelect, placeholde
                 <p className="text-xs text-slate-500 flex gap-2 mt-0.5">
                   {p.part_number && <span>Item: {p.part_number}</span>}
                   {p.ez_number && <span>EZ: {p.ez_number}</span>}
-                  {p.unit_price > 0 && <span className="text-[#005f27] font-medium">${p.unit_price}</span>}
+                  {showPrice && p.unit_price > 0 && <span className="text-[#005f27] font-medium">${p.unit_price}</span>}
                 </p>
               </div>
             ))}

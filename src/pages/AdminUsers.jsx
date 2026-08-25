@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, Users, Mail } from 'lucide-react';
+import { Plus, Search, Edit2, Users, Mail, Building2, Shield, Lock, Unlock, Eye, Trash2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,16 @@ import { PlusIcon, Trash2Icon, ChevronDownIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { formatInTimeZone } from 'date-fns-tz';
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // --- JSDoc Type Definitions for improved type checking ---
 /**
@@ -71,6 +80,7 @@ export default function AdminUsers() {
   const [inviteData, setInviteData] = useState({ email: '', roleIds: [], platformRole: '', inviteType: 'client', clientId: '' });
   /** @type {UserData | null} */
   const [selectedUser, setSelectedUser] = useState(null);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddRoleDialog, setShowAddRoleDialog] = useState(false);
   const [showAddPermissionsDialog, setShowAddPermissionsDialog] = useState(false);
@@ -157,6 +167,15 @@ export default function AdminUsers() {
       toast.error(`Failed to update user: ${ error.message}`);
     }
   });
+   const deleteUserMutation = useMutation({
+      mutationFn: (id) => api.deleteUser(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['admin-clients'] });
+        queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+        setUserToDelete(null);
+        toast.success('User deleted successfully');
+      },
+    });
 
   const updateRolesMutation = useMutation({
     mutationFn: ({ clientId, data }) => api.updateUserClientRoles(currentUserIdInEdit, clientId, data),
@@ -383,11 +402,21 @@ export default function AdminUsers() {
     },
     {
       header: 'Actions',
+      // render: (row) => (
+      //   <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEditUser(row); }}>
+      //     <Edit2 className="h-4 w-4" />
+      //   </Button>
+      // )
       render: (row) => (
-        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEditUser(row); }}>
-          <Edit2 className="h-4 w-4" />
-        </Button>
-      )
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleEditUser(row); }}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setUserToDelete(row); }}>
+                  <Trash2 className="h-4 w-4 text-rose-500" />
+                </Button>
+              </div>
+            )
     },
   ].filter(Boolean);
   
@@ -963,6 +992,27 @@ export default function AdminUsers() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!userToDelete} onOpenChange={(open) => !open && setUserToDelete(null)}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete User</AlertDialogTitle>
+      <AlertDialogDescription>
+        Are you sure you want to delete {userToDelete?.full_name || userToDelete?.email}? This action cannot be undone.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction
+        onClick={() => deleteUserMutation.mutate(userToDelete.id)}
+        className="bg-rose-600 hover:bg-rose-700"
+      >
+        {deleteUserMutation.isPending ? 'Deleting...' : 'Delete'}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
 
         {/* Roles and Permission Dialogs */}
         <AddRoleDialog permissions={permissions} open={showAddRoleDialog} onClose={setShowAddRoleDialog} onSuccess={() => {

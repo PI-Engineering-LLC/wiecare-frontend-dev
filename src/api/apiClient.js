@@ -113,9 +113,11 @@ export const api = {
   getUsers: (filters) => request('GET', '/users', { params: filters }),
   getUser: (id) => request('GET', `/users/${id}`),
   updateUser: (id, data) => request('PATCH', `/users/${id}`, { data }),
+  deleteUser: (id) => request('DELETE', `/users/${id}`),
   addUserToClient: (userId, clientId, data) => request('POST', `/users/${userId}/clients/${clientId}`, { data }),
   updateUserClientRoles: (userId, clientId, data) => request('PUT', `/users/${userId}/clients/${clientId}/roles`, { data }),
   removeUserFromClient: (userId, clientId) => request('DELETE', `/users/${userId}/clients/${clientId}`),
+  
 
 
   // Clients

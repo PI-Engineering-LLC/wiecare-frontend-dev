@@ -217,7 +217,7 @@ export default function Invoices() {
     {
       header: 'Amount',
       render: (row) => (
-        <span className="font-semibold">${row.total_amount?.toLocaleString() || '-'}</span>
+        <span className="font-semibold">${row.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })  || '-'}</span>
       )
     },
     {
@@ -226,7 +226,7 @@ export default function Invoices() {
         const balance = row.balance_due ?? (row.total_amount - (row.amount_paid || 0));
         return (
           <span className={`font-semibold ${balance > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-            ${balance?.toLocaleString() || '0'}
+            ${balance?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })  || '0'}
           </span>
         );
       }
@@ -304,7 +304,7 @@ export default function Invoices() {
         <StatsCard title="Total Invoices" value={totalInvoices} icon={FileText} />
         <StatsCard 
           title="Total Amount Due" 
-          value={`$${totalDue.toLocaleString()}`} 
+          value={`$${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }`} 
           icon={CreditCard} 
           variant={overdueInvoices.length > 0 ? 'danger' : 'primary'} 
         />
@@ -420,8 +420,8 @@ export default function Invoices() {
                             <td className="p-2">{item.description || '-'}</td>
                             <td className="p-2 text-right">{item.quantity || '-'}</td>
                             <td className="p-2">{item.unit || '-'}</td>
-                            <td className="p-2 text-right">${item.unit_price?.toLocaleString() || '-'}</td>
-                            <td className="p-2 text-right font-medium">${(item.amount || item.total)?.toLocaleString() || '-'}</td>
+                            <td className="p-2 text-right">${item.unit_price?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '-'}</td>
+                            <td className="p-2 text-right font-medium">${(item.amount || item.total)?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })  || '-'}</td>
                             <td className="p-2">{item.ez_number || '-'}</td>
                           </tr>
                         ))}
@@ -480,40 +480,40 @@ export default function Invoices() {
               <div className="pt-4 border-t space-y-2">
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Subtotal</p>
-                  <p className="font-medium">${selectedInvoice.subtotal?.toLocaleString() || '0.00'}</p>
+                  <p className="font-medium">${selectedInvoice.subtotal?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })  || '0.00'}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Sales Tax</p>
-                  <p className="font-medium">${(selectedInvoice.sales_tax || 0).toLocaleString()}</p>
+                  <p className="font-medium">${(selectedInvoice.sales_tax || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Packing</p>
-                  <p className="font-medium">${(selectedInvoice.packing || 0).toLocaleString()}</p>
+                  <p className="font-medium">${(selectedInvoice.packing || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Export Declaration</p>
-                  <p className="font-medium">${(selectedInvoice.export_declaration || 0).toLocaleString()}</p>
+                  <p className="font-medium">${(selectedInvoice.export_declaration || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Customs Fees</p>
-                  <p className="font-medium">${(selectedInvoice.customs_fees || 0).toLocaleString()}</p>
+                  <p className="font-medium">${(selectedInvoice.customs_fees || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Freight</p>
-                  <p className="font-medium">${(selectedInvoice.freight || 0).toLocaleString()}</p>
+                  <p className="font-medium">${(selectedInvoice.freight || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
                   <p className="font-semibold text-slate-900">Total</p>
-                  <p className="font-bold text-slate-900">${selectedInvoice.total_amount?.toLocaleString()}</p>
+                  <p className="font-bold text-slate-900">${selectedInvoice.total_amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <p className="text-slate-600">Paid</p>
-                  <p className="font-medium text-emerald-600">${(selectedInvoice.amount_paid || 0).toLocaleString()}</p>
+                  <p className="font-medium text-emerald-600">${(selectedInvoice.amount_paid || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t">
                   <p className="font-semibold text-slate-900">Balance Due</p>
                   <p className="text-xl font-bold text-slate-900">
-                    ${(selectedInvoice.balance_due ?? (selectedInvoice.total_amount - (selectedInvoice.amount_paid || 0)))?.toLocaleString()}
+                    ${(selectedInvoice.balance_due ?? (selectedInvoice.total_amount - (selectedInvoice.amount_paid || 0)))?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
                   </p>
                 </div>
               </div>
@@ -572,7 +572,7 @@ export default function Invoices() {
                           <p className={`text-sm ${colors.sub}`}>{payment.paid_at 
                 ? formatInTimeZone(new Date(payment.paid_at),'UTC', 'MMM d, yyyy'): '-'}</p>
                         </div>
-                        <p className={`font-semibold ${colors.text}`}>${payment.amount?.toLocaleString()}</p>
+                        <p className={`font-semibold ${colors.text}`}>${payment.amount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</p>
                       </div>
                     )
                   })}
@@ -597,7 +597,7 @@ export default function Invoices() {
               <div className="p-4 bg-slate-50 rounded-lg">
                 <p className="text-sm text-slate-500">Balance Due</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  ${(selectedInvoice.balance_due ?? (selectedInvoice.total_amount - (selectedInvoice.amount_paid || 0)))?.toLocaleString()}
+                  ${(selectedInvoice.balance_due ?? (selectedInvoice.total_amount - (selectedInvoice.amount_paid || 0)))?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
                 </p>
               </div>
 

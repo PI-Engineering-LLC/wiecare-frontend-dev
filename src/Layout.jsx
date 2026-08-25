@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   LayoutDashboard, FileText, ShoppingCart, Wrench, GraduationCap, BookOpen,
   FileBox, Shield, Bell, Settings, Users, Building2, Menu, X, LogOut,
-  ChevronRight, Package, Search, Plus, HelpCircle, Sparkles
+  ChevronRight, Package, Search, Plus, HelpCircle, Sparkles, AlertTriangle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { AvatarImg } from "@/components/UserAvatar";
@@ -19,6 +19,7 @@ import { useSocket } from './hooks/useSocket';
 import { useAuth } from './lib/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useClientSuspended} from '@/hooks/useClientSuspended';
 
 
 // ── CollapsibleGroup) ──────────────────────────────────────────────
@@ -70,6 +71,7 @@ export default function Layout({ children, currentPageName }) {
   const isInternalAdmin = usePlatformRole('super_admin') || usePlatformRole('platform_admin');
   const isClientAdmin = useClientRoles(['client_admin']); // Check if user has 'client_admin' role in active client
   const isCoasterAdmin = isInternalAdmin || isClientAdmin; // Broader admin check for UI purposes
+  const isSuspended = useClientSuspended();
   const navigate = useNavigate();
   // Load unread notifications
   const loadNotifications = async () => {
@@ -266,7 +268,7 @@ export default function Layout({ children, currentPageName }) {
               </Select>
             )}
             {(user?.memberships && user.memberships.length === 1) && (
-              <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+              <p className="text-sm font-bold text-slate-600 capitalize truncate max-w-[160px] sm:max-w-[220px]">
               {
                (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}
             </p>
@@ -275,7 +277,7 @@ export default function Layout({ children, currentPageName }) {
 
             }
             {(user?.platform_role && user?.memberships.length === 0) && (
-              <p className="text-[11px] text-slate-400 mt-0.5 capitalize">
+              <p className="text-sm font-bold text-slate-600 capitalize truncate max-w-[160px] sm:max-w-[220px]">
              Internal 
             </p>
 
@@ -438,8 +440,21 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </header>
 
+        {/* Scrollable main content */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6 max-w-full">
+          {isSuspended && (
+              <div className="mb-4 md:mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-red-700">Your account is on hold</p>
+                  <p className="text-sm text-red-600 mt-0.5">
+                    Access is limited due to an overdue invoice. Please settle your balance to restore full access.
+                  </p>
+                </div>
+              </div>
+            )}
+            {/* Greeting bar */}
             <div className="mb-4 md:mb-6">
               <h1 className="text-lg md:text-xl font-bold text-slate-800 leading-tight">
                 Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
