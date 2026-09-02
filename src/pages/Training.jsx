@@ -168,7 +168,7 @@ const formatToLocalTime = (dateStr, timeStr, creatorTimeZone, formatStr) => {
   //   const [hours, minutes] = t.start_time.split(':');
   // const trainingDate = new Date(t.session_date);
   // trainingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-  return t.status === 'upcoming' &&  formatToLocalTime(t.session_date, t.start_time, t.time_zone, 'EEEE, MMMM d, yyyy') >= new Date().toISOString().split('T')[0];
+  return t.status === 'upcoming' &&  formatToLocalTime(t.session_date, t.start_time, t.time_zone, 'yyyy-MM-dd') >= new Date().toISOString().split('T')[0];
   }
   );
 
