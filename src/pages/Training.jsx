@@ -132,9 +132,12 @@ export default function Training() {
     .filter(r => r.status === 'registered' || r.status === 'attended')
     .map(r => r.training_id);
 
-  const upcomingTrainings = trainings.filter(t => 
-    t.status === 'upcoming' && 
-    new Date(t.session_date) >= new Date()
+  const upcomingTrainings = trainings.filter(t => {
+    const [hours, minutes] = t.start_time.split(':');
+  const trainingDate = new Date(t.session_date);
+  trainingDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+  return t.status === 'upcoming' &&  trainingDate >= new Date();
+  }
   );
 
   const myUpcoming = registrations.filter(r => 
