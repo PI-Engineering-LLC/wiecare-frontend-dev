@@ -54,6 +54,38 @@ export default function Training() {
       : [],
     enabled: !!user?.id,
   });
+  // Pass the event's origin timezone into the function
+const formatToLocalTime = (dateStr, timeStr, creatorTimeZone, formatStr) => {
+  if (!dateStr || !timeStr) return 'TBD';
+
+  try {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
+    let cleanTime = timeStr.trim();
+    
+    if (cleanTime.split(':').length === 2) {
+      cleanTime += ':00';
+    }
+
+    // 1. Create a raw wall-clock date object
+    const rawDateTime = new Date(`${cleanDate}T${cleanTime}`);
+    
+    if (isNaN(rawDateTime.getTime())) {
+      return 'TBD';
+    }
+
+    // 2. Fallback to a default if creatorTimeZone is missing
+    const originZone = creatorTimeZone || 'America/Denver'; 
+
+    // 3. Bind the time to the creator's timezone, then convert to user's timezone
+    const utcDate = toZonedTime(rawDateTime, originZone);
+    return formatInTimeZone(utcDate, userTimeZone, formatStr);
+
+  } catch (error) {
+    console.error('Error formatting local time:', error);
+    return 'TBD';
+  }
+}
 
   const { data: myRequests = [] } = useQuery({
     queryKey: ['training-requests', user?.id, activeClientId],
@@ -157,38 +189,7 @@ export default function Training() {
 
   const categories = ['safety', 'operations', 'maintenance', 'business', 'technical', 'certification'];
 
-// Pass the event's origin timezone into the function
-const formatToLocalTime = (dateStr, timeStr, creatorTimeZone, formatStr) => {
-  if (!dateStr || !timeStr) return 'TBD';
 
-  try {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
-    let cleanTime = timeStr.trim();
-    
-    if (cleanTime.split(':').length === 2) {
-      cleanTime += ':00';
-    }
-
-    // 1. Create a raw wall-clock date object
-    const rawDateTime = new Date(`${cleanDate}T${cleanTime}`);
-    
-    if (isNaN(rawDateTime.getTime())) {
-      return 'TBD';
-    }
-
-    // 2. Fallback to a default if creatorTimeZone is missing
-    const originZone = creatorTimeZone || 'America/Denver'; 
-
-    // 3. Bind the time to the creator's timezone, then convert to user's timezone
-    const utcDate = toZonedTime(rawDateTime, originZone);
-    return formatInTimeZone(utcDate, userTimeZone, formatStr);
-
-  } catch (error) {
-    console.error('Error formatting local time:', error);
-    return 'TBD';
-  }
-}
 
   // const formatToLocalTime = (dateStr, timeStr, formatStr) => {
   //   if (!dateStr || !timeStr) return 'TBD';
