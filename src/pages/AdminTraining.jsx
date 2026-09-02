@@ -153,16 +153,19 @@ export default function AdminTraining() {
       duration_hours: training.duration_hours || 2,
       max_participants: training.max_participants || 20,
       is_mandatory: training.is_mandatory || false,
-      status: training.status || 'upcoming'
+      status: training.status || 'upcoming', 
     });
     setShowDialog(true);
   };
 
   const handleSubmit = async () => {
+    const creatorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    let finalFormData = { ...formData , time_zone: creatorTimeZone};
     if (selectedTraining) {
-      await updateMutation.mutateAsync({ id: selectedTraining.id, data: formData });
+      await updateMutation.mutateAsync({ id: selectedTraining.id, data: finalFormData });
     } else {
-      await createMutation.mutateAsync(formData);
+      await createMutation.mutateAsync(finalFormData);
     }
   };
 
@@ -584,7 +587,7 @@ export default function AdminTraining() {
                     className="mt-1"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <Label>End Time</Label>
                   <Input
                     type="time"
@@ -601,7 +604,7 @@ export default function AdminTraining() {
                     onChange={(e) => setFormData({ ...formData, duration_hours: parseFloat(e.target.value) || 0 })}
                     className="mt-1"
                   />
-                </div>
+                </div> */}
                 <div>
                   <Label>Max Participants</Label>
                   <Input

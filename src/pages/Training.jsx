@@ -16,7 +16,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import StatsCard from '@/components/shared/StatsCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 import EmptyState from '@/components/shared/EmptyState';
-import { formatInTimeZone } from 'date-fns-tz';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 import { toast } from 'sonner';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 import { useAuth } from '@/lib/AuthContext';
@@ -154,33 +154,66 @@ export default function Training() {
 
   const categories = ['safety', 'operations', 'maintenance', 'business', 'technical', 'certification'];
 
-  const formatToLocalTime = (dateStr, timeStr, formatStr) => {
-    if (!dateStr || !timeStr) return 'TBD';
-  
-    try {
-      // 1. Get the user's browser timezone dynamically
-      const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
-      let cleanTime = timeStr.trim();
-      if (cleanTime.split(':').length === 2) {
-        cleanTime += ':00';
-      }
-  
-      // 2. Append 'Z' to treat incoming strings as UTC
-      const utcDateTime = new Date(`${cleanDate}T${cleanTime}Z`);
-      if (isNaN(utcDateTime.getTime())) {
-        console.error(`Invalid date generated from: ${cleanDate}T${cleanTime}Z`);
-        return 'TBD';
-      }
-      // 3. Format it to the user's timezone
-      return formatInTimeZone(utcDateTime, userTimeZone, formatStr);
-    } catch (error) {
-      console.error('Error formatting local time:', error);
+// Pass the event's origin timezone into the function
+const formatToLocalTime = (dateStr, timeStr, creatorTimeZone, formatStr) => {
+  if (!dateStr || !timeStr) return 'TBD';
+
+  try {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
+    let cleanTime = timeStr.trim();
+    
+    if (cleanTime.split(':').length === 2) {
+      cleanTime += ':00';
+    }
+
+    // 1. Create a raw wall-clock date object
+    const rawDateTime = new Date(`${cleanDate}T${cleanTime}`);
+    
+    if (isNaN(rawDateTime.getTime())) {
       return 'TBD';
     }
 
+    // 2. Fallback to a default if creatorTimeZone is missing
+    const originZone = creatorTimeZone || 'America/Denver'; 
 
+    // 3. Bind the time to the creator's timezone, then convert to user's timezone
+    const utcDate = toZonedTime(rawDateTime, originZone);
+    return formatInTimeZone(utcDate, userTimeZone, formatStr);
+
+  } catch (error) {
+    console.error('Error formatting local time:', error);
+    return 'TBD';
   }
+}
+
+  // const formatToLocalTime = (dateStr, timeStr, formatStr) => {
+  //   if (!dateStr || !timeStr) return 'TBD';
+  
+  //   try {
+  //     // 1. Get the user's browser timezone dynamically
+  //     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  //     const cleanDate = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr.trim();
+  //     let cleanTime = timeStr.trim();
+  //     if (cleanTime.split(':').length === 2) {
+  //       cleanTime += ':00';
+  //     }
+  
+  //     // 2. Append 'Z' to treat incoming strings as UTC
+  //     const utcDateTime = new Date(`${cleanDate}T${cleanTime}Z`);
+  //     if (isNaN(utcDateTime.getTime())) {
+  //       console.error(`Invalid date generated from: ${cleanDate}T${cleanTime}Z`);
+  //       return 'TBD';
+  //     }
+  //     // 3. Format it to the user's timezone
+  //     return formatInTimeZone(utcDateTime, userTimeZone, formatStr);
+  //   } catch (error) {
+  //     console.error('Error formatting local time:', error);
+  //     return 'TBD';
+  //   }
+
+
+  // }
 
   return (
     <div className="space-y-6">
@@ -300,13 +333,13 @@ export default function Training() {
                         <div className="flex items-center gap-2 text-sm text-slate-600">
                           <Calendar className="h-4 w-4" />
                           {/* <span>{formatInTimeZone(startDateTime, userTimeZone, 'EEEE, MMMM d, yyyy')}</span> */}
-                          <span>{formatToLocalTime(training.session_date, training.start_time, 'EEEE, MMMM d, yyyy')}</span>
+                          <span>{formatToLocalTime(training.session_date, training.start_time, training.time_zone, 'EEEE, MMMM d, yyyy')}</span>
                         </div>
                         {training.start_time && (
                           <div className="flex items-center gap-2 text-sm text-slate-600">
                             <Clock className="h-4 w-4" />
-                            <span>{formatToLocalTime(training.session_date, training.start_time, 'h:mm a')} -{' '}
-                            {training.end_time ? formatToLocalTime(training.session_date, training.end_time, 'h:mm a') : 'TBD'}</span>
+                            <span>{formatToLocalTime(training.session_date, training.start_time,training.time_zone, 'h:mm a')} -{' '}
+                            {training.end_time ? formatToLocalTime(training.session_date, training.end_time,training.time_zone, 'h:mm a') : 'TBD'}</span>
                             {/* <span>{formatInTimeZone(startDateTime, userTimeZone, 'h:mm a')} -{' '}
                             {endDateTime ? formatInTimeZone(endDateTime, userTimeZone, 'h:mm a') : 'TBD'}</span> */}
                           </div>
@@ -392,9 +425,9 @@ export default function Training() {
                               : 'Date TBD'}
                             {training?.start_time && ` at ${training.start_time}`} */}
                             {training?.session_date 
-                              ? formatToLocalTime(training.session_date, training.start_time, 'EEEE, MMMM d, yyyy')
+                              ? formatToLocalTime(training.session_date, training.start_time,training.time_zone, 'EEEE, MMMM d, yyyy')
                               : 'Date TBD'}
-                            {training?.start_time && ` at ${formatToLocalTime(training.session_date, training.start_time, 'h:mm a')}`}
+                            {training?.start_time && ` at ${formatToLocalTime(training.session_date, training.start_time,training.time_zone, 'h:mm a')}`}
                           
                           </p>
                         </div>
@@ -536,15 +569,15 @@ export default function Training() {
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-slate-400" />
-                    <span>{formatToLocalTime(selectedTraining.session_date, selectedTraining.start_time, 'EEEE, MMMM d, yyyy')}</span>
+                    <span>{formatToLocalTime(selectedTraining.session_date, selectedTraining.start_time,selectedTraining.time_zone, 'EEEE, MMMM d, yyyy')}</span>
 
                     {/* <span>{formatInTimeZone(new Date(selectedTraining.session_date),'UTC', 'EEEE, MMMM d, yyyy')}</span> */}
                   </div>
                   {selectedTraining.start_time && (
                     <div className="flex items-center gap-2 text-sm">
                       <Clock className="h-4 w-4 text-slate-400" />
-                      <span>{formatToLocalTime(selectedTraining.session_date, selectedTraining.start_time, 'h:mm a')} -{' '}
-                      {selectedTraining.end_time ? formatToLocalTime(selectedTraining.session_date, selectedTraining.end_time, 'h:mm a') : 'TBD'}</span>
+                      <span>{formatToLocalTime(selectedTraining.session_date, selectedTraining.start_time,selectedTraining.time_zone, 'h:mm a')} -{' '}
+                      {selectedTraining.end_time ? formatToLocalTime(selectedTraining.session_date, selectedTraining.end_time,selectedTraining.time_zone, 'h:mm a') : 'TBD'}</span>
                       {/* <span>{selectedTraining.start_time} - {selectedTraining.end_time || 'TBD'}</span> */}
                     </div>
                   )}

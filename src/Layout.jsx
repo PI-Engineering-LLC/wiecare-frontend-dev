@@ -491,8 +491,14 @@ export default function Layout({ children, currentPageName }) {
         ) : (
           <div className="flex flex-col items-center pt-5">
             <button onClick={() => setActivityOpen(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+              className="relative w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+              title="Show Activity">
               <Bell className="h-4 w-4" />
+              {notifications.length > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#e2e961] text-[#005f27] rounded-full text-[9px] flex items-center justify-center font-bold leading-none">
+                    {notifications.length}
+                  </span>
+                )}
             </button>
           </div>
         )}

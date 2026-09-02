@@ -96,6 +96,7 @@ export default function AdminUsers() {
   const isPlatformAdmin = usePlatformRole('platform_admin');
   const isInternalAdmin = isSuperAdmin || isPlatformAdmin;
   const SYSTEM_ROLES = ['platform_admin', 'super_admin'];
+  const CLIENT_ROLES = ['client_admin', 'general_user'];
 
   const canInviteClientUser = usePermission('client:users.invite');
   const canInvitePlatformUser = isInternalAdmin;
@@ -666,7 +667,7 @@ export default function AdminUsers() {
                       </SelectTrigger>
                       <SelectContent>
                         {roles
-                        .filter(r => !SYSTEM_ROLES.includes(r.name))
+                        .filter(r => CLIENT_ROLES.includes(r.name))
                         .map(r => (<SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>))}
                       </SelectContent>
                     </Select>

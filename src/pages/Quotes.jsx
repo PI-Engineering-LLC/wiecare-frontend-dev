@@ -273,9 +273,9 @@ export default function Quotes() {
               <Button variant="ghost" size="icon" className="text-emerald-600" onClick={(e) => { e.stopPropagation(); handleApproveQuote(row); }}>
                 <CheckCircle className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-rose-600" onClick={(e) => { e.stopPropagation(); handleRejectQuote(row); }}>
+              {/* <Button variant="ghost" size="icon" className="text-rose-600" onClick={(e) => { e.stopPropagation(); handleRejectQuote(row); }}>
                 <XCircle className="h-4 w-4" />
-              </Button>
+              </Button> */}
             </>
           )}
         </div>
@@ -332,7 +332,7 @@ export default function Quotes() {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="sent">Sent</SelectItem>
                   <SelectItem value="approved">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
+                  {/* <SelectItem value="rejected">Rejected</SelectItem> */}
                   <SelectItem value="converted">Converted</SelectItem>
                 </SelectContent>
               </Select>
@@ -687,14 +687,14 @@ export default function Quotes() {
                 </div>
                 {selectedQuote.status === 'sent' && (selectedQuote.valid_until && new Date(selectedQuote.valid_until) > new Date()) && (
                   <div className="flex flex-wrap gap-2">
-                    <Button
+                    {/* <Button
                       variant="outline"
                       onClick={() => handleRejectQuote(selectedQuote)}
                       className="text-rose-600 border-rose-200 hover:bg-rose-50"
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       Reject
-                    </Button>
+                    </Button> */}
                     <Button
                       variant="outline"
                       onClick={() => { setQuoteToModify(selectedQuote); setShowModifyDialog(true); }}
