@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Filter, Eye, CheckCircle, XCircle, FileText, Download, X, Edit3, Camera, ImagePlus, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Eye, CheckCircle, XCircle, FileText, Download, X, Edit3, Camera, ImagePlus, Loader2, Paperclip, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ import { useClient } from '@/lib/ClientContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useClientSuspended, SuspendedNotice, SUSPENDED_MESSAGE } from '@/hooks/useClientSuspended';
 import PartAutocomplete from '@/components/shared/PartAutocomplete';
+import { useUrlParam } from '@/hooks/useUrlParam';
+import NotesRenderer from '@/components/quotes/NotesRenderer';
 
 export default function Quotes() {
   const { user } = useAuth();
@@ -49,11 +51,19 @@ export default function Quotes() {
 
   const [highlightQuoteId, setHighlightQuoteId] = useState(null);
 
+  const actionParam = useUrlParam('action');
+  const quoteIdParam = useUrlParam('quote_id');
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('action') === 'new') setShowRequestDialog(true);
-    if (params.get('quote_id')) setHighlightQuoteId(params.get('quote_id'));
-  }, []);
+    if (actionParam === 'new') setShowRequestDialog(true);
+    if (quoteIdParam) setHighlightQuoteId(quoteIdParam);
+  }, [actionParam, quoteIdParam]);
+  
+
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
+  //   if (params.get('action') === 'new') setShowRequestDialog(true);
+  //   if (params.get('quote_id')) setHighlightQuoteId(params.get('quote_id'));
+  // }, []);
 
 
   const { activeClientId, switchClient } = useClient()
@@ -677,14 +687,14 @@ export default function Quotes() {
               </div>
 
               <div className="flex items-center justify-end pt-2 border-t">
-                <div className="flex-1">
+                {/* <div className="flex-1">
                   {selectedQuote.notes && (
                     <div>
                       <p className="text-sm text-slate-500">Notes</p>
                       <p className="text-sm mt-1">{selectedQuote.notes}</p>
                     </div>
                   )}
-                </div>
+                </div> */}
                 {selectedQuote.status === 'sent' && (selectedQuote.valid_until && new Date(selectedQuote.valid_until) > new Date()) && (
                   <div className="flex flex-wrap gap-2">
                     {/* <Button
@@ -715,7 +725,39 @@ export default function Quotes() {
                 {selectedQuote.status === 'pending' && !selectedQuote.sending_entity && (
                   <p className="text-sm text-slate-500 italic">Your quote request is being reviewed by our team.</p>
                 )}
+
+
+
+
+                
               </div>
+              {<NotesRenderer notes={selectedQuote.notes} />
+              // (() => {
+//   const notes = selectedQuote.notes || '';
+//   const markerMatch = notes.match(/\[Client Modification Request[^\]]*\]:\s*([\s\S]*)/);
+//   const clientModification = markerMatch ? markerMatch[1].trim() : '';
+//   const adminNotes = markerMatch ? notes.slice(0, markerMatch.index).trim() : notes.trim();
+//   return (
+//     <div className="space-y-3 pt-4 border-t">
+//       {clientModification && (
+//         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+//           <p className="text-xs font-semibold text-amber-700 mb-1 flex items-center gap-1.5">
+//             <MessageSquare className="h-3.5 w-3.5" /> Client Modification Request
+//           </p>
+//           <p className="text-sm text-amber-800 whitespace-pre-line">{clientModification}</p>
+//         </div>
+//       )}
+//       {adminNotes && (
+//         <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+//           <p className="text-xs font-semibold text-slate-600 mb-1">Admin Notes</p>
+//           <p className="text-sm text-slate-700 whitespace-pre-line">{adminNotes}</p>
+//         </div>
+//       )}
+//       {/* ...action buttons (Reject / Request Changes / Approve) unchanged... */}
+//     </div>
+//   );
+// })()
+}
             </div>
           )}
         </DialogContent>

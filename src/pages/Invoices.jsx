@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/ClientContext';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
+import { useUrlParam } from '@/hooks/useUrlParam';
 
 export default function Invoices() {
   const {user} = useAuth();
@@ -35,6 +36,8 @@ export default function Invoices() {
   const { activeClientId, switchClient } = useClient()
   const location = useLocation()
     const navigate = useNavigate();
+    
+
   // useEffect(() => {
     
   //   const responseCode = searchParams.get('responseCode');
@@ -101,6 +104,14 @@ export default function Invoices() {
     queryFn: () => api.getInvoices({ client_id: activeClientId , order:'-created_at', limit: 50 }),
     enabled: !!activeClientId,
   });
+
+  const invoiceIdParam = useUrlParam('invoice_id');
+useEffect(() => {
+  if (invoiceIdParam && invoices.length > 0) {
+    const inv = invoices.find(i => i.id === invoiceIdParam);
+    if (inv) setSelectedInvoice(inv);
+  }
+}, [invoiceIdParam, invoices]);
 
   const updateInvoiceMutation = useMutation({
     mutationFn: ({ id, data }) => api.updateInvoice(id, data),

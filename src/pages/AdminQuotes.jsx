@@ -19,6 +19,7 @@ import LineItemsTable from '@/components/shared/LineItemsTable';
 import { toast } from 'sonner';
 import { PublicImage } from '@/components/PublicImage';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useUrlParam } from '@/hooks/useUrlParam';
 
 const EMPTY_ITEM = { item_number: '', ez_number: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 
@@ -52,10 +53,14 @@ export default function AdminQuotes() {
   const navigate = useNavigate();
   const location = useLocation()
 
+  const quoteIdParam = useUrlParam('quote_id');
+  useEffect(() => {
+    if (quoteIdParam) setHighlightQuoteId(quoteIdParam);
+  }, [quoteIdParam]);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const quoteId = params.get('quote_id');
-    if (quoteId) setHighlightQuoteId(quoteId);
+    // const quoteId = params.get('quote_id');
+    // if (quoteId) setHighlightQuoteId(quoteId);
 
     // Auto-open new quote dialog pre-filled from a maintenance/training request
     const maintenanceRequestId = params.get('maintenance_request_id');
@@ -156,7 +161,7 @@ export default function AdminQuotes() {
       discount_percent: discountPercent,
       tax_rate: quote.tax_rate ?? 0,
       valid_until: quote.valid_until || '',
-      notes: quote.notes || '',
+      notes: '',
       status: quote.status || 'draft'
     });
     setShowDiscount(discountPercent > 0);
