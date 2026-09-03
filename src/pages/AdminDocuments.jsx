@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, FileBox, Trash2, Upload, File, Download, FileText } from 'lucide-react';
+import { Plus, Search, Edit2, FileBox, Trash2, Upload, File, Download, FileText, Folder } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import { toast } from 'sonner';
 import { useUpload } from '@/hooks/useUpload';
 import { usePrivateDocument } from '@/hooks/usePrivateDocument';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 export default function AdminDocuments() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -165,10 +166,23 @@ export default function AdminDocuments() {
   };
 
   const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase()) || doc.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const client = clients.find(c => c.id === doc.client_id);
+    const q = searchTerm.toLowerCase();
+  
+    // const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //   doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase()) || doc.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    // const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
+    // return matchesSearch && matchesCategory;
+    const matchesSearch = !q ||
+    doc.title?.toLowerCase().includes(q) ||                    // document name
+    doc.coaster_name?.toLowerCase().includes(q) ||             // coaster name
+    doc.equipment_model?.toLowerCase().includes(q) ||          // equipment
+    client?.company_name?.toLowerCase().includes(q) ||        // customer (company) name
+    client?.contact_name?.toLowerCase().includes(q) ||         // customer contact name
+    doc.description?.toLowerCase().includes(q);
+  const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
+  return matchesSearch && matchesCategory;
+
   });
 
   const categories = [
@@ -274,6 +288,20 @@ export default function AdminDocuments() {
     },
   ];
 
+  // Group documents by coaster (filing system)
+const groupedDocuments = (() => {
+  const groups = {};
+  filteredDocuments.forEach(doc => {
+    const key = doc.coaster_name || 'Uncategorized';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(doc);
+  });
+  return Object.keys(groups)
+    .sort((a, b) => a.localeCompare(b))
+    .map(key => ({ coaster: key, documents: groups[key] }));
+})();
+
+
   return (
     <AdminOnly>
       <div className="space-y-6">
@@ -326,9 +354,45 @@ export default function AdminDocuments() {
             action={() => { resetForm(); setShowDialog(true); }}
             actionLabel="Upload Document"
           />
+        ): isLoading ? (
+          <DataTable columns={columns} data={[]} isLoading={isLoading} />
+        ) : groupedDocuments.length === 0 ? (
+          <EmptyState
+            icon={FileBox}
+            title="No documents found"
+            description="Try adjusting your search or filters"
+          />
         ) : (
-          <DataTable columns={columns} data={filteredDocuments} isLoading={isLoading} />
+          <div className="space-y-3">
+            {groupedDocuments.map(group => (
+              <Card key={group.coaster} className="border shadow-sm overflow-hidden">
+                <Accordion type="multiple" defaultValue={groupedDocuments.map(g => g.coaster)}>
+                  <AccordionItem value={group.coaster} className="border-0">
+                    <AccordionTrigger className="px-4 hover:no-underline">
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="p-2 bg-[#1e3a5f]/10 rounded-lg">
+                          <Folder className="h-5 w-5 text-[#1e3a5f]" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="font-semibold text-slate-900">{group.coaster}</p>
+                        </div>
+                        <Badge variant="secondary" className="mr-2">
+                          {group.documents.length} {group.documents.length === 1 ? 'document' : 'documents'}
+                        </Badge>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-2 pb-3">
+                      <DataTable columns={columns} data={group.documents} isLoading={false} />
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </Card>
+            ))}
+          </div>
         )}
+         
+        
+        
 
         <Dialog open={showDialog} onOpenChange={(open) => { if (!open) resetForm(); setShowDialog(open); }}>
           <DialogContent className="sm:max-w-lg">

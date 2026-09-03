@@ -97,6 +97,7 @@ export default function Documents() {
 
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.coaster_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.equipment_model?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || doc.category === categoryFilter;
