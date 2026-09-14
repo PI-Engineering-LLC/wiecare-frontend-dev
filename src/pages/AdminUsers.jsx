@@ -838,7 +838,7 @@ export default function AdminUsers() {
                             <PopoverContent className="w-[200px] p-0">
                               <Command>
                                 <CommandGroup>
-                                  {roles?.filter(r => ( !SYSTEM_ROLES.includes(r.name)&&(r.client_id == null || r.client_id === membership.client_id))).map(role => {
+                                  {roles?.filter(r => ( CLIENT_ROLES.includes(r.name)&&(r.client_id == null || r.client_id === membership.client_id))).map(role => {
                                     const isSelected = membership.roles.some(mr => mr.id === role.id);
                                     return (
                                       <CommandItem
@@ -935,7 +935,7 @@ export default function AdminUsers() {
                             <PopoverContent className="w-[200px] p-0">
                               <Command>
                                 <CommandGroup>
-                                  {roles?.filter(r => (!SYSTEM_ROLES.includes(r.name) &&(r.client_id == null || r.client_id === addingClientId))).map(role => (
+                                  {roles?.filter(r => (CLIENT_ROLES.includes(r.name) &&(r.client_id == null || r.client_id === addingClientId))).map(role => (
                                     <CommandItem
                                       key={role.id}
                                       onSelect={() => {

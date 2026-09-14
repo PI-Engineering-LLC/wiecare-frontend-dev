@@ -253,12 +253,17 @@ export default function Layout({ children, currentPageName }) {
           </button>
 
           <div className="relative flex-1 max-w-sm">
-            {(user?.memberships && user.memberships.length > 1) && (
-              <Select value={activeClientId || ''} onValueChange={(val) => switchClient(val)}>
+            {((user?.platform_role && user?.memberships && user.memberships.length > 0) || (user?.memberships && user.memberships.length > 1)) && (
+              <Select 
+              value={activeClientId || '__internal__'} 
+              onValueChange={(val) => switchClient(val)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Client" />
                 </SelectTrigger>
                 <SelectContent>
+                {user?.platform_role && (
+                  <SelectItem value="__internal__">Internal</SelectItem>
+                  )}
                   {user?.memberships?.map(m => (
                     <SelectItem key={m.clientId} value={m.clientId}>
                       {m.client.company_name}{m.client.coaster_name ? ` · ${m.client.coaster_name}` : ''}
@@ -267,7 +272,7 @@ export default function Layout({ children, currentPageName }) {
                 </SelectContent>
               </Select>
             )}
-            {(user?.memberships && user.memberships.length === 1) && (
+            {(!user?.platform_role && user?.memberships && user.memberships.length === 1) && (
               <p className="text-sm font-bold text-slate-600 capitalize truncate max-w-[160px] sm:max-w-[220px]">
               {
                (user?.memberships?.find(m => m.clientId === activeClientId)?.client?.company_name?.replace(/_/g, ' ') || '')}

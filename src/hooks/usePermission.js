@@ -7,7 +7,7 @@ export function usePermission(permissionString){
     const { activeClientId } = useClient();
 
     // PLATFORM ADMINS bypass client-specific permission checks
-    if( usePlatformRole('super_admin') ||  usePlatformRole('platform_admin')){
+    if(!activeClientId && (usePlatformRole('super_admin') ||  usePlatformRole('platform_admin'))){
         return true;
     }
 

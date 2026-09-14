@@ -10,7 +10,7 @@ export const ProtectedRoute = ({permission=null, platformRole=null, allowedRoles
   const { activeClientId } = useClient(); 
 
   // Check platform role directly from user object for platformRole prop
-  const hasPlatformRole = usePlatformRole('super_admin') || usePlatformRole(platformRole);
+  const hasPlatformRole = (usePlatformRole('super_admin') || usePlatformRole(platformRole)) && !activeClientId;
 
   // Check client roles for the active client
   const hasClientRoles = useClientRoles(allowedRoles || []); // Pass allowedRoles array
