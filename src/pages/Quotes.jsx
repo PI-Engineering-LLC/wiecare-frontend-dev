@@ -451,19 +451,19 @@ export default function Quotes() {
                 {quoteRequest.items.map((item, idx) => (
                   <div key={idx} className="p-3 border rounded-lg space-y-2">
                     <div className="grid grid-cols-3 gap-2">
-                      {/* <PartAutocomplete
+                      <PartAutocomplete
                         placeholder="EZ #"
                         value={item.ez_number}
                         // onChange={(e) => updateItem(idx, 'ez_number', e.target.value)}
                         onChange={(v) => updateItem(idx, 'ez_number', v)}
                         onSelect={(part) => selectPart(idx, part)}
                         showPrice={false}
-                      /> */}
-                      <Input
+                      />
+                      {/* <Input
                         placeholder="EZ #"
                         value={item.ez_number}
                         onChange={(e) => updateItem(idx, 'ez_number', e.target.value)}
-                      />
+                      /> */}
                       <Input
                         placeholder="Item #"
                         value={item.item_number}

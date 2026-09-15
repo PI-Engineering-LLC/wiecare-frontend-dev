@@ -34,6 +34,7 @@ export default function PartAutocomplete({ value, onChange, onSelect, placeholde
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
   const skipBlurRef = useRef(false);
+  const justSelectedRef = useRef(false);
   const debouncedQuery = useDebounce(query, 250);
 
   // Sync external value changes
@@ -47,6 +48,10 @@ export default function PartAutocomplete({ value, onChange, onSelect, placeholde
 
   // Search
   useEffect(() => {
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
+      return;
+    }
     if (!debouncedQuery || debouncedQuery.length < 2) {
       setResults([]);
       setOpen(false);
@@ -99,6 +104,7 @@ export default function PartAutocomplete({ value, onChange, onSelect, placeholde
 
   const commitSelect = useCallback((part) => {
     skipBlurRef.current = false;
+    justSelectedRef.current = true;
     setOpen(false);
     setResults([]);
     setQuery(part.name || '');
