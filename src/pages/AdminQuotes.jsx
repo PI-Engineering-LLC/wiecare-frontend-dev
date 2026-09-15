@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '@/api/apiClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminOnly from '@/components/AdminOnly';
-import { Plus, Search, Edit2, FileText, Send, Trash2, Eye, X } from 'lucide-react';
+import { Plus, Search, Edit2, FileText, Send, Trash2, Eye, X, Upload, Download, Loader2 } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import { toast } from 'sonner';
 import { PublicImage } from '@/components/PublicImage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUrlParam } from '@/hooks/useUrlParam';
+import { useUpload } from '@/hooks/useUpload';
+import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 
 const EMPTY_ITEM = { item_number: '', ez_number: '', description: '', quantity: 1, unit_price: 0, total: 0 };
 
@@ -78,6 +80,12 @@ export default function AdminQuotes() {
       setShowDialog(true);
     }
   }, []);
+
+  const [pdfFile, setPdfFile] = useState(null);
+    const [uploadingPdf, setUploadingPdf] = useState(false);
+    const pdfInputRef = useRef(null);
+    const { uploadFileToS3, isUploading } = useUpload();
+      const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
 
   const { data: quotes = [], isLoading } = useQuery({
     queryKey: ['admin-quotes'],
@@ -149,6 +157,7 @@ export default function AdminQuotes() {
 
   const handleEdit = (quote) => {
     setSelectedQuote(quote);
+    setPdfFile(null);
     const discountPercent = quote.discount_percent || 0;
     setFormData({
       client_id: quote.client_id || '',
@@ -182,10 +191,21 @@ export default function AdminQuotes() {
   };
 
   const handleSubmit = async (overrideStatus) => {
+    try{
     const client = clients.find(c => c.id === formData.client_id);
     const { subtotal, packing, exportDecl, discountAmount, taxAmount, total } = calculateTotals();
     const isClientRequest = selectedQuote && (selectedQuote.status === 'pending' || selectedQuote.status === 'assigned') && !selectedQuote.sending_entity;
+    let pdf_storage_key = selectedQuote?.pdf_storage_key || undefined;
+  
+      
+      if (pdfFile) {
+        setUploadingPdf(true);
+        const file_key = await uploadFileToS3({client_id: client?.id, file: pdfFile, type:'quote'});
+        pdf_storage_key = file_key;
+        setUploadingPdf(false);
+      }
 
+    
     const quoteData = {
       ...formData,
       status: overrideStatus ?? formData.status,
@@ -197,17 +217,20 @@ export default function AdminQuotes() {
       tax_amount: taxAmount,
       total_amount: total,
       currency: 'USD',
+      ...(pdf_storage_key ? { pdf_storage_key } : {}),
       quote_number: (!selectedQuote || isClientRequest) ? `Q-${Date.now()}` : (selectedQuote.quote_number || `Q-${Date.now()}`)
     };
-
+    let savedQuote;
+    
     if (selectedQuote && !isClientRequest) {
       const updatedQuote = await updateMutation.mutateAsync({ id: selectedQuote.id, data: quoteData });
+      savedQuote = updatedQuote
       // If sending/updating to client (status = sent), notify them
       if ((overrideStatus || formData.status) === 'sent') {
       }
     } else {
       const newQuote = await createMutation.mutateAsync(quoteData);
-
+      savedQuote = newQuote
       if (isClientRequest) {
         // Mark the client's original request as resolved
         await  updateMutation.mutateAsync({ id: selectedQuote.id, data:{ status: 'converted', converted_to_order_id: newQuote.id }});
@@ -216,6 +239,49 @@ export default function AdminQuotes() {
     if (location.search) {
       navigate(location.pathname, { replace: true });
     }
+   
+    if (selectedQuote) {
+          // If a new PDF was uploaded, update/create the Document record
+          if (pdfFile && pdf_storage_key && client) {
+            const existingDocs = await api.getDs({ file_storage_key: pdf_storage_key });
+            if (existingDocs.length > 0) {
+              await api.updateD(existingDocs[0].id, { file_storage_key: pdf_storage_key});
+            } else {
+              await api.createD({
+                title: `Quote ${quoteData.quote_number} – ${quoteData.title}`,
+                category: 'quote',
+                file_storage_key: pdf_storage_key,
+                file_type: pdfFile.type,
+                file_size: pdfFile.size,
+                coaster_name: client.coaster_name || '',
+                client_id: client.id,
+                is_public: false,
+                status: 'active',
+              });
+            }
+          }
+        } else {
+          // If PDF uploaded on create, save Document record
+          if (pdfFile && pdf_storage_key && client && savedQuote?.id) {
+            await api.createD({
+              title: `Quote ${quoteData.quote_number} – ${quoteData.title}`,
+              category: 'quote',
+              file_storage_key: pdf_storage_key,
+              file_type: pdfFile.type,
+              file_size: pdfFile.size,
+              coaster_name: client.coaster_name || '',
+              client_id: client.id,
+              is_public: false,
+              status: 'active',
+            });
+          }
+        }}catch(error){
+          toast.error('Error occured');
+          setUploadingPdf(false);
+        }finally{
+          setUploadingPdf(false);
+          setPdfFile(null)
+        }
   };
 
   const handleSend = async (quote) => {
@@ -696,6 +762,54 @@ export default function AdminQuotes() {
                 rows={2}
               />
             </div>
+             {/* PDF Upload */}
+             <div className="border-t pt-4">
+                <Label>Quote PDF (optional)</Label>
+                <input type="file" accept=".pdf" ref={pdfInputRef} className="hidden" onChange={(e) => setPdfFile(e.target.files[0] || null)} />
+                {selectedQuote?.pdf_storage_key && !pdfFile ? (
+                  <div className="mt-1 flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <FileText className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-green-700 flex-1">PDF already uploaded</span>
+                    <Button variant="ghost" size="sm" asChild className="text-xs"><a href={"#view"}
+                      onClick={async (e) => {
+                        try {
+                          const result = await handleSecureView(e, selectedQuote.pdf_storage_key)
+                        } catch (error) {
+                          if (error.message === "FILE_MISSING_IN_STORAGE") {
+                            try {
+                              await updateMutation.mutateAsync({ id: selectedQuote.id, data: { pdf_storage_key: null } });
+                              const existingDoc = await api.getDs({ pdf_storage_key: selectedQuote.pdf_storage_key });
+                              if (existingDoc.length > 0) {
+                                await api.updateD(existingDoc.id, { status: 'archived' })
+                              }
+                            } catch (error) {
+                              toast.error('Error occured');
+                            }
+
+                            toast.error('File Not Found');
+                          } else {
+                            toast.error('Failed to download, please try again!');
+                          }
+                        }
+
+                      }}>
+                      <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedQuote.pdf_storage_key? 'Authorizing Access...' :'View'}</a></Button>
+                    <Button variant="ghost" size="sm" onClick={() => pdfInputRef.current?.click()} className="text-xs">Replace</Button>
+                  </div>
+                ) : pdfFile ? (
+                  <div className="mt-1 flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <FileText className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-blue-700 flex-1 truncate">{pdfFile.name}</span>
+                    <Button variant="ghost" size="sm" onClick={() => pdfInputRef.current?.click()} className="text-xs">Change</Button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" className="w-full mt-1 border-dashed" onClick={() => pdfInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-2" />Upload Quote PDF
+                  </Button>
+                )}
+              </div>
+
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { resetForm(); setShowDialog(false); }}>Cancel</Button>
@@ -704,7 +818,7 @@ export default function AdminQuotes() {
               <Button
                 variant="outline"
                 onClick={() => handleSubmit('draft')}
-                disabled={!formData.client_id || !formData.title || createMutation.isPending || updateMutation.isPending}
+                disabled={!formData.client_id || !formData.title || createMutation.isPending || updateMutation.isPending|| uploadingPdf}
               >
                 Save as Draft
               </Button>
@@ -712,10 +826,11 @@ export default function AdminQuotes() {
             <Button
               onClick={() => handleSubmit('sent')}
               disabled={!formData.client_id || !formData.title ||!formData.sending_entity || 
-                ( isNaN(new Date(formData?.valid_until).getTime())) || createMutation.isPending || updateMutation.isPending}
+                ( isNaN(new Date(formData?.valid_until).getTime())) || createMutation.isPending || updateMutation.isPending|| uploadingPdf}
               className="bg-[#005f27] hover:bg-[#436a36]"
             >
-              {createMutation.isPending || updateMutation.isPending ? 'Saving...' :
+              {uploadingPdf ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading PDF...</> :
+              createMutation.isPending || updateMutation.isPending ? 'Saving...' :
                 (selectedQuote && (selectedQuote.status === 'pending' || selectedQuote.status === 'assigned') && !selectedQuote.sending_entity)
                   ? 'Create & Send to Client'
                   : selectedQuote

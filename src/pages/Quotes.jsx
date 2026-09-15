@@ -24,6 +24,7 @@ import { useClientSuspended, SuspendedNotice, SUSPENDED_MESSAGE } from '@/hooks/
 import PartAutocomplete from '@/components/shared/PartAutocomplete';
 import { useUrlParam } from '@/hooks/useUrlParam';
 import NotesRenderer from '@/components/quotes/NotesRenderer';
+import { usePrivateDocument } from '@/hooks/usePrivateDocument';
 
 export default function Quotes() {
   const { user } = useAuth();
@@ -34,6 +35,8 @@ export default function Quotes() {
   const [showModifyDialog, setShowModifyDialog] = useState(false);
   const [modificationRequest, setModificationRequest] = useState('');
   const [quoteToModify, setQuoteToModify] = useState(null);
+  const { handleSecureView, currentlyLoadingKey } = usePrivateDocument();
+  
 
   const navigate = useNavigate();
   const location = useLocation()
@@ -288,6 +291,43 @@ export default function Quotes() {
               </Button> */}
             </>
           )}
+          { row.pdf_storage_key  && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-700 hover:text-green-800 hover:bg-green-50 text-xs"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          try {
+                            await handleSecureView(e, row.pdf_storage_key, true)
+          
+                          } catch (error) {
+                            if (error.message === "FILE_MISSING_IN_STORAGE") {
+                              try {
+                                await updateQuoteMutation.mutateAsync({ id: row.id, data: { pdf_storage_key: null } });
+                                const existingDoc = await api.getDs({ file_storage_key: row.pdf_storage_key });
+                                if (existingDoc.length > 0) {
+                                  await api.updateD(existingDoc.id, { file_storage_key: null, status: 'archived' })
+                                }
+                              } catch (error) {
+                                toast.error('Error occured');
+                              }
+          
+                              toast.error('File Not Found');
+                            } else {
+                              toast.error('Failed to download, please try again');
+                            }
+                          }
+          
+                        }
+          
+                        }
+                      >
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        {currentlyLoadingKey === row.pdf_storage_key? 'Authorizing Access...' :'Quote'}
+                        
+                      </Button>
+                    )}
         </div>
       )
     },
@@ -725,12 +765,59 @@ export default function Quotes() {
                 {selectedQuote.status === 'pending' && !selectedQuote.sending_entity && (
                   <p className="text-sm text-slate-500 italic">Your quote request is being reviewed by our team.</p>
                 )}
+                 
 
 
 
 
                 
               </div>
+              {/** View uploaded pdf if existing */}
+              {selectedQuote?.pdf_storage_key && (
+                                <div className={`p-4 rounded-lg border ${selectedQuote.pdf_storage_key ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2"> 
+                                      <FileText className={`h-4 w-4 ${selectedQuote.pdf_storage_key ? 'text-green-600' : 'text-amber-500'}`} />
+                                  </div>
+                                  <div>
+                                        <p className={`text-sm font-medium ${selectedQuote.pdf_storage_key? 'text-green-800' : 'text-amber-800'}`}>
+                                          Quote
+                                        </p>
+                                        <p className={`text-xs ${selectedQuote.pdf_storage_key? 'text-green-600' : 'text-amber-600'}`}>
+                                          {selectedQuote.pdf_storage_key? 'Quote pdf attached' : 'no pdf attached'}
+                                        </p>
+                                      </div>
+                                  <Button 
+                                        size="sm"
+                                        className="bg-green-700 hover:bg-green-800"
+                                         onClick={async (e) => {
+                                      try {
+                                        const result = await handleSecureView(e, selectedQuote.pdf_storage_key, true)
+                                      } catch (error) {
+                                        if (error.message === "FILE_MISSING_IN_STORAGE") {
+                                          try {
+                                            await updateQuoteMutation.mutateAsync({ id: selectedQuote.id, data: { pdf_storage_key: null } });
+                                            const existingDoc = await api.getDs({ file_storage_key: selectedQuote.pdf_storage_key });
+                                            if (existingDoc.length > 0) {
+                                              await api.updateD(existingDoc.id, { status: 'archived' })
+                                            }
+                                          } catch (error) {
+                                            toast.error('Error occured');
+                                          }
+                
+                                          toast.error('File Not Found');
+                                        } else {
+                                          toast.error('Failed to download, please try again!');
+                                        }
+                                      }
+                
+                                    }}>
+                                    <Download className="h-3 w-3 mr-1" /> {currentlyLoadingKey === selectedQuote.pdf_storage_key ? 'Authorizing Access...' : 'Download'}
+                                    </Button>
+                                </div>
+                                </div>
+                              )
+                              }
               {<NotesRenderer notes={selectedQuote.notes} />
               // (() => {
 //   const notes = selectedQuote.notes || '';
@@ -759,6 +846,7 @@ export default function Quotes() {
 // })()
 }
             </div>
+            
           )}
         </DialogContent>
       </Dialog>
