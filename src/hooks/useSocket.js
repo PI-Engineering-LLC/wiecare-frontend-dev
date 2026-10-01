@@ -35,6 +35,8 @@ export function useSocket(onNotification) {
       queryClient.invalidateQueries({ queryKey: ['admin-invoices']});
       queryClient.invalidateQueries({ queryKey: ['admin-payments']});
       queryClient.invalidateQueries({ queryKey: ['org-invoices']});
+      queryClient.invalidateQueries({ queryKey: ['me-suspended']});
+      queryClient.invalidateQueries({ queryKey: ['client-suspended']});
       }
       if (data?.category === 'quote') {
         queryClient.invalidateQueries({ queryKey: ['admin-quotes']});
@@ -71,6 +73,8 @@ export function useSocket(onNotification) {
         queryClient.invalidateQueries({ queryKey: ['admin-clients']});
         queryClient.invalidateQueries({ queryKey: ['clients']});
         queryClient.invalidateQueries({ queryKey: ['client']});
+        queryClient.invalidateQueries({ queryKey: ['me-suspended']});
+      queryClient.invalidateQueries({ queryKey: ['client-suspended']});
       }
       if (data?.category === 'user') {
         queryClient.invalidateQueries({ queryKey: ['admin-users']});
