@@ -400,7 +400,7 @@ export default function AdminParts() {
                 />
               </div>
               <div>
-                <Label>Unit Price (€) *</Label>
+                <Label>Unit Price (USD$) *</Label>
                 <Input
                   type="number"
                   value={formData.unit_price}
