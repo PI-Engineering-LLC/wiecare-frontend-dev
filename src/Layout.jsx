@@ -164,13 +164,13 @@ export default function Layout({ children, currentPageName }) {
             <span className="text-white font-bold text-base">
             <img
               className="aspect-square h-full w-full object-cover"
-              alt="Wiegand USA Customer Portal logo"
+              alt="Wiegand Sports Customer Portal logo"
               src="/wiecare_logo.png"
             />
             </span>
           </div>
           <div>
-            <span className="font-bold text-slate-900 text-base leading-none">Wiegand USA Customer Portal</span>
+            <span className="font-bold text-slate-900 text-base leading-none">Wiegand Sports Customer Portal</span>
             {isInternalAdmin && <p className="text-[10px] text-[#005f27] font-semibold mt-0.5">Admin Portal</p>}
           </div>
         </Link>
