@@ -369,7 +369,11 @@ const {activeClientId} = useClient()
                       fixedWeeks
                       selected={newRequest.preferred_date_1}
                       onSelect={(date) => setNewRequest({ ...newRequest, preferred_date_1: date })}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
@@ -397,7 +401,11 @@ const {activeClientId} = useClient()
                       fixedWeeks
                       selected={newRequest.preferred_date_2}
                       onSelect={(date) => setNewRequest({ ...newRequest, preferred_date_2: date })}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
